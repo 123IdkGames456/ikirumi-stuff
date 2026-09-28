@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#090b10">
 <title>Device AI Text</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#090b10;color:#f4f7fb;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{padding:14px}.wrap{width:min(1050px,100%);margin:auto}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}.brand h1{font-size:clamp(25px,5vw,38px);margin:0}.brand p{margin:4px 0 0;color:#8993a2;font-size:12px}.pill{border:1px solid #303744;background:#11151d;border-radius:999px;padding:8px 11px;color:#aeb8c7;font-size:11px}.layout{display:grid;grid-template-columns:280px 1fr;gap:14px}.panel{border:1px solid #292f39;background:#10141b;border-radius:17px;padding:15px}.panel h2{font-size:15px;margin:0 0 12px}.label{display:block;color:#9da7b5;font-size:11px;margin:11px 0 6px}textarea,input,select{width:100%;border:1px solid #333b48;background:#0a0e14;color:#fff;border-radius:10px;padding:10px;font:inherit;outline:0}textarea{resize:vertical;min-height:110px}.chat{height:calc(100vh - 160px);min-height:430px;display:flex;flex-direction:column}.messages{flex:1;overflow:auto;padding:4px 2px 12px}.msg{max-width:86%;padding:11px 13px;border-radius:13px;margin:7px 0;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5;font-size:13px}.user{margin-left:auto;background:#dce6f2;color:#0b0e13}.ai{margin-right:auto;background:#1a202a;color:#edf2f7}.composer{display:flex;gap:8px;align-items:flex-end}.composer textarea{min-height:52px;max-height:180px;flex:1}.btn{border:1px solid #394250;background:#1a202a;color:#fff;border-radius:10px;padding:11px 14px;font-weight:750;cursor:pointer}.btn.primary{background:#dce6f2;color:#0b0e13;border-color:#dce6f2}.btn:disabled{opacity:.45}.status{margin-top:9px;color:#7f8998;font-size:10px;min-height:15px}.memory{padding:10px;border:1px solid #303744;border-radius:11px;background:#0c1016;color:#8d98a7;font-size:10px;line-height:1.45}.memory strong{display:block;color:#c4ccd7;margin-bottom:3px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}.small{font-size:10px;color:#707b8a;line-height:1.45;margin-top:10px}.danger{color:#ff9f9f}.ok{color:#9fe0b4}@media(max-width:760px){.layout{grid-template-columns:1fr}.chat{height:70vh;min-height:400px}}@media(max-width:450px){body{padding:9px}.panel{padding:12px}.msg{max-width:94%}}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#090b10;color:#f4f7fb;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{padding:14px}.wrap{width:min(1050px,100%);margin:auto}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}.brand h1{font-size:clamp(25px,5vw,38px);margin:0}.brand p{margin:4px 0 0;color:#8993a2;font-size:12px}.pill{border:1px solid #303744;background:#11151d;border-radius:999px;padding:8px 11px;color:#aeb8c7;font-size:11px}.layout{display:grid;grid-template-columns:280px 1fr;gap:14px}.panel{border:1px solid #292f39;background:#10141b;border-radius:17px;padding:15px}.panel h2{font-size:15px;margin:0 0 12px}.label{display:block;color:#9da7b5;font-size:11px;margin:11px 0 6px}textarea,input,select{width:100%;border:1px solid #333b48;background:#0a0e14;color:#fff;border-radius:10px;padding:10px;font:inherit;outline:0}textarea{resize:vertical;min-height:110px}.chat{height:calc(100vh - 160px);min-height:430px;display:flex;flex-direction:column}.messages{flex:1;overflow:auto;padding:4px 2px 12px}.msg{max-width:86%;padding:11px 13px;border-radius:13px;margin:7px 0;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5;font-size:13px}.imageMsg{max-width:min(86%,700px);padding:6px;background:#1a202a;border-radius:13px;margin:7px 0}.imageMsg img{display:block;width:100%;height:auto;border-radius:9px}.imagePrompt{color:#8993a2;font-size:10px;margin:5px 3px 2px}.user{margin-left:auto;background:#dce6f2;color:#0b0e13}.ai{margin-right:auto;background:#1a202a;color:#edf2f7}.composer{display:flex;gap:8px;align-items:flex-end}.composer textarea{min-height:52px;max-height:180px;flex:1}.btn{border:1px solid #394250;background:#1a202a;color:#fff;border-radius:10px;padding:11px 14px;font-weight:750;cursor:pointer}.btn.primary{background:#dce6f2;color:#0b0e13;border-color:#dce6f2}.btn:disabled{opacity:.45}.status{margin-top:9px;color:#7f8998;font-size:10px;min-height:15px}.memory{padding:10px;border:1px solid #303744;border-radius:11px;background:#0c1016;color:#8d98a7;font-size:10px;line-height:1.45}.memory strong{display:block;color:#c4ccd7;margin-bottom:3px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}.small{font-size:10px;color:#707b8a;line-height:1.45;margin-top:10px}.danger{color:#ff9f9f}.ok{color:#9fe0b4}@media(max-width:760px){.layout{grid-template-columns:1fr}.chat{height:70vh;min-height:400px}}@media(max-width:450px){body{padding:9px}.panel{padding:12px}.msg{max-width:94%}}
 </style>
 </head>
 <body>
@@ -21,7 +21,7 @@
 <input id="temperature" type="range" min="0" max="1.5" step="0.1" value="0.7">
 <div class="memory"><strong>Saved on this device</strong><span id="memoryText">Chats and settings use local browser storage. Nothing is uploaded for inference.</span></div>
 <div class="actions"><button class="btn" id="newChat">New chat</button><button class="btn" id="clear">Clear saved data</button></div>
-<div class="small">The 1.7B model is much more capable and uses about 1.2 GB of model storage. The first load can take time; after that the browser can reuse its cached model. Messages can always be sent while the AI is generating; they are queued and processed in order. AI generation is performed on the device, not by a text-generation server.</div>
+<div class="small">Type /image followed by a prompt to generate an image. Image generation uses an external image service; text AI inference remains on this device. The first load can take time; after that the browser can reuse its cached model. Messages can always be sent while the AI is generating; they are queued and processed in order. AI generation is performed on the device, not by a text-generation server.</div>
 <div class="status" id="status">Preparing local AI…</div>
 </section>
 <section class="panel chat">
@@ -34,7 +34,7 @@
 <script>
 const $=id=>document.getElementById(id);
 const messages=$('messages'),input=$('input'),send=$('send'),status=$('status'),progress=$('progress'),pill=$('pill');
-let engine=null,busy=false,history=[],queue=[],loadingPromise=null;
+let engine=null,busy=false,imageBusy=false,history=[],queue=[],loadingPromise=null,imageAbort=null,imageProgressTimer=null;
 const MODEL='HuggingFaceTB/SmolLM2-1.7B-Instruct';
 
 function add(role,text){const d=document.createElement('div');d.className='msg '+role;d.textContent=text;messages.appendChild(d);messages.scrollTop=messages.scrollHeight}
@@ -103,15 +103,14 @@ async function loadAI(){
 }
 
 async function processQueue(){
- if(busy)return;
+ if(busy||imageBusy)return;
  busy=true;
  try{
   await loadAI();
   while(queue.length){
    status.textContent='Generating locally…';
    progress.textContent='Your message stays on this device';
-   const recent=history.slice(-12);
-   const chat=[{role:'system',content:'You are a helpful AI assistant. Answer the user directly. Never invent previous messages or claim the user said something they did not say. If you do not know, say so. Keep answers concise.'},...recent.map(m=>({role:m.role,content:m.content}))];
+   const chat=[{role:'system',content:'You are a helpful AI assistant. Answer the user directly. You have access to the complete conversation below. Use earlier messages when they are relevant. Never invent previous messages or claim the user said something they did not say. If you do not know, say so. Keep answers concise.'},...history.map(m=>({role:m.role,content:m.content}))];
    const out=await engine(chat,{max_new_tokens:192,do_sample:true,temperature:Number($('temperature').value),top_p:.9,return_full_text:false});
    let answer=Array.isArray(out)?out[0]?.generated_text:out?.generated_text;
    if(Array.isArray(answer))answer=answer[answer.length-1]?.content||'';
@@ -121,14 +120,101 @@ async function processQueue(){
   status.textContent='Ready · AI runs locally';
   progress.textContent='No AI server used · model stays cached';
   progress.className='status ok';
- }catch(e){}finally{busy=false;if(queue.length)processQueue()}
+ }catch(e){}finally{busy=false;if(queue.length&&!imageBusy)processQueue()}
 }
 
-function reply(){const text=input.value.trim();if(!text)return;input.value='';add('user',text);history.push({role:'user',content:text});save();queue.push(text);progress.textContent=busy?'Message queued':'Starting local AI…';processQueue()}
+function setComposerDisabled(disabled){
+ input.disabled=disabled;
+ send.disabled=disabled;
+ if(disabled)input.placeholder='Image generation in progress…';
+ else input.placeholder='Message the local AI…';
+}
+
+function addImage(src,prompt){
+ const wrap=document.createElement('div');
+ wrap.className='imageMsg';
+ const img=document.createElement('img');
+ img.src=src;
+ img.alt=prompt;
+ const label=document.createElement('div');
+ label.className='imagePrompt';
+ label.textContent='/image '+prompt;
+ wrap.append(img,label);
+ messages.appendChild(wrap);
+ messages.scrollTop=messages.scrollHeight;
+}
+
+function startImageProgress(){
+ let value=1;
+ progress.className='status';
+ progress.textContent='Generating image · 1%';
+ clearInterval(imageProgressTimer);
+ imageProgressTimer=setInterval(()=>{
+  if(value<94)value+=Math.max(1,Math.ceil((94-value)/12));
+  progress.textContent='Generating image · '+value+'%';
+ },700);
+}
+
+function stopImageProgress(finalText){
+ clearInterval(imageProgressTimer);
+ imageProgressTimer=null;
+ progress.textContent=finalText;
+}
+
+async function generateImage(prompt){
+ if(imageBusy||busy)return;
+ imageBusy=true;
+ imageAbort=new AbortController();
+ setComposerDisabled(true);
+ queue=[];
+ status.textContent='Generating image…';
+ startImageProgress();
+ try{
+  const url='https://image.pollinations.ai/prompt/'+encodeURIComponent(prompt)+'?model=flux&width=768&height=768&nologo=true&private=true&safe=true';
+  const response=await fetch(url,{signal:imageAbort.signal,cache:'no-store'});
+  if(!response.ok)throw new Error('Image generation failed: HTTP '+response.status);
+  const blob=await response.blob();
+  if(!blob.type.startsWith('image/'))throw new Error('Generated response was not an image');
+  if(imageAbort.signal.aborted)throw new DOMException('Aborted','AbortError');
+  const imageUrl=URL.createObjectURL(blob);
+  stopImageProgress('Image generation · 100% · done');
+  addImage(imageUrl,prompt);
+  status.textContent='Ready · image generated';
+ }catch(e){
+  stopImageProgress('Image generation failed');
+  status.textContent='Image generation failed';
+  add('ai','Image generation failed.');
+ }finally{
+  imageAbort=null;
+  imageBusy=false;
+  setComposerDisabled(false);
+  progress.className='status '+(status.textContent==='Image generation failed'?'danger':'ok');
+ }
+}
+
+function reply(){
+ const text=input.value.trim();
+ if(!text||imageBusy)return;
+ if(text.toLowerCase().startsWith('/image ')){
+  const prompt=text.slice(7).trim();
+  if(!prompt)return;
+  input.value='';
+  add('user',text);
+  generateImage(prompt);
+  return;
+ }
+ input.value='';
+ add('user',text);
+ history.push({role:'user',content:text});
+ save();
+ queue.push(text);
+ progress.textContent=busy?'Message queued':'Starting local AI…';
+ processQueue();
+}
 $('newChat').onclick=()=>{history=[];save();messages.innerHTML='<div class="msg ai">New local chat started.</div>'};
 $('clear').onclick=()=>{localStorage.removeItem('device-ai-text-history');history=[];messages.innerHTML='<div class="msg ai">Saved chat data cleared from this browser.</div>';status.textContent='Local chat storage cleared'};
 send.onclick=reply;
-input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();reply()}});
+input.addEventListener('keydown',e=>{if(e.key==='Escape'&&imageBusy&&imageAbort){imageAbort.abort();return}if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();reply()}});
 load();
 status.textContent='Ready · '+deviceName()+' detected · 1.7B model';
 progress.textContent=deviceName()==='Phone'?'Phone mode: CPU/WASM only for compatibility':'PC mode: WebGPU first, CPU/WASM fallback';
