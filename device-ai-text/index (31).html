@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090b10">
+<title>Device AI Text</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#090b10;color:#f4f7fb;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{padding:14px}.wrap{width:min(1050px,100%);margin:auto}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}.brand h1{font-size:clamp(25px,5vw,38px);margin:0}.brand p{margin:4px 0 0;color:#8993a2;font-size:12px}.pill{border:1px solid #303744;background:#11151d;border-radius:999px;padding:8px 11px;color:#aeb8c7;font-size:11px}.layout{display:grid;grid-template-columns:280px 1fr;gap:14px}.panel{border:1px solid #292f39;background:#10141b;border-radius:17px;padding:15px}.panel h2{font-size:15px;margin:0 0 12px}.label{display:block;color:#9da7b5;font-size:11px;margin:11px 0 6px}textarea,input,select{width:100%;border:1px solid #333b48;background:#0a0e14;color:#fff;border-radius:10px;padding:10px;font:inherit;outline:0}textarea{resize:vertical;min-height:110px}.chat{height:calc(100vh - 160px);min-height:430px;display:flex;flex-direction:column}.messages{flex:1;overflow:auto;padding:4px 2px 12px}.msg{max-width:86%;padding:11px 13px;border-radius:13px;margin:7px 0;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5;font-size:13px}.user{margin-left:auto;background:#dce6f2;color:#0b0e13}.ai{margin-right:auto;background:#1a202a;color:#edf2f7}.composer{display:flex;gap:8px;align-items:flex-end}.composer textarea{min-height:52px;max-height:180px;flex:1}.btn{border:1px solid #394250;background:#1a202a;color:#fff;border-radius:10px;padding:11px 14px;font-weight:750;cursor:pointer}.btn.primary{background:#dce6f2;color:#0b0e13;border-color:#dce6f2}.btn:disabled{opacity:.45}.status{margin-top:9px;color:#7f8998;font-size:10px;min-height:15px}.memory{padding:10px;border:1px solid #303744;border-radius:11px;background:#0c1016;color:#8d98a7;font-size:10px;line-height:1.45}.memory strong{display:block;color:#c4ccd7;margin-bottom:3px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}.small{font-size:10px;color:#707b8a;line-height:1.45;margin-top:10px}.danger{color:#ff9f9f}.ok{color:#9fe0b4}@media(max-width:760px){.layout{grid-template-columns:1fr}.chat{height:70vh;min-height:400px}}@media(max-width:450px){body{padding:9px}.panel{padding:12px}.msg{max-width:94%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="top"><div class="brand"><h1>Device AI Text</h1><p>Private text AI that runs locally in your browser.</p></div><div class="pill" id="pill">Starting…</div></div>
+<div class="layout">
+<section class="panel">
+<h2>Local AI</h2>
+<label class="label" for="model">Model</label>
+<select id="model"><option value="large">SmolLM2 1.7B Instruct · ~1.2 GB</option></select>
+<label class="label" for="temperature">Temperature</label>
+<input id="temperature" type="range" min="0" max="1.5" step="0.1" value="0.7">
+<div class="memory"><strong>Saved on this device</strong><span id="memoryText">Chats and settings use local browser storage. Nothing is uploaded for inference.</span></div>
+<div class="actions"><button class="btn" id="newChat">New chat</button><button class="btn" id="clear">Clear saved data</button></div>
+<div class="small">The 1.7B model is much more capable and uses about 1.2 GB of model storage. The first load can take time; after that the browser can reuse its cached model. Messages can always be sent while the AI is generating; they are queued and processed in order. AI generation is performed on the device, not by a text-generation server.</div>
+<div class="status" id="status">Preparing local AI…</div>
+</section>
+<section class="panel chat">
+<div class="messages" id="messages"><div class="msg ai">Hi! I am a local text AI. Send a message to start.</div></div>
+<div class="composer"><textarea id="input" placeholder="Message the local AI…"></textarea><button class="btn primary" id="send">Send</button></div>
+<div class="status" id="progress">Model is not loaded yet.</div>
+</section>
+</div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const messages=$('messages'),input=$('input'),send=$('send'),status=$('status'),progress=$('progress'),pill=$('pill');
+let engine=null,busy=false,history=[],queue=[],loadingPromise=null;
+const MODEL='HuggingFaceTB/SmolLM2-1.7B-Instruct';
+
+function add(role,text){const d=document.createElement('div');d.className='msg '+role;d.textContent=text;messages.appendChild(d);messages.scrollTop=messages.scrollHeight}
+function save(){try{localStorage.setItem('device-ai-text-history',JSON.stringify(history))}catch(e){}}
+function load(){try{history=JSON.parse(localStorage.getItem('device-ai-text-history')||'[]');if(!Array.isArray(history))history=[];for(const m of history)if(m&&(m.role==='user'||m.role==='assistant'))add(m.role==='user'?'user':'ai',m.content)}catch(e){history=[]}}
+function deviceName(){return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent||'')?'Phone':'PC'}
+function error(title,fix,detail){pill.textContent='AI error';status.textContent=title;progress.textContent='Fix: '+fix+(detail?' · '+detail:'');progress.className='status danger'}
+function update(p){if(!p)return;if(typeof p.progress==='number')progress.textContent=(p.status||'Loading model')+' · '+Math.max(0,Math.min(100,p.progress)).toFixed(1)+'%';else if(p.status)progress.textContent=p.status+(p.file?' · '+p.file:'')}
+
+async function loadAI(){
+ if(engine)return engine;
+ if(loadingPromise)return loadingPromise;
+ loadingPromise=(async()=>{
+  const device=deviceName();
+  status.textContent='Preparing '+device+' local AI…';
+  let mod;
+  try{mod=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.2/+esm')}
+  catch(e){error('AI library failed','Connect to the internet once and reload','CDN/library error');throw e}
+  const {pipeline,env}=mod;
+  env.allowLocalModels=false;
+  env.allowRemoteModels=true;
+  env.useBrowserCache=true;
+  env.useWasmCache=true;
+  env.useCustomCache=false;
+
+  const startWasm=async()=>{
+   status.textContent='Starting CPU/WASM AI…';
+   progress.textContent='Using CPU mode for maximum browser compatibility';
+   return pipeline('text-generation',MODEL,{device:'wasm',dtype:'q4f16',progress_callback:update});
+  };
+
+  const startWebGPU=async()=>{
+   status.textContent='Starting WebGPU AI…';
+   return pipeline('text-generation',MODEL,{device:'webgpu',dtype:'q4f16',progress_callback:update});
+  };
+
+  try{
+   if(device==='Phone'){
+    engine=await startWasm();
+    pill.textContent='Phone · CPU/WASM';
+   }else{
+    if(navigator.gpu){
+     try{engine=await startWebGPU();pill.textContent='PC · WebGPU'}
+     catch(gpuError){console.warn('WebGPU unavailable, using WASM',gpuError);engine=await startWasm();pill.textContent='PC · CPU/WASM'}
+    }else{
+     engine=await startWasm();
+     pill.textContent='PC · CPU/WASM';
+    }
+   }
+   status.textContent='Local AI ready';
+   progress.textContent='Ready · model cached on this device';
+   progress.className='status ok';
+   return engine;
+  }catch(e){
+   engine=null;
+   console.error(e);
+   const m=String(e?.message||e);
+   if(/memory|out of memory|allocation|OOM/i.test(m))error('Not enough memory','Close other apps/tabs and reload');
+   else if(/fetch|network|download|404|not found/i.test(m))error('Model download failed','Connect to Wi-Fi/mobile data, reload, and let the first download finish');
+   else if(/wasm|onnx|backend/i.test(m))error('CPU AI backend failed','Update your browser to the latest Chrome, Edge, Safari, or Firefox and reload');
+   else error('AI could not start','Reload the page and allow browser storage');
+   throw e;
+  }
+ })().finally(()=>loadingPromise=null);
+ return loadingPromise;
+}
+
+async function processQueue(){
+ if(busy)return;
+ busy=true;
+ try{
+  await loadAI();
+  while(queue.length){
+   status.textContent='Generating locally…';
+   progress.textContent='Your message stays on this device';
+   const recent=history.slice(-12);
+   const chat=[{role:'system',content:'You are a helpful AI assistant. Answer the user directly. Never invent previous messages or claim the user said something they did not say. If you do not know, say so. Keep answers concise.'},...recent.map(m=>({role:m.role,content:m.content}))];
+   const out=await engine(chat,{max_new_tokens:192,do_sample:true,temperature:Number($('temperature').value),top_p:.9,return_full_text:false});
+   let answer=Array.isArray(out)?out[0]?.generated_text:out?.generated_text;
+   if(Array.isArray(answer))answer=answer[answer.length-1]?.content||'';
+   answer=String(answer||'').trim()||'I could not generate a response.';
+   add('ai',answer);history.push({role:'assistant',content:answer});save();queue.shift();
+  }
+  status.textContent='Ready · AI runs locally';
+  progress.textContent='No AI server used · model stays cached';
+  progress.className='status ok';
+ }catch(e){}finally{busy=false;if(queue.length)processQueue()}
+}
+
+function reply(){const text=input.value.trim();if(!text)return;input.value='';add('user',text);history.push({role:'user',content:text});save();queue.push(text);progress.textContent=busy?'Message queued':'Starting local AI…';processQueue()}
+$('newChat').onclick=()=>{history=[];save();messages.innerHTML='<div class="msg ai">New local chat started.</div>'};
+$('clear').onclick=()=>{localStorage.removeItem('device-ai-text-history');history=[];messages.innerHTML='<div class="msg ai">Saved chat data cleared from this browser.</div>';status.textContent='Local chat storage cleared'};
+send.onclick=reply;
+input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();reply()}});
+load();
+status.textContent='Ready · '+deviceName()+' detected · 1.7B model';
+progress.textContent=deviceName()==='Phone'?'Phone mode: CPU/WASM only for compatibility':'PC mode: WebGPU first, CPU/WASM fallback';
+</script>
+</body>
+</html>
