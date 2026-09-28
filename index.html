@@ -4,2569 +4,292 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Ikirumi</title>
-
-<style>
-*{
-box-sizing:border-box;
-}
-
-html,
-body{
-margin:0;
-width:100%;
-height:100%;
-overflow:hidden;
-background:#050608;
-color:#fff;
-font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-}
-
-body{
-background:
-radial-gradient(circle at 12% 0%,rgba(255,255,255,.075),transparent 30%),
-radial-gradient(circle at 100% 100%,rgba(120,140,255,.045),transparent 34%),
-#050608;
-}
-
-button,
-input{
-font:inherit;
-}
-
-button{
--webkit-tap-highlight-color:transparent;
-}
-
-#app{
-width:100%;
-height:100%;
-display:flex;
-flex-direction:column;
-}
-
-.topbar{
-height:70px;
-min-height:70px;
-display:flex;
-align-items:center;
-gap:13px;
-padding:0 18px;
-border-bottom:1px solid rgba(255,255,255,.07);
-background:rgba(7,8,11,.78);
-backdrop-filter:blur(30px);
--webkit-backdrop-filter:blur(30px);
-position:relative;
-z-index:100;
-}
-
-.logo{
-display:flex;
-align-items:center;
-gap:9px;
-flex-shrink:0;
-font-size:18px;
-font-weight:850;
-letter-spacing:-.6px;
-}
-
-.logo-mark{
-width:31px;
-height:31px;
-display:flex;
-align-items:center;
-justify-content:center;
-border-radius:10px;
-background:linear-gradient(145deg,#fff,#b9bec8);
-color:#08090c;
-font-size:14px;
-font-weight:950;
-box-shadow:
-0 0 24px rgba(255,255,255,.13),
-inset 0 1px 0 rgba(255,255,255,.8);
-transition:transform .35s ease;
-}
-
-.logo:hover .logo-mark{
-transform:rotate(-8deg) scale(1.06);
-}
-
-.tabs{
-height:46px;
-display:flex;
-align-items:center;
-gap:4px;
-flex:1;
-min-width:0;
-overflow-x:auto;
-overflow-y:hidden;
-scrollbar-width:thin;
-scrollbar-color:#34373d transparent;
-padding:3px 2px;
-}
-
-.tabs::-webkit-scrollbar{
-height:4px;
-}
-
-.tabs::-webkit-scrollbar-track{
-background:transparent;
-}
-
-.tabs::-webkit-scrollbar-thumb{
-background:#34373d;
-border-radius:20px;
-}
-
-.tab{
-height:38px;
-min-width:max-content;
-display:flex;
-align-items:center;
-gap:7px;
-border:1px solid transparent;
-background:transparent;
-color:#737b88;
-padding:0 13px;
-border-radius:10px;
-cursor:pointer;
-font-size:13px;
-font-weight:680;
-white-space:nowrap;
-transition:
-background .2s ease,
-color .2s ease,
-border-color .2s ease,
-transform .2s ease;
-animation:tabIn .28s ease both;
-}
-
-.tab:hover{
-color:#fff;
-background:rgba(255,255,255,.055);
-transform:translateY(-1px);
-}
-
-.tab.active{
-color:#fff;
-background:#34373c;
-border-color:rgba(255,255,255,.09);
-box-shadow:
-inset 0 1px 0 rgba(255,255,255,.04),
-0 5px 18px rgba(0,0,0,.2);
-}
-
-.tab-icon{
-font-size:11px;
-opacity:.82;
-}
-
-.tab-name{
-max-width:180px;
-overflow:hidden;
-text-overflow:ellipsis;
-}
-
-.category-tab{
-position:relative;
-}
-
-.category-tab .tab-close{
-width:19px;
-height:19px;
-display:flex;
-align-items:center;
-justify-content:center;
-border:0;
-background:transparent;
-color:#626a76;
-border-radius:6px;
-padding:0;
-margin-left:1px;
-cursor:pointer;
-font-size:14px;
-transition:.18s;
-}
-
-.category-tab .tab-close:hover{
-color:#fff;
-background:rgba(255,255,255,.1);
-}
-
-.site-tab .tab-icon{
-font-size:8px;
-}
-
-.header-right{
-display:flex;
-align-items:center;
-gap:7px;
-flex-shrink:0;
-}
-
-.refresh-button{
-width:37px;
-height:37px;
-display:flex;
-align-items:center;
-justify-content:center;
-border:1px solid rgba(255,255,255,.08);
-background:rgba(255,255,255,.045);
-color:#929aa7;
-border-radius:10px;
-cursor:pointer;
-font-size:17px;
-transition:.2s;
-}
-
-.refresh-button:hover{
-color:#fff;
-background:#24262a;
-transform:rotate(25deg);
-}
-
-.page{
-position:absolute;
-left:0;
-top:70px;
-width:100%;
-height:calc(100% - 70px);
-overflow:auto;
-scroll-behavior:smooth;
-}
-
-#home{
-display:block;
-}
-
-.home-content{
-width:100%;
-max-width:1550px;
-min-height:100%;
-margin:auto;
-padding:
-clamp(28px,4vw,55px)
-clamp(16px,4vw,46px)
-70px;
-}
-
-.hero{
-display:flex;
-align-items:flex-end;
-justify-content:space-between;
-gap:25px;
-margin-bottom:26px;
-animation:fadeUp .5s ease both;
-}
-
-.hero-title{
-font-size:clamp(32px,5vw,48px);
-font-weight:900;
-letter-spacing:-2.6px;
-line-height:1;
-}
-
-.hero-title span{
-background:linear-gradient(120deg,#fff,#777f8c);
--webkit-background-clip:text;
-background-clip:text;
-color:transparent;
-}
-
-.hero-subtitle{
-margin-top:9px;
-color:#737b88;
-font-size:13px;
-}
-
-.connection{
-display:flex;
-align-items:center;
-gap:8px;
-padding:9px 12px;
-border-radius:999px;
-border:1px solid rgba(255,255,255,.07);
-background:rgba(255,255,255,.035);
-font-size:11px;
-font-weight:650;
-color:#7f8793;
-}
-
-.connection-dot{
-width:6px;
-height:6px;
-border-radius:50%;
-background:#7ee787;
-box-shadow:0 0 13px rgba(126,231,135,.6);
-animation:pulse 2s ease-in-out infinite;
-}
-
-.search{
-height:48px;
-position:relative;
-margin-bottom:27px;
-animation:fadeUp .55s .05s ease both;
-}
-
-.search input{
-width:100%;
-height:100%;
-border:1px solid rgba(255,255,255,.075);
-outline:none;
-border-radius:13px;
-background:rgba(255,255,255,.035);
-color:#fff;
-padding:0 16px 0 43px;
-font-size:13px;
-transition:
-border-color .2s,
-background .2s,
-box-shadow .2s,
-transform .2s;
-}
-
-.search input:focus{
-border-color:rgba(255,255,255,.17);
-background:rgba(255,255,255,.05);
-box-shadow:0 10px 35px rgba(0,0,0,.15);
-}
-
-.search input::placeholder{
-color:#626a77;
-}
-
-.search-icon{
-position:absolute;
-left:15px;
-top:50%;
-transform:translateY(-50%);
-color:#68717e;
-font-size:16px;
-pointer-events:none;
-}
-
-.section-heading{
-display:flex;
-align-items:center;
-justify-content:space-between;
-margin-bottom:14px;
-}
-
-.section-title{
-font-size:18px;
-font-weight:780;
-letter-spacing:-.5px;
-}
-
-.section-count{
-font-size:11px;
-color:#646c79;
-}
-
-.category-grid{
-display:grid;
-grid-template-columns:
-repeat(auto-fill,minmax(min(100%,235px),1fr));
-gap:14px;
-animation:fadeUp .6s .1s ease both;
-}
-
-.category-card{
-position:relative;
-min-height:155px;
-padding:20px;
-border:1px solid rgba(255,255,255,.07);
-border-radius:18px;
-background:
-linear-gradient(
-145deg,
-rgba(255,255,255,.055),
-rgba(255,255,255,.015)
-);
-overflow:hidden;
-cursor:pointer;
-opacity:0;
-animation:cardIn .45s ease forwards;
-transition:
-transform .25s cubic-bezier(.2,.8,.2,1),
-border-color .25s ease,
-background .25s ease,
-box-shadow .25s ease;
-}
-
-.category-card:hover{
-transform:translateY(-6px) scale(1.008);
-border-color:rgba(255,255,255,.15);
-background:
-linear-gradient(
-145deg,
-rgba(255,255,255,.085),
-rgba(255,255,255,.025)
-);
-box-shadow:
-0 20px 50px rgba(0,0,0,.24),
-0 0 0 1px rgba(255,255,255,.015);
-}
-
-.category-card:active{
-transform:translateY(-2px) scale(.995);
-}
-
-.category-card.open{
-border-color:rgba(255,255,255,.16);
-}
-
-.category-glow{
-position:absolute;
-width:180px;
-height:180px;
-right:-100px;
-top:-100px;
-border-radius:50%;
-background:rgba(255,255,255,.055);
-filter:blur(28px);
-transition:.35s;
-}
-
-.category-card:hover .category-glow{
-transform:scale(1.3);
-background:rgba(255,255,255,.1);
-}
-
-.category-icon{
-width:48px;
-height:48px;
-display:flex;
-align-items:center;
-justify-content:center;
-border-radius:13px;
-border:1px solid rgba(255,255,255,.07);
-background:rgba(255,255,255,.06);
-font-size:21px;
-position:relative;
-margin-bottom:25px;
-transition:
-transform .3s ease,
-background .3s ease;
-}
-
-.category-card:hover .category-icon{
-transform:scale(1.08) rotate(-3deg);
-background:rgba(255,255,255,.09);
-}
-
-.category-name{
-position:relative;
-font-size:16px;
-font-weight:780;
-letter-spacing:-.3px;
-}
-
-.category-info{
-position:relative;
-margin-top:5px;
-font-size:11px;
-color:#666e7b;
-}
-
-.category-arrow{
-position:absolute;
-right:18px;
-bottom:18px;
-width:29px;
-height:29px;
-display:flex;
-align-items:center;
-justify-content:center;
-border-radius:9px;
-background:rgba(255,255,255,.045);
-color:#68707c;
-font-size:16px;
-transition:.25s ease;
-}
-
-.category-card:hover .category-arrow{
-color:#fff;
-background:rgba(255,255,255,.1);
-transform:translateX(4px);
-}
-
-.site-section{
-margin-top:35px;
-display:none;
-animation:sectionIn .35s ease both;
-}
-
-.site-section.visible{
-display:block;
-}
-
-.site-grid{
-display:grid;
-grid-template-columns:
-repeat(auto-fill,minmax(min(100%,250px),1fr));
-gap:14px;
-}
-
-.site-card{
-position:relative;
-min-height:175px;
-padding:20px;
-border:1px solid rgba(255,255,255,.07);
-border-radius:17px;
-background:
-linear-gradient(
-145deg,
-rgba(255,255,255,.05),
-rgba(255,255,255,.016)
-);
-overflow:hidden;
-cursor:pointer;
-opacity:0;
-animation:cardIn .42s ease forwards;
-transition:
-transform .23s ease,
-border-color .23s ease,
-background .23s ease,
-box-shadow .23s ease;
-}
-
-.site-card:hover{
-transform:translateY(-5px);
-border-color:rgba(255,255,255,.15);
-background:
-linear-gradient(
-145deg,
-rgba(255,255,255,.08),
-rgba(255,255,255,.025)
-);
-box-shadow:0 18px 45px rgba(0,0,0,.23);
-}
-
-.site-card:active{
-transform:translateY(-1px) scale(.995);
-}
-
-.site-glow{
-position:absolute;
-width:180px;
-height:180px;
-right:-110px;
-top:-110px;
-border-radius:50%;
-background:rgba(255,255,255,.05);
-filter:blur(25px);
-}
-
-.site-card-icon{
-width:46px;
-height:46px;
-display:flex;
-align-items:center;
-justify-content:center;
-border-radius:12px;
-border:1px solid rgba(255,255,255,.06);
-background:rgba(255,255,255,.06);
-font-size:18px;
-margin-bottom:30px;
-position:relative;
-transition:.25s;
-}
-
-.site-card:hover .site-card-icon{
-transform:scale(1.06);
-background:rgba(255,255,255,.09);
-}
-
-.site-card-name{
-position:relative;
-font-size:16px;
-font-weight:760;
-padding-right:30px;
-word-break:break-word;
-}
-
-.site-card-info{
-position:relative;
-margin-top:6px;
-font-size:11px;
-color:#666e7b;
-}
-
-.site-card-arrow{
-position:absolute;
-right:18px;
-bottom:18px;
-width:28px;
-height:28px;
-display:flex;
-align-items:center;
-justify-content:center;
-border-radius:9px;
-background:rgba(255,255,255,.045);
-color:#68707c;
-font-size:16px;
-transition:.25s;
-}
-
-.site-card:hover .site-card-arrow{
-color:#fff;
-background:rgba(255,255,255,.1);
-transform:translateX(4px);
-}
-
-.empty{
-grid-column:1/-1;
-padding:70px 20px;
-text-align:center;
-border:1px dashed rgba(255,255,255,.1);
-border-radius:17px;
-color:#6f7784;
-animation:fadeUp .3s ease;
-}
-
-.empty-icon{
-font-size:28px;
-margin-bottom:10px;
-}
-
-#siteFrame{
-position:absolute;
-left:0;
-top:70px;
-width:100%;
-height:calc(100% - 70px);
-border:0;
-background:#050608;
-display:none;
-opacity:0;
-transition:opacity .25s ease;
-}
-
-#siteFrame.ready{
-opacity:1;
-}
-
-#loading{
-position:fixed;
-inset:0;
-z-index:1000;
-display:none;
-align-items:center;
-justify-content:center;
-flex-direction:column;
-background:rgba(5,6,8,.88);
-backdrop-filter:blur(28px);
--webkit-backdrop-filter:blur(28px);
-animation:fadeIn .2s ease;
-}
-
-.loader-wrap{
-width:58px;
-height:58px;
-display:flex;
-align-items:center;
-justify-content:center;
-border-radius:17px;
-background:rgba(255,255,255,.055);
-border:1px solid rgba(255,255,255,.08);
-box-shadow:0 15px 50px rgba(0,0,0,.25);
-}
-
-.loader{
-width:27px;
-height:27px;
-border:2px solid rgba(255,255,255,.12);
-border-top-color:#fff;
-border-right-color:#fff;
-border-radius:50%;
-animation:spin .65s linear infinite;
-}
-
-.loading-title{
-margin-top:18px;
-font-size:14px;
-font-weight:750;
-}
-
-.loading-info{
-margin-top:7px;
-font-size:11px;
-color:#68707d;
-max-width:500px;
-text-align:center;
-word-break:break-word;
-}
-
-#error{
-position:fixed;
-inset:0;
-z-index:1100;
-display:none;
-align-items:center;
-justify-content:center;
-flex-direction:column;
-text-align:center;
-padding:30px;
-background:#050608;
-animation:fadeIn .25s ease;
-}
-
-.error-icon{
-width:56px;
-height:56px;
-display:flex;
-align-items:center;
-justify-content:center;
-border-radius:17px;
-background:rgba(255,255,255,.06);
-border:1px solid rgba(255,255,255,.08);
-font-size:23px;
-margin-bottom:18px;
-}
-
-#error h2{
-margin:0;
-font-size:25px;
-letter-spacing:-.7px;
-}
-
-#error p{
-max-width:600px;
-margin:12px 0 0;
-color:#858c98;
-line-height:1.5;
-font-size:13px;
-}
-
-#error button{
-margin-top:22px;
-border:0;
-background:#fff;
-color:#07080b;
-padding:11px 19px;
-border-radius:10px;
-font-weight:750;
-cursor:pointer;
-transition:.2s;
-}
-
-#error button:hover{
-transform:translateY(-2px);
-box-shadow:0 10px 25px rgba(0,0,0,.3);
-}
-
-@keyframes spin{
-to{
-transform:rotate(360deg);
-}
-}
-
-@keyframes pulse{
-0%,100%{
-opacity:.65;
-transform:scale(.85);
-}
-50%{
-opacity:1;
-transform:scale(1.15);
-}
-}
-
-@keyframes fadeIn{
-from{
-opacity:0;
-}
-to{
-opacity:1;
-}
-}
-
-@keyframes fadeUp{
-from{
-opacity:0;
-transform:translateY(14px);
-}
-to{
-opacity:1;
-transform:translateY(0);
-}
-}
-
-@keyframes sectionIn{
-from{
-opacity:0;
-transform:translateY(10px);
-}
-to{
-opacity:1;
-transform:translateY(0);
-}
-}
-
-@keyframes cardIn{
-from{
-opacity:0;
-transform:translateY(13px) scale(.985);
-}
-to{
-opacity:1;
-transform:translateY(0) scale(1);
-}
-}
-
-@keyframes tabIn{
-from{
-opacity:0;
-transform:translateX(-8px);
-}
-to{
-opacity:1;
-transform:translateX(0);
-}
-}
-
-@media(max-width:900px){
-
-.topbar{
-padding:0 12px;
-gap:8px;
-}
-
-.home-content{
-padding-left:20px;
-padding-right:20px;
-}
-
-.connection{
-display:none;
-}
-
-}
-
-@media(max-width:650px){
-
-.topbar{
-height:64px;
-min-height:64px;
-}
-
-.page{
-top:64px;
-height:calc(100% - 64px);
-}
-
-#siteFrame{
-top:64px;
-height:calc(100% - 64px);
-}
-
-.logo{
-font-size:16px;
-}
-
-.logo-mark{
-width:28px;
-height:28px;
-}
-
-.tabs{
-height:42px;
-}
-
-.tab{
-height:36px;
-padding:0 10px;
-font-size:12px;
-}
-
-.tab-name{
-max-width:130px;
-}
-
-.home-content{
-padding:
-25px
-14px
-50px;
-}
-
-.hero{
-align-items:flex-start;
-flex-direction:column;
-margin-bottom:22px;
-}
-
-.hero-title{
-font-size:34px;
-}
-
-.category-grid,
-.site-grid{
-grid-template-columns:1fr;
-}
-
-.category-card{
-min-height:140px;
-}
-
-.site-card{
-min-height:155px;
-}
-
-}
-
-@media(max-width:430px){
-
-.topbar{
-padding:0 8px;
-}
-
-.logo span{
-display:none;
-}
-
-.logo-mark{
-width:29px;
-height:29px;
-}
-
-.header-right{
-gap:4px;
-}
-
-.refresh-button{
-width:33px;
-height:33px;
-}
-
-.tab{
-padding:0 8px;
-}
-
-.tab-name{
-max-width:105px;
-}
-
-}
-</style>
+<style>*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050608;color:#fff;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input{font:inherit}button{-webkit-tap-highlight-color:transparent}#app{width:100%;height:100%;display:flex;flex-direction:column}.topbar{height:64px;min-height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid rgba(255,255,255,.07);background:rgba(7,8,11,.8);backdrop-filter:blur(25px);position:relative;z-index:100}.logo{display:flex;align-items:center;gap:9px;font-size:18px;font-weight:850}.logo-mark{width:31px;height:31px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:linear-gradient(145deg,#fff,#b9bec8);color:#08090c;font-weight:950}.refresh-button,.back-button{height:36px;padding:0 13px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.045);color:#929aa7;border-radius:10px;cursor:pointer;transition:.2s}.refresh-button:hover,.back-button:hover{color:#fff;background:#24262a}.back-button{display:none}.page{position:absolute;left:0;top:64px;width:100%;height:calc(100% - 64px);overflow:auto}.home-content{width:100%;max-width:1500px;min-height:100%;margin:auto;padding:42px 28px 70px}.hero{margin-bottom:28px}.hero-title{font-size:clamp(32px,5vw,48px);font-weight:900;letter-spacing:-2.5px}.hero-title span{background:linear-gradient(120deg,#fff,#777f8c);-webkit-background-clip:text;background-clip:text;color:transparent}.hero-subtitle{margin-top:9px;color:#737b88;font-size:13px}.site-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}.site-card{position:relative;min-height:160px;padding:20px;border:1px solid rgba(255,255,255,.07);border-radius:17px;background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.015));overflow:hidden;cursor:pointer;opacity:0;animation:cardIn .4s ease forwards;transition:.23s}.site-card:hover{transform:translateY(-5px);border-color:rgba(255,255,255,.15);background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.025));box-shadow:0 18px 45px rgba(0,0,0,.23)}.site-card-icon{width:46px;height:46px;display:flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.06);font-size:18px;margin-bottom:30px;transition:.25s}.site-card:hover .site-card-icon{transform:scale(1.06);background:rgba(255,255,255,.09)}.site-card-name{font-size:16px;font-weight:760;word-break:break-word}.site-card-path{margin-top:6px;font-size:11px;color:#666e7b}.site-card-arrow{position:absolute;right:18px;bottom:18px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:9px;background:rgba(255,255,255,.045);color:#68707c;font-size:16px;transition:.25s}.site-card:hover .site-card-arrow{color:#fff;background:rgba(255,255,255,.1);transform:translateX(4px)}.empty{padding:70px 20px;text-align:center;border:1px dashed rgba(255,255,255,.1);border-radius:17px;color:#6f7784}.empty-icon{font-size:28px;margin-bottom:10px}#siteFrame{position:absolute;left:0;top:64px;width:100%;height:calc(100% - 64px);border:0;background:#050608;display:none;opacity:0;transition:opacity .25s}#siteFrame.ready{opacity:1}#loading,#error{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;flex-direction:column;text-align:center;background:rgba(5,6,8,.88);backdrop-filter:blur(25px);padding:30px}.loader-wrap{width:58px;height:58px;display:flex;align-items:center;justify-content:center;border-radius:17px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08)}.loader{width:27px;height:27px;border:2px solid rgba(255,255,255,.12);border-top-color:#fff;border-right-color:#fff;border-radius:50%;animation:spin .65s linear infinite}.loading-title{margin-top:18px;font-size:14px;font-weight:750}.loading-info{margin-top:7px;font-size:11px;color:#68707d;max-width:500px;word-break:break-word}.error-icon{width:56px;height:56px;display:flex;align-items:center;justify-content:center;border-radius:17px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);font-size:23px;margin-bottom:18px}#error h2{margin:0;font-size:25px}#error p{max-width:600px;margin:12px 0 0;color:#858c98;line-height:1.5;font-size:13px}#error button{margin-top:22px;border:0;background:#fff;color:#07080b;padding:11px 19px;border-radius:10px;font-weight:750;cursor:pointer}@keyframes spin{to{transform:rotate(360deg)}}@keyframes cardIn{from{opacity:0;transform:translateY(13px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}@media(max-width:650px){.topbar{padding:0 12px}.logo{font-size:16px}.logo-mark{width:29px;height:29px}.home-content{padding:30px 14px 50px}.site-grid{grid-template-columns:1fr}.hero-title{font-size:34px}}</style>
 </head>
-
 <body>
-
 <div id="app">
-
 <header class="topbar">
-
-<div class="logo">
-<div class="logo-mark">I</div>
-<span>Ikirumi</span>
+<div class="logo"><div class="logo-mark">I</div><span>Ikirumi</span></div>
+<div>
+<button id="backButton" class="back-button" onclick="showHome()">← Back</button>
+<button class="refresh-button" onclick="refreshRepository()" title="Refresh">↻</button>
 </div>
-
-<nav id="tabs" class="tabs">
-
-<button
-id="homeTab"
-class="tab active"
-onclick="showHome()"
->
-<span class="tab-icon">⌂</span>
-<span class="tab-name">Home</span>
-</button>
-
-</nav>
-
-<div class="header-right">
-
-<button
-class="refresh-button"
-onclick="refreshRepository()"
-title="Refresh"
->
-↻
-</button>
-
-</div>
-
 </header>
 
 <section id="home" class="page">
-
 <div class="home-content">
-
 <div class="hero">
-
-<div>
-<div class="hero-title">
-Welcome to <span>Ikirumi</span>
+<div class="hero-title">Welcome to <span>Ikirumi</span></div>
+<div class="hero-subtitle">Choose a site to launch.</div>
 </div>
-
-<div class="hero-subtitle">
-Choose a category and launch one of your sites.
+<div id="siteGrid" class="site-grid"></div>
 </div>
-</div>
-
-<div class="connection">
-<span class="connection-dot"></span>
-GitHub connected
-</div>
-
-</div>
-
-<div class="search">
-
-<span class="search-icon">⌕</span>
-
-<input
-id="siteSearch"
-type="text"
-placeholder="Search categories or sites..."
-autocomplete="off"
->
-
-</div>
-
-<div class="section-heading">
-
-<div class="section-title">
-Categories
-</div>
-
-<div
-id="categoryCount"
-class="section-count"
->
-0 categories
-</div>
-
-</div>
-
-<div
-id="categoryGrid"
-class="category-grid"
-></div>
-
-<div
-id="siteSection"
-class="site-section"
->
-
-<div class="section-heading">
-
-<div
-id="siteSectionTitle"
-class="section-title"
->
-Sites
-</div>
-
-<div
-id="siteSectionCount"
-class="section-count"
->
-0 sites
-</div>
-
-</div>
-
-<div
-id="siteGrid"
-class="site-grid"
-></div>
-
-</div>
-
-</div>
-
 </section>
 
 <iframe id="siteFrame"></iframe>
 
-</div>
-
 <div id="loading">
-
-<div class="loader-wrap">
-<div class="loader"></div>
-</div>
-
-<div
-id="loadingTitle"
-class="loading-title"
->
-Starting Ikirumi
-</div>
-
-<div
-id="loadingInfo"
-class="loading-info"
->
-Loading all available sites...
-</div>
-
+<div class="loader-wrap"><div class="loader"></div></div>
+<div id="loadingTitle" class="loading-title">Starting Ikirumi</div>
+<div id="loadingInfo" class="loading-info">Loading sites...</div>
 </div>
 
 <div id="error">
-
-<div class="error-icon">
-!
-</div>
-
-<h2>
-Something went wrong
-</h2>
-
+<div class="error-icon">!</div>
+<h2>Something went wrong</h2>
 <p id="errorText"></p>
-
-<button onclick="initialize()">
-Try Again
-</button>
-
+<button onclick="initialize()">Try Again</button>
+</div>
 </div>
 
 <script>
-
 const OWNER="ikirumi11";
 const REPO="ikirumi-stuff";
 const BRANCH="main";
+const TREE_URL="https://api.github.com/repos/"+OWNER+"/"+REPO+"/git/trees/"+BRANCH+"?recursive=1";
+const RAW_BASE="https://raw.githubusercontent.com/"+OWNER+"/"+REPO+"/"+BRANCH+"/";
 
-const TREE_URL=
-"https://api.github.com/repos/"+
-OWNER+"/"+REPO+
-"/git/trees/"+BRANCH+
-"?recursive=1";
-
-const RAW_BASE=
-"https://raw.githubusercontent.com/"+
-OWNER+"/"+REPO+"/"+BRANCH+"/";
-
-const home=
-document.getElementById("home");
-
-const homeTab=
-document.getElementById("homeTab");
-
-const tabs=
-document.getElementById("tabs");
-
-const siteFrame=
-document.getElementById("siteFrame");
-
-const categoryGrid=
-document.getElementById("categoryGrid");
-
-const categoryCount=
-document.getElementById("categoryCount");
-
-const siteSection=
-document.getElementById("siteSection");
-
-const siteSectionTitle=
-document.getElementById("siteSectionTitle");
-
-const siteSectionCount=
-document.getElementById("siteSectionCount");
-
-const siteGrid=
-document.getElementById("siteGrid");
-
-const siteSearch=
-document.getElementById("siteSearch");
-
-const loading=
-document.getElementById("loading");
-
-const loadingTitle=
-document.getElementById("loadingTitle");
-
-const loadingInfo=
-document.getElementById("loadingInfo");
-
-const error=
-document.getElementById("error");
-
-const errorText=
-document.getElementById("errorText");
+const home=document.getElementById("home");
+const siteGrid=document.getElementById("siteGrid");
+const siteFrame=document.getElementById("siteFrame");
+const backButton=document.getElementById("backButton");
+const loading=document.getElementById("loading");
+const loadingTitle=document.getElementById("loadingTitle");
+const loadingInfo=document.getElementById("loadingInfo");
+const error=document.getElementById("error");
+const errorText=document.getElementById("errorText");
 
 let repositoryFiles=[];
 let sites=[];
-let currentSite="";
-let currentView="home";
-
-let openCategories=new Set();
-
 let virtualFiles=new Map();
 let virtualUrls=new Map();
 
-const defaultCategories=[
-"All",
-"Games",
-"Tools",
-"AI",
-"Creative",
-"Social",
-"Code",
-"Learning",
-"Other"
-];
-
-const categoryIcons={
-All:"◉",
-Games:"🎮",
-Tools:"🛠",
-AI:"✦",
-Creative:"✎",
-Social:"◉",
-Code:"⌘",
-Learning:"◆",
-Other:"◇"
-};
-
-function clearActiveTabs(){
-
-document
-.querySelectorAll(".tab")
-.forEach(tab=>{
-tab.classList.remove("active");
-});
-
-}
-
-function activateTab(tab){
-
-clearActiveTabs();
-
-if(!tab){
-return;
-}
-
-tab.classList.add("active");
-
-setTimeout(()=>{
-
-tab.scrollIntoView({
-behavior:"smooth",
-block:"nearest",
-inline:"center"
-});
-
-},20);
-
-}
-
 function showHome(){
-
-currentView="home";
-currentSite="";
-
-activateTab(homeTab);
-
 home.style.display="block";
 siteFrame.classList.remove("ready");
 siteFrame.style.display="none";
+backButton.style.display="none";
 error.style.display="none";
-
-renderHome();
-
-}
-
-function getVisibleCategories(){
-
-return defaultCategories.filter(category=>{
-
-if(category==="All"){
-return sites.length>0;
-}
-
-return sites.some(
-folder=>getCategory(folder)===category
-);
-
-});
-
-}
-
-function openCategory(category){
-
-if(
-!getVisibleCategories()
-.includes(category)
-){
-return;
-}
-
-openCategories.add(category);
-
-let tab=
-document.querySelector(
-'.category-tab[data-category="'+
-CSS.escape(category)+
-'"]'
-);
-
-if(!tab){
-
-tab=createCategoryTab(category);
-
-}
-
-showCategory(category,tab);
-
-}
-
-function showCategory(category,tab){
-
-currentView=category;
-currentSite="";
-
-activateTab(tab);
-
-home.style.display="block";
-siteFrame.classList.remove("ready");
-siteFrame.style.display="none";
-error.style.display="none";
-
-renderHome();
-
-}
-
-function closeCategory(category,event){
-
-if(event){
-event.stopPropagation();
-}
-
-openCategories.delete(category);
-
-const tab=
-document.querySelector(
-'.category-tab[data-category="'+
-CSS.escape(category)+
-'"]'
-);
-
-if(tab){
-tab.remove();
-}
-
-if(currentView===category){
-
-showHome();
-
-}
-
-}
-
-function createCategoryTab(category){
-
-const existing=
-document.querySelector(
-'.category-tab[data-category="'+
-CSS.escape(category)+
-'"]'
-);
-
-if(existing){
-return existing;
-}
-
-openCategories.add(category);
-
-const tab=
-document.createElement("button");
-
-tab.className=
-"tab category-tab";
-
-tab.dataset.category=
-category;
-
-tab.innerHTML=
-'<span class="tab-icon"></span>'+
-'<span class="tab-name"></span>'+
-'<button class="tab-close" title="Close category">×</button>';
-
-tab.querySelector(
-".tab-icon"
-).textContent=
-categoryIcons[category]||"◇";
-
-tab.querySelector(
-".tab-name"
-).textContent=
-category;
-
-tab.onclick=()=>{
-showCategory(category,tab);
-};
-
-tab.querySelector(
-".tab-close"
-).onclick=
-event=>{
-closeCategory(category,event);
-};
-
-tabs.appendChild(tab);
-
-return tab;
-
-}
-
-function renderCategoryCards(){
-
-categoryGrid.innerHTML="";
-
-const query=
-siteSearch.value
-.trim()
-.toLowerCase();
-
-const available=
-getVisibleCategories()
-.filter(category=>{
-
-if(!query){
-return true;
-}
-
-if(
-category
-.toLowerCase()
-.includes(query)
-){
-return true;
-}
-
-return sites.some(folder=>
-(
-category==="All"||
-getCategory(folder)===category
-)&&
-getSiteName(folder)
-.toLowerCase()
-.includes(query)
-);
-
-});
-
-categoryCount.textContent=
-available.length+
-(
-available.length===1
-?" category"
-:" categories"
-);
-
-available.forEach(
-(category,index)=>{
-
-const categorySites=
-category==="All"
-?sites
-:sites.filter(
-folder=>getCategory(folder)===category
-);
-
-const card=
-document.createElement("div");
-
-card.className=
-"category-card"+
-(
-openCategories.has(category)
-?" open"
-:""
-);
-
-card.style.animationDelay=
-Math.min(index*45,450)+"ms";
-
-card.innerHTML=
-'<div class="category-glow"></div>'+
-'<div class="category-icon"></div>'+
-'<div class="category-name"></div>'+
-'<div class="category-info"></div>'+
-'<div class="category-arrow">›</div>';
-
-card.querySelector(
-".category-icon"
-).textContent=
-categoryIcons[category]||"◇";
-
-card.querySelector(
-".category-name"
-).textContent=
-category;
-
-card.querySelector(
-".category-info"
-).textContent=
-categorySites.length+
-(
-categorySites.length===1
-?" site"
-:" sites"
-)+
-(
-openCategories.has(category)
-?" · Open"
-:" · Click to open"
-);
-
-card.onclick=()=>{
-openCategory(category);
-};
-
-categoryGrid.appendChild(card);
-
-});
-
-if(available.length===0){
-
-const empty=
-document.createElement("div");
-
-empty.className="empty";
-
-empty.innerHTML=
-'<div class="empty-icon">⌕</div>'+
-'No categories found.';
-
-categoryGrid.appendChild(empty);
-
-}
-
-}
-
-function renderCategorySites(category){
-
-siteGrid.innerHTML="";
-
-const query=
-siteSearch.value
-.trim()
-.toLowerCase();
-
-const filtered=
-sites.filter(folder=>{
-
-if(
-category!=="All"&&
-getCategory(folder)!==category
-){
-return false;
-}
-
-if(!query){
-return true;
-}
-
-return getSiteName(folder)
-.toLowerCase()
-.includes(query);
-
-});
-
-siteSectionTitle.textContent=
-category==="All"
-?"All Sites"
-:category+" Sites";
-
-siteSectionCount.textContent=
-filtered.length+
-(
-filtered.length===1
-?" site"
-:" sites"
-);
-
-filtered.forEach(
-(folder,index)=>{
-
-const name=
-getSiteName(folder);
-
-const categoryName=
-getCategory(folder);
-
-const card=
-createSiteCard(
-folder,
-name,
-categoryName,
-index
-);
-
-siteGrid.appendChild(card);
-
-});
-
-if(filtered.length===0){
-
-const empty=
-document.createElement("div");
-
-empty.className="empty";
-
-empty.innerHTML=
-'<div class="empty-icon">⌕</div>'+
-'No sites found in this category.';
-
-siteGrid.appendChild(empty);
-
-}
-
-}
-
-function createSiteCard(
-folder,
-name,
-category,
-index
-){
-
-const card=
-document.createElement("div");
-
-card.className="site-card";
-
-card.style.animationDelay=
-Math.min(index*40,400)+"ms";
-
-card.innerHTML=
-'<div class="site-glow"></div>'+
-'<div class="site-card-icon">▶</div>'+
-'<div class="site-card-name"></div>'+
-'<div class="site-card-info"></div>'+
-'<div class="site-card-arrow">›</div>';
-
-card.querySelector(
-".site-card-name"
-).textContent=
-name;
-
-card.querySelector(
-".site-card-info"
-).textContent=
-category+
-" · Ready to launch";
-
-card.onclick=()=>{
-
-const tab=
-Array.from(
-document.querySelectorAll(".site-tab")
-).find(
-element=>
-element.dataset.site===folder
-);
-
-openSite(folder,tab);
-
-};
-
-return card;
-
-}
-
-function renderHome(){
-
-home.style.display="block";
-siteFrame.style.display="none";
-
-renderCategoryCards();
-
-if(currentView!=="home"){
-
-siteSection.classList.add("visible");
-
-renderCategorySites(
-currentView
-);
-
-}else{
-
-siteSection.classList.remove("visible");
-siteGrid.innerHTML="";
-
-}
-
-}
-
-siteSearch.addEventListener(
-"input",
-renderHome
-);
-
-function removeSiteTabs(){
-
-document
-.querySelectorAll(".site-tab")
-.forEach(tab=>{
-tab.remove();
-});
-
-}
-
-function removeCategoryTabs(){
-
-document
-.querySelectorAll(".category-tab")
-.forEach(tab=>{
-tab.remove();
-});
-
-}
-
-async function refreshRepository(){
-
-repositoryFiles=[];
-sites=[];
-currentSite="";
-currentView="home";
-
-openCategories.clear();
-
-removeSiteTabs();
-removeCategoryTabs();
-
-siteFrame.style.display="none";
-
-await initialize();
-
-}
-
-async function loadRepository(){
-
-loadingTitle.textContent=
-"Loading Sites";
-
-loadingInfo.textContent=
-"Reading GitHub repository...";
-
-const response=
-await fetch(
-TREE_URL+
-"&cache="+
-Date.now(),
-{
-cache:"no-store"
-}
-);
-
-if(!response.ok){
-
-throw new Error(
-"GitHub returned HTTP "+
-response.status
-);
-
-}
-
-const data=
-await response.json();
-
-if(!Array.isArray(data.tree)){
-
-throw new Error(
-"GitHub did not return a valid file tree."
-);
-
-}
-
-if(data.truncated){
-
-throw new Error(
-"This repository is too large to read in one request."
-);
-
-}
-
-repositoryFiles=
-data.tree.filter(
-file=>file.type==="blob"
-);
-
-sites=
-getAllSites();
-
-createSiteTabs();
-
-renderHome();
-
+renderSites();
 }
 
 function getFolders(path){
-
-const prefix=
-path?
-path+"/":
-"";
-
-const result=
-new Set();
-
+const prefix=path?path+"/":"";
+const result=new Set();
 for(const file of repositoryFiles){
-
-if(
-!file.path.startsWith(prefix)
-){
-continue;
+if(!file.path.startsWith(prefix)) continue;
+const remaining=file.path.substring(prefix.length);
+const slash=remaining.indexOf("/");
+if(slash===-1) continue;
+result.add(prefix+remaining.substring(0,slash));
 }
-
-const remaining=
-file.path.substring(
-prefix.length
-);
-
-const slash=
-remaining.indexOf("/");
-
-if(slash===-1){
-continue;
-}
-
-const folder=
-prefix+
-remaining.substring(
-0,
-slash
-);
-
-result.add(folder);
-
-}
-
 return Array.from(result);
-
 }
 
 function getFiles(path){
-
-const prefix=
-path?
-path+"/":
-"";
-
+const prefix=path?path+"/":"";
 return repositoryFiles.filter(file=>{
-
-if(
-!file.path.startsWith(prefix)
-){
-return false;
-}
-
-const remaining=
-file.path.substring(
-prefix.length
-);
-
-return(
-remaining.length>0&&
-!remaining.includes("/")
-);
-
+if(!file.path.startsWith(prefix)) return false;
+const remaining=file.path.substring(prefix.length);
+return remaining.length>0&&!remaining.includes("/");
 });
-
 }
 
 function hasIndex(path){
-
-return getFiles(path).some(
-file=>
-file.path
-.split("/")
-.pop()
-.toLowerCase()==="index.html"
-);
-
+return getFiles(path).some(file=>file.path.split("/").pop().toLowerCase()==="index.html");
 }
 
 function getAllSites(){
-
 const result=[];
-
 function scan(path){
-
-const folders=
-getFolders(path);
-
-for(
-const folder of folders
-){
-
-if(hasIndex(folder)){
-
-result.push(folder);
-
-}
-
+for(const folder of getFolders(path)){
+if(hasIndex(folder)) result.push(folder);
 scan(folder);
-
 }
-
 }
-
 scan("");
-
-return result
-.sort(
-(a,b)=>
-a.localeCompare(
-b,
-undefined,
-{
-numeric:true,
-sensitivity:"base"
-}
-)
-)
-.filter(
-(value,index,array)=>
-array.indexOf(value)===index
-);
-
+return result.sort((a,b)=>a.localeCompare(b,undefined,{numeric:true,sensitivity:"base"})).filter((v,i,a)=>a.indexOf(v)===i);
 }
 
 function getSiteName(folder){
-
-return folder
-.split("/")
-.pop();
-
+return folder.split("/").pop();
 }
 
-function createSiteTabs(){
-
-removeSiteTabs();
-
-for(
-const folder of sites
-){
-
-const name=
-getSiteName(folder);
-
-const tab=
-document.createElement("button");
-
-tab.className="tab site-tab";
-
-tab.dataset.site=folder;
-
-tab.title=name;
-
-tab.innerHTML=
-'<span class="tab-icon">●</span>'+
-'<span class="tab-name"></span>';
-
-tab.querySelector(
-".tab-name"
-).textContent=name;
-
-tab.onclick=
-()=>openSite(
-folder,
-tab
-);
-
-tabs.appendChild(tab);
-
+function renderSites(){
+siteGrid.innerHTML="";
+if(sites.length===0){
+siteGrid.innerHTML='<div class="empty"><div class="empty-icon">⌕</div>No sites found.</div>';
+return;
+}
+sites.forEach((folder,index)=>{
+const card=document.createElement("div");
+card.className="site-card";
+card.style.animationDelay=Math.min(index*35,400)+"ms";
+card.innerHTML='<div class="site-card-icon">▶</div><div class="site-card-name"></div><div class="site-card-path"></div><div class="site-card-arrow">›</div>';
+card.querySelector(".site-card-name").textContent=getSiteName(folder);
+card.querySelector(".site-card-path").textContent=folder;
+card.onclick=()=>openSite(folder);
+siteGrid.appendChild(card);
+});
 }
 
+async function refreshRepository(){
+repositoryFiles=[];
+sites=[];
+showHome();
+await initialize();
 }
 
-function getCategory(folder){
-
-const name=
-getSiteName(folder)
-.toLowerCase();
-
-const path=
-folder.toLowerCase();
-
-if(
-name.includes("game")||
-name.includes("games")||
-path.startsWith("games/")||
-path.includes("/games/")
-){
-return "Games";
-}
-
-if(
-name.includes("tool")||
-name.includes("tools")||
-name.includes("converter")||
-name.includes("calculator")||
-name.includes("utility")||
-name.includes("utilities")||
-name.includes("file")
-){
-return "Tools";
-}
-
-if(
-name==="ai"||
-name.includes(" ai")||
-name.includes("ai ")||
-name.includes("artificial")||
-name.includes("image ai")||
-name.includes("text ai")||
-name.includes("generator")||
-path.startsWith("ai/")||
-path.includes("/ai/")
-){
-return "AI";
-}
-
-if(
-name.includes("draw")||
-name.includes("paint")||
-name.includes("art")||
-name.includes("modeler")||
-name.includes("model")||
-name.includes("creative")||
-name.includes("design")
-){
-return "Creative";
-}
-
-if(
-name.includes("chat")||
-name.includes("social")||
-name.includes("peer")||
-name.includes("screen share")||
-name.includes("messenger")
-){
-return "Social";
-}
-
-if(
-name.includes("code")||
-name.includes("python")||
-name.includes("program")||
-name.includes("logic")||
-name.includes("coding")||
-name.includes("developer")||
-name.includes("dev")
-){
-return "Code";
-}
-
-if(
-name.includes("test")||
-name.includes("reaction")||
-name.includes("training")||
-name.includes("learn")||
-name.includes("school")||
-name.includes("study")
-){
-return "Learning";
-}
-
-return "Other";
-
-}
-
-async function openSite(
-folder,
-tab
-){
-
-if(tab){
-activateTab(tab);
-}
-
-currentSite=folder;
-
-home.style.display="none";
-siteFrame.classList.remove("ready");
-
-try{
-
-await loadSite(folder);
-
-}catch(e){
-
-loading.style.display="none";
-
-errorText.textContent=
-"Could not open "+
-getSiteName(folder)+
-": "+
-e.message;
-
-error.style.display="flex";
-
-}
-
+async function loadRepository(){
+loadingTitle.textContent="Loading Sites";
+loadingInfo.textContent="Reading GitHub repository...";
+const response=await fetch(TREE_URL+"&cache="+Date.now(),{cache:"no-store"});
+if(!response.ok) throw new Error("GitHub returned HTTP "+response.status);
+const data=await response.json();
+if(!Array.isArray(data.tree)) throw new Error("GitHub did not return a valid file tree.");
+if(data.truncated) throw new Error("This repository is too large to read in one request.");
+repositoryFiles=data.tree.filter(file=>file.type==="blob");
+sites=getAllSites();
+renderSites();
 }
 
 function normalizePath(path){
-
 const result=[];
-
-for(
-const part of path.split("/")
-){
-
-if(
-!part||
-part=="."
-){
-continue;
+for(const part of path.split("/")){
+if(!part||part===".") continue;
+if(part==="..") result.pop(); else result.push(part);
 }
-
-if(part===".."){
-
-result.pop();
-
-}else{
-
-result.push(part);
-
-}
-
-}
-
 return result.join("/");
-
 }
 
 function directory(path){
-
-const index=
-path.lastIndexOf("/");
-
-return index===-1
-?""
-:path.substring(
-0,
-index+1
-);
-
+const index=path.lastIndexOf("/");
+return index===-1?"":path.substring(0,index+1);
 }
 
-function resolvePath(
-source,
-currentFile
-){
-
-if(!source){
-return null;
-}
-
+function resolvePath(source,currentFile){
+if(!source) return null;
 source=source.trim();
-
-if(
-source.startsWith("#")||
-source.startsWith("data:")||
-source.startsWith("blob:")||
-source.startsWith("javascript:")
-){
-return null;
-}
-
-if(
-source.startsWith("http://")||
-source.startsWith("https://")||
-source.startsWith("//")
-){
-return source;
-}
-
-const clean=
-source
-.split("?")[0]
-.split("#")[0];
-
-return clean.startsWith("/")
-?
-normalizePath(
-clean.substring(1)
-)
-:
-normalizePath(
-directory(currentFile)+
-clean
-);
-
+if(source.startsWith("#")||source.startsWith("data:")||source.startsWith("blob:")||source.startsWith("javascript:")) return null;
+if(source.startsWith("http://")||source.startsWith("https://")||source.startsWith("//")) return source;
+const clean=source.split("?")[0].split("#")[0];
+return clean.startsWith("/")?normalizePath(clean.substring(1)):normalizePath(directory(currentFile)+clean);
 }
 
 function virtualUrl(path){
-
-return virtualUrls.get(
-normalizePath(path)
-)||null;
-
+return virtualUrls.get(normalizePath(path))||null;
 }
 
 async function prepareFiles(folder){
-
 virtualFiles.clear();
-
-for(
-const url of virtualUrls.values()
-){
-
-try{
-
-URL.revokeObjectURL(url);
-
-}catch(e){}
-
+for(const url of virtualUrls.values()){
+try{URL.revokeObjectURL(url)}catch(e){}
 }
-
 virtualUrls.clear();
 
-const filesToDownload=
-repositoryFiles.filter(
-file=>
-file.path===
-folder+"/index.html"||
-file.path.startsWith(
-folder+"/"
-)
-);
-
-if(
-filesToDownload.length===0
-){
-
-throw new Error(
-"No files were found for this site."
-);
-
-}
+const filesToDownload=repositoryFiles.filter(file=>file.path===folder+"/index.html"||file.path.startsWith(folder+"/"));
+if(filesToDownload.length===0) throw new Error("No files were found for this site.");
 
 loading.style.display="flex";
 
-for(
-let i=0;
-i<filesToDownload.length;
-i++
-){
-
-const file=
-filesToDownload[i];
-
-const relative=
-file.path.substring(
-folder.length+1
-);
-
-loadingTitle.textContent=
-"Opening Site";
-
-loadingInfo.textContent=
-(i+1)+
-" / "+
-filesToDownload.length+
-" · "+
-relative;
-
-const response=
-await fetch(
-RAW_BASE+
-file.path+
-"?cache="+
-Date.now(),
-{
-cache:"no-store"
-}
-);
-
-if(!response.ok){
-
-throw new Error(
-"Failed to download "+
-relative
-);
-
+for(let i=0;i<filesToDownload.length;i++){
+const file=filesToDownload[i];
+const relative=file.path.substring(folder.length+1);
+loadingTitle.textContent="Opening Site";
+loadingInfo.textContent=(i+1)+" / "+filesToDownload.length+" · "+relative;
+const response=await fetch(RAW_BASE+file.path+"?cache="+Date.now(),{cache:"no-store"});
+if(!response.ok) throw new Error("Failed to download "+relative);
+const blob=await response.blob();
+virtualFiles.set(relative,{blob:blob,type:blob.type});
 }
 
-const blob=
-await response.blob();
-
-virtualFiles.set(
-relative,
-{
-blob:blob,
-type:blob.type
-}
-);
-
-}
-
-for(
-const [path,file]
-of virtualFiles
-){
-
+for(const [path,file] of virtualFiles){
 let blob=file.blob;
-
-if(
-path
-.toLowerCase()
-.endsWith(".css")
-){
-
-let text=
-await blob.text();
-
-text=
-rewriteCSS(
-text,
-path
-);
-
-blob=
-new Blob(
-[text],
-{
-type:"text/css"
+if(path.toLowerCase().endsWith(".css")){
+let text=await blob.text();
+text=rewriteCSS(text,path);
+blob=new Blob([text],{type:"text/css"});
 }
-);
-
+virtualUrls.set(path,URL.createObjectURL(blob));
 }
-
-virtualUrls.set(
-path,
-URL.createObjectURL(blob)
-);
-
-}
-
 return filesToDownload;
-
 }
 
-function rewriteCSS(
-text,
-file
-){
-
-return text.replace(
-/url\s*\(\s*(['"]?)(.*?)\1\s*\)/gi,
-(
-full,
-quote,
-source
-)=>{
-
-const path=
-resolvePath(
-source,
-file
-);
-
-if(!path){
-return full;
+function rewriteCSS(text,file){
+return text.replace(/url\s*\(\s*(['"]?)(.*?)\1\s*\)/gi,(full,quote,source)=>{
+const path=resolvePath(source,file);
+if(!path) return full;
+const url=virtualUrl(path);
+return url?'url("'+url+'")':full;
+});
 }
 
-const url=
-virtualUrl(path);
-
-return url
-?
-'url("'+url+'")'
-:
-full;
-
-}
-);
-
-}
-
-function replaceAttribute(
-element,
-attribute,
-currentFile
-){
-
-const source=
-element.getAttribute(
-attribute
-);
-
-if(!source){
-return;
-}
-
-const path=
-resolvePath(
-source,
-currentFile
-);
-
-if(!path){
-return;
-}
-
-const url=
-virtualUrl(path);
-
-if(url){
-
-element.setAttribute(
-attribute,
-url
-);
-
-}
-
+function replaceAttribute(element,attribute,currentFile){
+const source=element.getAttribute(attribute);
+if(!source) return;
+const path=resolvePath(source,currentFile);
+if(!path) return;
+const url=virtualUrl(path);
+if(url) element.setAttribute(attribute,url);
 }
 
 async function loadSite(folder){
+const filesToDownload=await prepareFiles(folder);
+const index=virtualFiles.get("index.html");
+if(!index) throw new Error("index.html was not found.");
 
-const filesToDownload=
-await prepareFiles(folder);
+const parser=new DOMParser();
+const doc=parser.parseFromString(await index.blob.text(),"text/html");
 
-const index=
-virtualFiles.get(
-"index.html"
-);
+doc.querySelectorAll("base").forEach(element=>element.remove());
+doc.querySelectorAll("link[href]").forEach(element=>replaceAttribute(element,"href","index.html"));
+doc.querySelectorAll("script[src]").forEach(element=>replaceAttribute(element,"src","index.html"));
+doc.querySelectorAll("img[src],video[src],audio[src],source[src],iframe[src]").forEach(element=>replaceAttribute(element,"src","index.html"));
+doc.querySelectorAll("video[poster]").forEach(element=>replaceAttribute(element,"poster","index.html"));
 
-if(!index){
-
-throw new Error(
-"index.html was not found."
-);
-
-}
-
-let html=
-await index.blob.text();
-
-const parser=
-new DOMParser();
-
-const doc=
-parser.parseFromString(
-html,
-"text/html"
-);
-
-doc
-.querySelectorAll("base")
-.forEach(
-element=>
-element.remove()
-);
-
-doc
-.querySelectorAll("link[href]")
-.forEach(
-element=>
-replaceAttribute(
-element,
-"href",
-"index.html"
-)
-);
-
-doc
-.querySelectorAll("script[src]")
-.forEach(
-element=>
-replaceAttribute(
-element,
-"src",
-"index.html"
-)
-);
-
-doc
-.querySelectorAll(
-"img[src],video[src],audio[src],source[src],iframe[src]"
-)
-.forEach(
-element=>
-replaceAttribute(
-element,
-"src",
-"index.html"
-)
-);
-
-doc
-.querySelectorAll(
-"video[poster]"
-)
-.forEach(
-element=>
-replaceAttribute(
-element,
-"poster",
-"index.html"
-)
-);
-
-loadingTitle.textContent=
-"Launching "+
-getSiteName(folder);
-
-loadingInfo.textContent=
-filesToDownload.length+
-" files ready";
-
-siteFrame.srcdoc=
-"<!DOCTYPE html>"+
-doc.documentElement.outerHTML;
-
+loadingTitle.textContent="Launching "+getSiteName(folder);
+loadingInfo.textContent=filesToDownload.length+" files ready";
+siteFrame.srcdoc="<!DOCTYPE html>"+doc.documentElement.outerHTML;
 siteFrame.style.display="block";
+backButton.style.display="inline-block";
+home.style.display="none";
 
 siteFrame.onload=()=>{
-
 requestAnimationFrame(()=>{
-
 siteFrame.classList.add("ready");
 loading.style.display="none";
-
 });
-
 };
+}
 
+async function openSite(folder){
+siteFrame.classList.remove("ready");
+try{
+await loadSite(folder);
+}catch(e){
+loading.style.display="none";
+errorText.textContent="Could not open "+getSiteName(folder)+": "+e.message;
+error.style.display="flex";
+}
 }
 
 async function initialize(){
-
 error.style.display="none";
-
 loading.style.display="flex";
-
-loadingTitle.textContent=
-"Starting Ikirumi";
-
-loadingInfo.textContent=
-"Loading all available sites...";
-
+loadingTitle.textContent="Starting Ikirumi";
+loadingInfo.textContent="Loading sites...";
 try{
-
 await loadRepository();
-
 showHome();
-
 loading.style.display="none";
-
 }catch(e){
-
 loading.style.display="none";
-
-errorText.textContent=
-"Could not initialize Ikirumi: "+
-e.message;
-
+errorText.textContent="Could not initialize Ikirumi: "+e.message;
 error.style.display="flex";
-
 }
-
 }
 
 initialize();
-
 </script>
-
 </body>
 </html>
