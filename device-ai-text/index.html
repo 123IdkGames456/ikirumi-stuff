@@ -179,8 +179,8 @@ async function generateImage(prompt){
  status.textContent='Generating image…';
  startImageProgress();
  try{
-  const url='https://image.pollinations.ai/prompt/'+encodeURIComponent(prompt)+'?model=flux&width=768&height=768&nologo=true&private=true&safe=true';
-  const response=await fetch(url,{signal:imageAbort.signal,cache:'no-store'});
+  const url='https://image.pollinations.ai/prompt/'+encodeURIComponent(prompt)+'?model=flux&width=768&height=768&nologo=true&private=true&safe=true&seed='+Math.floor(Math.random()*2147483647);
+  const response=await fetch(url,{signal:imageAbort.signal,cache:'no-store',headers:{'Accept':'image/*'}});
   if(!response.ok)throw new Error('Image generation failed: HTTP '+response.status);
   const blob=await response.blob();
   if(!blob.type.startsWith('image/'))throw new Error('Generated response was not an image');
