@@ -111,7 +111,7 @@ async function processQueue(){
    status.textContent='Generating locally…';
    progress.textContent='Your message stays on this device';
    const recent=history.slice(-12);
-   const prompt=['You are a helpful, concise AI assistant.',...recent.map(m=>(m.role==='user'?'User: ':'Assistant: ')+m.content),'Assistant:'].join('\n');
+   const prompt=['### System: You are a helpful AI assistant. Answer ONLY the latest user message. Never claim the user said something that is not in the conversation. Never invent companies, people, facts, or previous messages. If you do not know something, say so. Keep the answer concise.','### Conversation:',...recent.map(m=>(m.role==='user'?'User: ':'Assistant: ')+m.content),'### Assistant:'].join('\n');
    const out=await engine(prompt,{max_new_tokens:128,do_sample:true,temperature:Number($('temperature').value),top_p:.9,return_full_text:false});
    let answer=Array.isArray(out)?(out[0]?.generated_text||''):(out?.generated_text||'');
    answer=String(answer).replace(/^Assistant:\s*/i,'').trim()||'I could not generate a response.';
