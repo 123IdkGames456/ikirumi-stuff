@@ -16,12 +16,12 @@
 <section class="panel">
 <h2>Local AI</h2>
 <label class="label" for="model">Model</label>
-<select id="model"><option value="tiny">SmolLM2 135M Instruct · tiny · under 250 MB</option></select>
+<select id="model"><option value="large">SmolLM2 1.7B Instruct · ~1.2 GB</option></select>
 <label class="label" for="temperature">Temperature</label>
 <input id="temperature" type="range" min="0" max="1.5" step="0.1" value="0.7">
 <div class="memory"><strong>Saved on this device</strong><span id="memoryText">Chats and settings use local browser storage. Nothing is uploaded for inference.</span></div>
 <div class="actions"><button class="btn" id="newChat">New chat</button><button class="btn" id="clear">Clear saved data</button></div>
-<div class="small">The tiny model is designed to stay under 250 MB. It is slower and less capable, but uses much less storage. Messages can always be sent while the AI is generating; they are queued and processed in order. AI generation is performed on the device, not by a text-generation server.</div>
+<div class="small">The 1.7B model is much more capable and uses about 1.2 GB of model storage. The first load can take time; after that the browser can reuse its cached model. Messages can always be sent while the AI is generating; they are queued and processed in order. AI generation is performed on the device, not by a text-generation server.</div>
 <div class="status" id="status">Preparing local AI…</div>
 </section>
 <section class="panel chat">
@@ -35,7 +35,7 @@
 const $=id=>document.getElementById(id);
 const messages=$('messages'),input=$('input'),send=$('send'),status=$('status'),progress=$('progress'),pill=$('pill');
 let engine=null,busy=false,history=[],queue=[],loadingPromise=null;
-const MODEL='onnx-community/SmolLM2-135M-Instruct-ONNX';
+const MODEL='HuggingFaceTB/SmolLM2-1.7B-Instruct';
 
 function add(role,text){const d=document.createElement('div');d.className='msg '+role;d.textContent=text;messages.appendChild(d);messages.scrollTop=messages.scrollHeight}
 function save(){try{localStorage.setItem('device-ai-text-history',JSON.stringify(history))}catch(e){}}
@@ -63,12 +63,12 @@ async function loadAI(){
   const startWasm=async()=>{
    status.textContent='Starting CPU/WASM AI…';
    progress.textContent='Using CPU mode for maximum browser compatibility';
-   return pipeline('text-generation',MODEL,{device:'wasm',dtype:'q8',progress_callback:update});
+   return pipeline('text-generation',MODEL,{device:'wasm',dtype:'q4f16',progress_callback:update});
   };
 
   const startWebGPU=async()=>{
    status.textContent='Starting WebGPU AI…';
-   return pipeline('text-generation',MODEL,{device:'webgpu',dtype:'q4',progress_callback:update});
+   return pipeline('text-generation',MODEL,{device:'webgpu',dtype:'q4f16',progress_callback:update});
   };
 
   try{
@@ -111,10 +111,11 @@ async function processQueue(){
    status.textContent='Generating locally…';
    progress.textContent='Your message stays on this device';
    const recent=history.slice(-12);
-   const prompt=['### System: You are a helpful AI assistant. Answer ONLY the latest user message. Never claim the user said something that is not in the conversation. Never invent companies, people, facts, or previous messages. If you do not know something, say so. Keep the answer concise.','### Conversation:',...recent.map(m=>(m.role==='user'?'User: ':'Assistant: ')+m.content),'### Assistant:'].join('\n');
-   const out=await engine(prompt,{max_new_tokens:128,do_sample:true,temperature:Number($('temperature').value),top_p:.9,return_full_text:false});
-   let answer=Array.isArray(out)?(out[0]?.generated_text||''):(out?.generated_text||'');
-   answer=String(answer).replace(/^Assistant:\s*/i,'').trim()||'I could not generate a response.';
+   const chat=[{role:'system',content:'You are a helpful AI assistant. Answer the user directly. Never invent previous messages or claim the user said something they did not say. If you do not know, say so. Keep answers concise.'},...recent.map(m=>({role:m.role,content:m.content}))];
+   const out=await engine(chat,{max_new_tokens:192,do_sample:true,temperature:Number($('temperature').value),top_p:.9,return_full_text:false});
+   let answer=Array.isArray(out)?out[0]?.generated_text:out?.generated_text;
+   if(Array.isArray(answer))answer=answer[answer.length-1]?.content||'';
+   answer=String(answer||'').trim()||'I could not generate a response.';
    add('ai',answer);history.push({role:'assistant',content:answer});save();queue.shift();
   }
   status.textContent='Ready · AI runs locally';
@@ -129,7 +130,7 @@ $('clear').onclick=()=>{localStorage.removeItem('device-ai-text-history');histor
 send.onclick=reply;
 input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();reply()}});
 load();
-status.textContent='Ready · '+deviceName()+' detected';
+status.textContent='Ready · '+deviceName()+' detected · 1.7B model';
 progress.textContent=deviceName()==='Phone'?'Phone mode: CPU/WASM only for compatibility':'PC mode: WebGPU first, CPU/WASM fallback';
 </script>
 </body>
