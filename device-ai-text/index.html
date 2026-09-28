@@ -35,7 +35,7 @@
 const $=id=>document.getElementById(id);
 const messages=$('messages'),input=$('input'),send=$('send'),status=$('status'),progress=$('progress'),pill=$('pill');
 let engine=null,busy=false,history=[],queue=[],loadingPromise=null;
-const MODEL='HuggingFaceTB/SmolLM2-1.7B-Instruct';
+const MODEL='onnx-community/SmolLM2-1.7B-Instruct-ONNX';
 
 function add(role,text){const d=document.createElement('div');d.className='msg '+role;d.textContent=text;messages.appendChild(d);messages.scrollTop=messages.scrollHeight}
 function save(){try{localStorage.setItem('device-ai-text-history',JSON.stringify(history))}catch(e){}}
@@ -63,12 +63,12 @@ async function loadAI(){
   const startWasm=async()=>{
    status.textContent='Starting CPU/WASM AI…';
    progress.textContent='Using CPU mode for maximum browser compatibility';
-   return pipeline('text-generation',MODEL,{device:'wasm',dtype:'q4f16',progress_callback:update});
+   return pipeline('text-generation',MODEL,{device:'wasm',dtype:'q4',progress_callback:update});
   };
 
   const startWebGPU=async()=>{
    status.textContent='Starting WebGPU AI…';
-   return pipeline('text-generation',MODEL,{device:'webgpu',dtype:'q4f16',progress_callback:update});
+   return pipeline('text-generation',MODEL,{device:'webgpu',dtype:'q4',progress_callback:update});
   };
 
   try{
@@ -110,9 +110,9 @@ async function processQueue(){
   while(queue.length){
    status.textContent='Generating locally…';
    progress.textContent='Your message stays on this device';
-   const recent=history.slice(-12);
+   const recent=history.slice(-6);
    const chat=[{role:'system',content:'You are a helpful AI assistant. Answer the user directly. Never invent previous messages or claim the user said something they did not say. If you do not know, say so. Keep answers concise.'},...recent.map(m=>({role:m.role,content:m.content}))];
-   const out=await engine(chat,{max_new_tokens:192,do_sample:true,temperature:Number($('temperature').value),top_p:.9,return_full_text:false});
+   const out=await engine(chat,{max_new_tokens:96,do_sample:true,temperature:Math.min(Number($('temperature').value),0.8),top_p:.85,return_full_text:false});
    let answer=Array.isArray(out)?out[0]?.generated_text:out?.generated_text;
    if(Array.isArray(answer))answer=answer[answer.length-1]?.content||'';
    answer=String(answer||'').trim()||'I could not generate a response.';
