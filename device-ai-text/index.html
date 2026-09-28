@@ -79,6 +79,7 @@ async function loadAI(){
  if(loadingPromise)return loadingPromise;
  loadingPromise=(async()=>{
   const device=deviceName();
+  const hasGPU=!!navigator.gpu;
   status.textContent='Preparing AI for '+device+'…';
   progress.textContent='Checking browser support and saved model cache…';
 
@@ -108,22 +109,22 @@ async function loadAI(){
 
   try{
    if(device==='Phone'){
-    if(navigator.gpu){
+    if(hasGPU){
      try{engine=await tryLoad('webgpu')}
-     catch(e){console.warn('Phone WebGPU failed, using WASM',e);progress.textContent='GPU mode failed. Switching to phone-safe CPU mode…';engine=await tryLoad('wasm')}
+     catch(e){console.warn('Phone WebGPU failed, using WASM',e);progress.textContent='GPU unavailable. Switching to phone-safe CPU mode…';engine=await tryLoad('wasm')}
     }else{
      engine=await tryLoad('wasm');
     }
    }else{
-    if(navigator.gpu){
+    if(hasGPU){
      try{engine=await tryLoad('webgpu')}
-     catch(e){console.warn('PC WebGPU failed, using WASM',e);progress.textContent='GPU mode failed. Switching to CPU mode…';engine=await tryLoad('wasm')}
+     catch(e){console.warn('PC WebGPU failed, using WASM',e);progress.textContent='GPU unavailable. Switching to CPU mode…';engine=await tryLoad('wasm')}
     }else{
      engine=await tryLoad('wasm');
     }
    }
 
-   pill.textContent=device+' · '+(navigator.gpu?'GPU/CPU':'CPU');
+   pill.textContent=device+' · '+(hasGPU?'GPU/CPU':'CPU');
    status.textContent='Local AI ready';
    progress.textContent='Ready · model cached on this device';
    progress.className='status ok';
@@ -136,8 +137,8 @@ async function loadAI(){
     setError('Not enough device memory','Close other apps/tabs and reload. If it still fails, use a newer browser/device.');
    }else if(/fetch|network|download|failed to load|404|not found/i.test(message)){
     setError('Model could not be downloaded','Connect to the internet once, reload, and let the model finish downloading.');
-   }else if(/webgpu|gpu/i.test(message)){
-    setError('Browser GPU mode failed','Update Chrome/Edge/Safari, or reload so the AI can use CPU mode.');
+   }else if(/webgpu|gpu adapter|no available backend/i.test(message)){
+    setError('GPU backend unavailable','Do not enable unsafe WebGPU flags. The page will use CPU/WASM instead; reload if it does not switch automatically.');
    }else{
     setError('The AI could not start','Reload the page and try again. Make sure browser storage is allowed.');
    }
