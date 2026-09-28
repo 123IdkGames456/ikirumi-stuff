@@ -35,7 +35,7 @@
 const $=id=>document.getElementById(id);
 const messages=$('messages'),input=$('input'),send=$('send'),status=$('status'),progress=$('progress'),pill=$('pill');
 let engine=null,busy=false,history=[],queue=[],loadingPromise=null;
-const MODEL='onnx-community/SmolLM2-135M-Instruct-ONNX';
+const MODEL='onnx-community/SmolLM-135M-Instruct-ONNX';
 
 function add(role,text){
  const d=document.createElement('div');
@@ -45,74 +45,102 @@ function add(role,text){
  messages.scrollTop=messages.scrollHeight;
 }
 
-function save(){
- try{localStorage.setItem('device-ai-text-history',JSON.stringify(history))}catch(e){}
-}
+function save(){try{localStorage.setItem('device-ai-text-history',JSON.stringify(history))}catch(e){}}
 
 function load(){
  try{
   history=JSON.parse(localStorage.getItem('device-ai-text-history')||'[]');
   if(!Array.isArray(history))history=[];
-  for(const m of history){
-   if(m&&((m.role==='user')||(m.role==='assistant')))add(m.role==='user'?'user':'ai',m.content);
-  }
+  for(const m of history)if(m&&(m.role==='user'||m.role==='assistant'))add(m.role==='user'?'user':'ai',m.content);
  }catch(e){history=[]}
+}
+
+function deviceName(){
+ const ua=navigator.userAgent||'';
+ if(/Android|iPhone|iPad|iPod|Mobile/i.test(ua))return 'Phone';
+ return 'PC';
+}
+
+function setError(title,fix){
+ pill.textContent='AI error';
+ status.textContent=title;
+ progress.textContent='Fix: '+fix;
+ progress.className='status danger';
 }
 
 function updateProgress(p){
  if(!p)return;
- if(typeof p.progress==='number'){
-  const value=Math.max(0,Math.min(100,p.progress));
-  progress.textContent=(p.status||'Loading model')+' · '+value.toFixed(1)+'%';
- }else if(p.status){
-  progress.textContent=p.status+(p.file?' · '+p.file:'');
- }
+ if(typeof p.progress==='number')progress.textContent=(p.status||'Loading model')+' · '+Math.max(0,Math.min(100,p.progress)).toFixed(1)+'%';
+ else if(p.status)progress.textContent=p.status+(p.file?' · '+p.file:'');
 }
 
 async function loadAI(){
  if(engine)return engine;
  if(loadingPromise)return loadingPromise;
  loadingPromise=(async()=>{
-  status.textContent='Loading local AI library…';
-  progress.textContent='Checking the device cache…';
-  const mod=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.2/+esm');
+  const device=deviceName();
+  status.textContent='Preparing AI for '+device+'…';
+  progress.textContent='Checking browser support and saved model cache…';
+
+  let mod;
+  try{
+   mod=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.2/+esm');
+  }catch(e){
+   setError('AI library could not load','Check your internet connection, then reload the page.');
+   throw e;
+  }
+
   const {pipeline,env}=mod;
   env.allowLocalModels=false;
+  env.allowRemoteModels=true;
   env.useBrowserCache=true;
+  env.useWasmCache=true;
   env.useCustomCache=false;
 
-  const make=async(device)=>{
-   status.textContent=device==='webgpu'?'Starting AI with WebGPU…':'Starting AI with CPU/WASM…';
+  const tryLoad=async(deviceName)=>{
+   status.textContent='Starting '+(deviceName==='webgpu'?'GPU':'CPU')+' AI on '+device+'…';
    return await pipeline('text-generation',MODEL,{
-    device,
+    device:deviceName,
     dtype:'q4',
     progress_callback:updateProgress
    });
   };
 
   try{
-   if(navigator.gpu){
-    try{engine=await make('webgpu')}
-    catch(webgpuError){
-     console.warn('WebGPU failed, falling back to WASM',webgpuError);
-     progress.textContent='WebGPU unavailable here. Switching to CPU/WASM…';
-     engine=await make('wasm');
+   if(device==='Phone'){
+    if(navigator.gpu){
+     try{engine=await tryLoad('webgpu')}
+     catch(e){console.warn('Phone WebGPU failed, using WASM',e);progress.textContent='GPU mode failed. Switching to phone-safe CPU mode…';engine=await tryLoad('wasm')}
+    }else{
+     engine=await tryLoad('wasm');
     }
    }else{
-    engine=await make('wasm');
+    if(navigator.gpu){
+     try{engine=await tryLoad('webgpu')}
+     catch(e){console.warn('PC WebGPU failed, using WASM',e);progress.textContent='GPU mode failed. Switching to CPU mode…';engine=await tryLoad('wasm')}
+    }else{
+     engine=await tryLoad('wasm');
+    }
    }
 
-   pill.textContent=navigator.gpu?'On-device · WebGPU/WASM':'On-device · WASM';
+   pill.textContent=device+' · '+(navigator.gpu?'GPU/CPU':'CPU');
    status.textContent='Local AI ready';
-   progress.textContent='AI ready · model is stored in the browser cache';
+   progress.textContent='Ready · model cached on this device';
    progress.className='status ok';
    return engine;
   }catch(e){
+   console.error(e);
    engine=null;
-   pill.textContent='AI failed to load';
-   status.textContent='Could not start the local AI';
-   progress.textContent=String(e?.message||e);
-   progress.className='status danger';
+   const message=String(e?.message||e);
+   if(/memory|out of memory|allocation|OOM/i.test(message)){
+    setError('Not enough device memory','Close other apps/tabs and reload. If it still fails, use a newer browser/device.');
+   }else if(/fetch|network|download|failed to load|404|not found/i.test(message)){
+    setError('Model could not be downloaded','Connect to the internet once, reload, and let the model finish downloading.');
+   }else if(/webgpu|gpu/i.test(message)){
+    setError('Browser GPU mode failed','Update Chrome/Edge/Safari, or reload so the AI can use CPU mode.');
+   }else{
+    setError('The AI could not start','Reload the page and try again. Make sure browser storage is allowed.');
+   }
    throw e;
   }
  })().finally(()=>{loadingPromise=null});
@@ -125,42 +153,23 @@ async function processQueue(){
  try{
   await loadAI();
   while(queue.length){
-   const item=queue[0];
    status.textContent='Generating on this device…';
-   progress.textContent='Processing your message locally';
+   progress.textContent='Processing locally · no message is being sent to an AI server';
    const recent=history.slice(-12);
-   const prompt=[
-    'You are a helpful, concise AI assistant.',
-    ...recent.map(m=>(m.role==='user'?'User: ':'Assistant: ')+m.content),
-    'Assistant:'
-   ].join('\n');
-
-   const out=await engine(prompt,{
-    max_new_tokens:128,
-    do_sample:true,
-    temperature:Number($('temperature').value),
-    top_p:0.9,
-    return_full_text:false
-   });
-
+   const prompt=['You are a helpful, concise AI assistant.',...recent.map(m=>(m.role==='user'?'User: ':'Assistant: ')+m.content),'Assistant:'].join('\n');
+   const out=await engine(prompt,{max_new_tokens:128,do_sample:true,temperature:Number($('temperature').value),top_p:0.9,return_full_text:false});
    let answer=Array.isArray(out)?(out[0]?.generated_text||''):(out?.generated_text||'');
-   answer=String(answer).replace(/^Assistant:\s*/i,'').trim();
-   if(!answer)answer='I could not generate a response.';
+   answer=String(answer).replace(/^Assistant:\s*/i,'').trim()||'I could not generate a response.';
    add('ai',answer);
    history.push({role:'assistant',content:answer});
    save();
    queue.shift();
   }
   status.textContent='Ready · AI runs locally';
-  progress.textContent='No server used · model remains cached on this device';
+  progress.textContent='No AI server used · model stays cached on this device';
   progress.className='status ok';
  }catch(e){
-  console.error(e);
-  add('ai','The local AI could not generate a response. Try again after the model finishes loading.');
-  status.textContent='Local AI error';
-  progress.textContent=String(e?.message||e);
-  progress.className='status danger';
-  queue.shift();
+  if(queue.length)queue.shift();
  }finally{
   busy=false;
   if(queue.length)processQueue();
@@ -179,29 +188,12 @@ function reply(){
  processQueue();
 }
 
-$('newChat').onclick=()=>{
- history=[];
- save();
- messages.innerHTML='<div class="msg ai">New local chat started.</div>';
-};
-
-$('clear').onclick=()=>{
- localStorage.removeItem('device-ai-text-history');
- history=[];
- messages.innerHTML='<div class="msg ai">Saved chat data cleared from this browser.</div>';
- status.textContent='Local chat storage cleared';
-};
-
+$('newChat').onclick=()=>{history=[];save();messages.innerHTML='<div class="msg ai">New local chat started.</div>'};
+$('clear').onclick=()=>{localStorage.removeItem('device-ai-text-history');history=[];messages.innerHTML='<div class="msg ai">Saved chat data cleared from this browser.</div>';status.textContent='Local chat storage cleared'};
 send.onclick=reply;
-input.addEventListener('keydown',e=>{
- if(e.key==='Enter'&&!e.shiftKey){
-  e.preventDefault();
-  reply();
- }
-});
-
+input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();reply()}});
 load();
-status.textContent='Ready · send a message to load the AI';
+status.textContent='Ready · '+deviceName()+' detected';
 progress.textContent='First use downloads the model once; later uses load it from browser cache';
 </script>
 </body>
