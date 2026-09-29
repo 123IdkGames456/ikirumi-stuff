@@ -131,6 +131,8 @@ async function loadAI(){
  })().finally(()=>loadingPromise=null);
  return loadingPromise;
 }
+function showStreamingMessage(){const d=document.createElement('div');d.className='msg ai';messages.appendChild(d);return d}
+async function streamText(text,el){el.textContent='';const parts=text.match(/\S+\s*/g)||[text];for(const part of parts){el.textContent+=part;messages.scrollTop=messages.scrollHeight;await new Promise(r=>setTimeout(r,Math.min(35,8+part.length*2)))}
 async function processQueue(){
  if(busy||redownloading)return;
  busy=true;
@@ -147,7 +149,7 @@ async function processQueue(){
    let answer=Array.isArray(out)?out[0]?.generated_text:out?.generated_text;
    if(Array.isArray(answer))answer=answer[answer.length-1]?.content||'';
    answer=String(answer||'').trim()||'I could not generate a response.';
-   currentChat.messages.push({role:'assistant',content:answer});if(activeChatId===currentChat.id){history=currentChat.messages;add('ai',answer)}save();renderChats();
+   currentChat.messages.push({role:'assistant',content:answer});if(activeChatId===currentChat.id){history=currentChat.messages;const bubble=showStreamingMessage();await streamText(answer,bubble)}save();renderChats();
   }
   status.textContent='Ready · AI runs locally';progress.textContent='No AI server used · model cached';progress.className='status ok';
  }catch(e){}finally{busy=false;if(queue.length&&!redownloading)processQueue()}
