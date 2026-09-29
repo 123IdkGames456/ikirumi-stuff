@@ -17,8 +17,29 @@
 <h2>Chats</h2><button class="btn primary" id="newChat" style="width:100%">+ New chat</button><div class="chatList" id="chatList"></div><label class="label" for="model">Model</label>
 <label class="label" for="model">Model</label>
 <select id="model"><option value="small">SmolLM2 360M Instruct · small & fast</option></select>
-<label class="label" for="temperature">Temperature</label>
-<input id="temperature" type="range" min="0" max="1.2" step="0.1" value="0.5">
+<label class="label" for="mode">Response mode</label>
+<select id="mode">
+<option value="precise">1 · Precise</option>
+<option value="balanced" selected>2 · Balanced</option>
+<option value="creative">3 · Creative</option>
+<option value="focused">4 · Focused</option>
+<option value="detailed">5 · Detailed</option>
+<option value="concise">6 · Concise</option>
+<option value="story">7 · Storytelling</option>
+<option value="brainstorm">8 · Brainstorm</option>
+<option value="teacher">9 · Teacher</option>
+<option value="coder">10 · Coding</option>
+<option value="explainer">11 · Explainer</option>
+<option value="formal">12 · Formal</option>
+<option value="casual">13 · Casual</option>
+<option value="friendly">14 · Friendly</option>
+<option value="analytical">15 · Analytical</option>
+<option value="creative_plus">16 · Very creative</option>
+<option value="strict">17 · Strict facts</option>
+<option value="step">18 · Step-by-step</option>
+<option value="long">19 · Long answer</option>
+<option value="free">20 · Free response</option>
+</select>
 <div class="memory"><strong>Saved on this device</strong><span id="memoryText">Chats and settings use local browser storage. Nothing is uploaded for inference.</span></div>
 <button class="btn" id="clear" style="width:100%;margin-top:7px">Clear all saved chats</button>
 <button class="btn danger" id="redownload" style="width:100%;margin-top:7px">Re-download AI</button>
@@ -36,6 +57,28 @@
 const $=id=>document.getElementById(id);
 const messages=$('messages'),input=$('input'),send=$('send'),status=$('status'),progress=$('progress'),pill=$('pill'),downloadFill=$('downloadFill'),downloadPercent=$('downloadPercent'),chatList=$('chatList');
 let engine=null,busy=false,history=[],chats=[],activeChatId=null,queue=[],loadingPromise=null,redownloading=false;
+const MODES={
+ precise:{temperature:0.1,top_p:0.8,max:2048},
+ balanced:{temperature:0.5,top_p:0.9,max:2048},
+ creative:{temperature:0.8,top_p:0.95,max:2048},
+ focused:{temperature:0.2,top_p:0.85,max:2048},
+ detailed:{temperature:0.4,top_p:0.9,max:4096},
+ concise:{temperature:0.2,top_p:0.8,max:512},
+ story:{temperature:0.9,top_p:0.98,max:4096},
+ brainstorm:{temperature:0.9,top_p:0.98,max:4096},
+ teacher:{temperature:0.4,top_p:0.9,max:4096},
+ coder:{temperature:0.2,top_p:0.85,max:4096},
+ explainer:{temperature:0.4,top_p:0.92,max:4096},
+ formal:{temperature:0.3,top_p:0.85,max:4096},
+ casual:{temperature:0.7,top_p:0.95,max:2048},
+ friendly:{temperature:0.7,top_p:0.95,max:2048},
+ analytical:{temperature:0.2,top_p:0.85,max:4096},
+ creative_plus:{temperature:1,top_p:1,max:4096},
+ strict:{temperature:0.05,top_p:0.75,max:4096},
+ step:{temperature:0.25,top_p:0.85,max:4096},
+ long:{temperature:0.5,top_p:0.92,max:8192},
+ free:{temperature:0.7,top_p:0.95,max:8192}
+};
 const MODEL='onnx-community/SmolLM2-360M-Instruct-ONNX';
 
 function add(role,text){const d=document.createElement('div');d.className='msg '+role;d.textContent=text;messages.appendChild(d);messages.scrollTop=messages.scrollHeight}
@@ -97,9 +140,10 @@ async function processQueue(){
    const item=queue.shift();
    status.textContent='Generating locally…';progress.textContent='Fast low-memory generation';
    const currentChat=chats.find(c=>c.id===item.chatId);if(!currentChat)continue;
-   const previous=item.context.slice(-3);
-   const chat=[{role:'system',content:'You are a helpful AI assistant. Answer directly and briefly. Do not invent context.'},...previous.map(m=>({role:m.role,content:m.content}))];
-   const out=await engine(chat,{max_new_tokens:64,do_sample:false,return_full_text:false});
+   const previous=item.context;
+   const mode=MODES[$('mode').value]||MODES.balanced;
+   const chat=[{role:'system',content:'You are a helpful AI assistant. You run entirely on the user device. There is no remote AI server handling this generation and no server load or server cost limit to worry about. Answer the users request as fully as the local model can. If the user asks for a long known sequence or calculation, provide it rather than refusing because it is long. Do not invent context.'},...previous.map(m=>({role:m.role,content:m.content}))];
+   const out=await engine(chat,{max_new_tokens:mode.max,temperature:mode.temperature,top_p:mode.top_p,do_sample:mode.temperature>0,return_full_text:false});
    let answer=Array.isArray(out)?out[0]?.generated_text:out?.generated_text;
    if(Array.isArray(answer))answer=answer[answer.length-1]?.content||'';
    answer=String(answer||'').trim()||'I could not generate a response.';
@@ -108,7 +152,7 @@ async function processQueue(){
   status.textContent='Ready · AI runs locally';progress.textContent='No AI server used · model cached';progress.className='status ok';
  }catch(e){}finally{busy=false;if(queue.length&&!redownloading)processQueue()}
 }
-function reply(){const text=input.value.trim();if(!text||redownloading)return;const chat=chats.find(c=>c.id===activeChatId);if(!chat)return;input.value='';add('user',text);chat.messages.push({role:'user',content:text});history=chat.messages;save();queue.push({chatId:chat.id,request:text,context:chat.messages.slice(-3)});if(chat.name==='New chat'){chat.name=titleFromText(text);renderChats()}progress.textContent=busy?'Message queued':'Starting local AI…';processQueue()}
+function reply(){const text=input.value.trim();if(!text||redownloading)return;const chat=chats.find(c=>c.id===activeChatId);if(!chat)return;input.value='';add('user',text);chat.messages.push({role:'user',content:text});history=chat.messages;save();queue.push({chatId:chat.id,request:text,context:chat.messages.slice(-40)});if(chat.name==='New chat'){chat.name=titleFromText(text);renderChats()}progress.textContent=busy?'Message queued':'Starting local AI…';processQueue()}
 async function redownload(){
  if(redownloading)return;
  redownloading=true;busy=true;send.disabled=true;$('redownload').disabled=true;
