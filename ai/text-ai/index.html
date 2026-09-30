@@ -24,22 +24,27 @@ const status=document.getElementById("status"),chat=document.getElementById("cha
 let wllama=null,messages=[];
 function add(type,text){const e=document.createElement("div");e.className="message "+type;const b=document.createElement("b");b.textContent=type==="user"?"You":"AI";e.append(b,document.createTextNode(text));chat.appendChild(e);chat.scrollTop=chat.scrollHeight;return e}
 async function loadRuntime(){
-try{
 const mod=await import("./wllama/esm/index.js");
 const Wllama=mod.Wllama;
 if(!Wllama)throw new Error("Wllama was not found");
 return Wllama
-}catch(e){status.textContent="Wllama runtime is missing from the folder";throw e}
 }
 async function chooseModel(){
-try{
-const Wllama=await loadRuntime();
 const i=document.createElement("input");
 i.type="file";
 i.accept=".gguf,application/octet-stream";
-i.onchange=async()=>{if(!i.files||!i.files[0])return;await loadModel(Wllama,i.files[0])};
+i.onchange=async()=>{
+if(!i.files||!i.files[0])return;
+status.textContent="GGUF selected — loading browser AI runtime...";
+try{
+const Wllama=await loadRuntime();
+await loadModel(Wllama,i.files[0]);
+}catch(e){
+status.textContent="Wllama runtime is missing from the folder";
+alert("The GGUF file was selected, but the Wllama runtime files are missing from ai/text-ai/wllama/.");
+}
+};
 i.click()
-}catch(e){alert("The browser AI runtime files are not installed yet.")}
 }
 async function loadModel(Wllama,file){
 load.disabled=true;status.textContent="Loading local AI...";
