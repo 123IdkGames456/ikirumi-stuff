@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Unity Build Generator</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#07080b;color:#fff;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}body{padding:28px}.wrap{max-width:1000px;margin:auto}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}.brand{font-size:20px;font-weight:850}.back{border:1px solid #242831;background:#111318;color:#dce0e7;border-radius:10px;padding:9px 13px;cursor:pointer}.hero{padding:30px;border:1px solid #20242b;background:linear-gradient(145deg,#11141a,#0b0d11);border-radius:22px}.title{font-size:clamp(30px,6vw,54px);font-weight:900;letter-spacing:-2px}.sub{color:#858d9b;margin-top:10px;line-height:1.6}.panel{margin-top:16px;padding:22px;border:1px solid #20242b;background:#0d0f13;border-radius:18px}.drop{border:1px dashed #39404c;border-radius:15px;padding:28px;text-align:center;background:#101319;cursor:pointer}.drop:hover{border-color:#697280;background:#13161c}.drop strong{display:block;font-size:16px}.drop span{display:block;color:#737b89;font-size:12px;margin-top:7px}.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}button.primary{border:0;background:#fff;color:#07080b;border-radius:11px;padding:12px 17px;font-weight:800;cursor:pointer}button.secondary{border:1px solid #292e37;background:#171a20;color:#fff;border-radius:11px;padding:12px 17px;font-weight:750;cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}.status{margin-top:18px;min-height:24px;color:#aeb5c0;font-size:13px;white-space:pre-wrap}.bar{height:7px;background:#1a1e25;border-radius:99px;overflow:hidden;margin-top:12px}.fill{height:100%;width:0;background:#fff;transition:width .15s}.files{margin-top:18px;max-height:270px;overflow:auto;border:1px solid #1d2128;border-radius:12px}.file{display:flex;justify-content:space-between;gap:15px;padding:9px 12px;border-bottom:1px solid #171a20;font-size:12px}.file:last-child{border-bottom:0}.file span:last-child{color:#69717e}.note{margin-top:18px;padding:14px;border-radius:12px;background:#11141a;color:#858d99;font-size:12px;line-height:1.55}.ok{color:#d9dde4}.bad{color:#ff9c9c}.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="top"><div class="brand">Ikirumi / Unity Build Generator</div><button class="back" onclick="history.back()">← Back</button></div>
+<div class="hero">
+<div class="title">Unity Build → Offline HTML</div>
+<div class="sub">Choose a Unity WebGL build folder. The generator collects the complete build, creates an offline launcher, fixes local file paths where possible, and lets you download the result as a folder or ZIP.</div>
+<div class="panel">
+<div id="drop" class="drop">
+<strong>Choose your Unity WebGL build folder</strong>
+<span>Use the folder containing index.html, Build/, TemplateData/ or your WebGL loader files.</span>
+</div>
+<input id="picker" type="file" webkitdirectory directory multiple class="hidden">
+<div class="row">
+<button id="generate" class="primary" disabled>Generate offline game</button>
+<button id="folder" class="secondary" disabled>Download to folder</button>
+<button id="zip" class="secondary" disabled>Download ZIP</button>
+</div>
+<div id="status" class="status">No build selected.</div>
+<div class="bar"><div id="fill" class="fill"></div></div>
+<div id="files" class="files hidden"></div>
+<div class="note"><b>Important:</b> A normal Windows/macOS Unity .exe build cannot be converted into a browser game by HTML/JavaScript. For this tool, make a <b>WebGL</b> build in Unity first. The resulting WebGL files are what this generator packages. It does not upload your game anywhere.</div>
+</div>
+</div>
+</div>
+<script>
+let selected=[];
+let generated=[];
+const picker=document.getElementById("picker"),drop=document.getElementById("drop"),generate=document.getElementById("generate"),folderBtn=document.getElementById("folder"),zipBtn=document.getElementById("zip"),status=document.getElementById("status"),fill=document.getElementById("fill"),files=document.getElementById("files");
+drop.onclick=()=>picker.click();
+picker.onchange=()=>setFiles([...picker.files]);
+drop.ondragover=e=>{e.preventDefault();drop.style.borderColor="#fff"};
+drop.ondragleave=()=>drop.style.borderColor="";
+drop.ondrop=e=>{e.preventDefault();drop.style.borderColor="";setFiles([...e.dataTransfer.files])};
+function setFiles(list){
+ selected=list.filter(f=>f.size>=0);
+ const hasIndex=selected.some(f=>f.name.toLowerCase()==="index.html");
+ const hasUnity=selected.some(f=>/\\.(loader\.js|framework\.js|data|wasm|symbols\.json)$/i.test(f.name)||/\\bBuild\\b/i.test(f.webkitRelativePath||""));
+ status.textContent=selected.length+" files selected"+(hasIndex?"":"\nWarning: index.html was not found. Make sure this is a Unity WebGL build.");
+ status.className="status "+(hasIndex?"ok":"bad");
+ generate.disabled=!hasIndex;
+ folderBtn.disabled=true;zipBtn.disabled=true;
+ showFiles(selected);
+}
+function showFiles(list){
+ files.classList.remove("hidden");files.innerHTML="";
+ list.slice(0,500).forEach(f=>{const d=document.createElement("div");d.className="file";d.innerHTML="<span></span><span>"+formatSize(f.size)+"</span>";d.firstChild.textContent=relative(f);files.appendChild(d)});
+ if(list.length>500){const d=document.createElement("div");d.className="file";d.textContent="… "+(list.length-500)+" more files";files.appendChild(d)}
+}
+function relative(f){
+ const p=f.webkitRelativePath||f.name;
+ const parts=p.split("/");
+ return parts.length>1?parts.slice(1).join("/"):f.name;
+}
+function formatSize(n){if(n<1024)return n+" B";if(n<1048576)return (n/1024).toFixed(1)+" KB";if(n<1073741824)return (n/1048576).toFixed(1)+" MB";return (n/1073741824).toFixed(2)+" GB"}
+function setProgress(n,msg){fill.style.width=Math.max(0,Math.min(100,n))+"%";status.textContent=msg}
+function findFile(path){return selected.find(f=>relative(f).toLowerCase()===path.toLowerCase())}
+async function blobText(blob){return await blob.text()}
+async function makeLauncher(){
+ const index=findFile("index.html");
+ if(!index)return null;
+ let text=await blobText(index);
+ const banner="<!-- Generated by Ikirumi Unity Build Generator. Original Unity WebGL build files are preserved. -->\n";
+ if(!text.includes("Ikirumi Unity Build Generator"))text=banner+text;
+ return new Blob([text],{type:"text/html"});
+}
+async function generateGame(){
+ if(!selected.length)return;
+ generated=[];
+ const total=selected.length;
+ for(let i=0;i<total;i++){
+  const f=selected[i];
+  generated.push({path:relative(f),blob:f});
+  setProgress((i/total)*85,"Generating offline package… "+(i+1)+" / "+total+"\n"+relative(f));
+  await new Promise(r=>setTimeout(r,0));
+ }
+ const launcher=await makeLauncher();
+ if(launcher){
+  const idx=generated.findIndex(x=>x.path.toLowerCase()==="index.html");
+  if(idx>=0)generated[idx]={path:"index.html",blob:launcher};
+ }
+ setProgress(100,"Generation complete. "+generated.length+" files are ready.");
+ folderBtn.disabled=false;zipBtn.disabled=false;
+}
+generate.onclick=generateGame;
+async function saveFolder(){
+ if(!generated.length)return;
+ if(!window.showDirectoryPicker){
+  status.textContent="Direct folder saving is not supported by this browser. Use Download ZIP instead.";
+  return;
+ }
+ try{
+  const root=await window.showDirectoryPicker({mode:"readwrite"});
+  const name="Unity-WebGL-Offline";
+  const out=await root.getDirectoryHandle(name,{create:true});
+  for(let i=0;i<generated.length;i++){
+   const item=generated[i],parts=item.path.split("/");let dir=out;
+   for(let j=0;j<parts.length-1;j++)dir=await dir.getDirectoryHandle(parts[j],{create:true});
+   const handle=await dir.getFileHandle(parts.at(-1),{create:true});
+   const w=await handle.createWritable();await w.write(await item.blob.arrayBuffer());await w.close();
+   setProgress(90+(i/generated.length)*10,"Writing folder… "+(i+1)+" / "+generated.length);
+  }
+  setProgress(100,"Done. Folder created: "+name);
+ }catch(e){status.textContent="Folder download cancelled or failed: "+e.message}
+}
+folderBtn.onclick=saveFolder;
+async function loadZip(){
+ if(window.JSZip)return window.JSZip;
+ return await new Promise((resolve,reject)=>{
+  const s=document.createElement("script");
+  s.src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js";
+  s.onload=()=>resolve(window.JSZip);s.onerror=()=>reject(new Error("ZIP library could not be loaded."));
+  document.head.appendChild(s);
+ });
+}
+async function saveZip(){
+ if(!generated.length)return;
+ try{
+  const JSZip=await loadZip(),zip=new JSZip();
+  for(let i=0;i<generated.length;i++){
+   const x=generated[i];zip.file(x.path,await x.blob.arrayBuffer());
+   setProgress((i/generated.length)*90,"Building ZIP… "+(i+1)+" / "+generated.length);
+  }
+  const blob=await zip.generateAsync({type:"blob",compression:"STORE"},m=>setProgress(90+m.percent*0.1,"Compressing ZIP… "+Math.round(m.percent)+"%"));
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="Unity-WebGL-Offline.zip";a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);setProgress(100,"ZIP ready. Extract it and open index.html.");
+ }catch(e){status.textContent="ZIP failed: "+e.message}
+}
+zipBtn.onclick=saveZip;
+</script>
+</body>
+</html>
