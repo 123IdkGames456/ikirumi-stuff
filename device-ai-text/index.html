@@ -1,177 +1,58 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#090b10">
-<title>Device AI Text</title>
-<style>
-*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#090b10;color:#f4f7fb;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{padding:14px}.wrap{width:min(1050px,100%);margin:auto}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}.brand h1{font-size:clamp(25px,5vw,38px);margin:0}.brand p{margin:4px 0 0;color:#8993a2;font-size:12px}.pill{border:1px solid #303744;background:#11151d;border-radius:999px;padding:8px 11px;color:#aeb8c7;font-size:11px}.layout{display:grid;grid-template-columns:250px 1fr;gap:14px}.panel{border:1px solid #292f39;background:#10141b;border-radius:17px;padding:15px}.panel h2{font-size:15px;margin:0 0 12px}.chatList{display:flex;flex-direction:column;gap:6px;max-height:calc(100vh - 350px);overflow:auto}.chatItem{display:flex;align-items:center;gap:6px;border:1px solid #292f39;background:#0c1016;border-radius:10px;padding:7px}.chatSelect{flex:1;min-width:0;border:0;background:transparent;color:#dfe5ed;text-align:left;padding:4px;font:inherit;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}.chatSelect.active{color:#fff;font-weight:750}.chatAction{border:0;background:#171c24;color:#8d98a7;border-radius:7px;padding:5px 7px;font-size:10px;cursor:pointer}.emptyChats{color:#707b8a;font-size:10px;padding:8px 2px}.label{display:block;color:#9da7b5;font-size:11px;margin:11px 0 6px}textarea,input,select{width:100%;border:1px solid #333b48;background:#0a0e14;color:#fff;border-radius:10px;padding:10px;font:inherit;outline:0}textarea{resize:vertical;min-height:110px}.chat{height:calc(100vh - 160px);min-height:430px;display:flex;flex-direction:column}.messages{flex:1;overflow:auto;padding:4px 2px 12px}.msg{max-width:86%;padding:11px 13px;border-radius:13px;margin:7px 0;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5;font-size:13px}.user{margin-left:auto;background:#dce6f2;color:#0b0e13}.ai{margin-right:auto;background:#1a202a;color:#edf2f7}.composer{display:flex;gap:8px;align-items:flex-end}.composer textarea{min-height:52px;max-height:180px;flex:1}.btn{border:1px solid #394250;background:#1a202a;color:#fff;border-radius:10px;padding:11px 14px;font-weight:750;cursor:pointer}.btn.primary{background:#dce6f2;color:#0b0e13;border-color:#dce6f2}.btn.danger{border-color:#633c3c;background:#251719;color:#ffb3b3}.btn:disabled{opacity:.45}.status{margin-top:9px;color:#7f8998;font-size:10px;min-height:15px}.memory{padding:10px;border:1px solid #303744;border-radius:11px;background:#0c1016;color:#8d98a7;font-size:10px;line-height:1.45}.memory strong{display:block;color:#c4ccd7;margin-bottom:3px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}.small{font-size:10px;color:#707b8a;line-height:1.45;margin-top:10px}.dangerText{color:#ff9f9f}.ok{color:#9fe0b4}.downloadBox{margin-top:9px}.downloadTrack{height:8px;background:#252c36;border-radius:999px;overflow:hidden}.downloadFill{height:100%;width:0%;background:#dce6f2;border-radius:999px;transition:width .15s ease}.downloadText{display:flex;justify-content:space-between;gap:8px;margin-top:5px;color:#8d98a7;font-size:10px}@media(max-width:760px){.layout{grid-template-columns:1fr}.chat{height:70vh;min-height:400px}}@media(max-width:450px){body{padding:9px}.panel{padding:12px}.msg{max-width:94%}}
-</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Ikirumi</title>
+<style>*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050608;color:#fff;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input{font:inherit}button{-webkit-tap-highlight-color:transparent}#app{width:100%;height:100%;display:flex;flex-direction:column}.topbar{height:64px;min-height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid rgba(255,255,255,.07);background:rgba(7,8,11,.8);backdrop-filter:blur(25px);position:relative;z-index:100}.logo{display:flex;align-items:center;gap:9px;font-size:18px;font-weight:850}.logo-mark{width:31px;height:31px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:linear-gradient(145deg,#fff,#b9bec8);color:#08090c;font-weight:950}.refresh-button,.back-button{height:36px;padding:0 13px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.045);color:#929aa7;border-radius:10px;cursor:pointer;transition:.2s}.refresh-button:hover,.back-button:hover{color:#fff;background:#24262a}.back-button{display:none}.page{position:absolute;left:0;top:64px;width:100%;height:calc(100% - 64px);overflow:auto}.home-content{width:100%;max-width:1500px;min-height:100%;margin:auto;padding:42px 28px 70px}.hero{margin-bottom:28px}.hero-title{font-size:clamp(32px,5vw,48px);font-weight:900;letter-spacing:-2.5px}.hero-title span{background:linear-gradient(120deg,#fff,#777f8c);-webkit-background-clip:text;background-clip:text;color:transparent}.hero-subtitle{margin-top:9px;color:#737b88;font-size:13px}.site-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}.site-card{position:relative;min-height:160px;padding:20px;border:1px solid rgba(255,255,255,.07);border-radius:17px;background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.015));overflow:hidden;cursor:pointer;opacity:0;animation:cardIn .4s ease forwards;transition:.23s}.site-card:hover{transform:translateY(-5px);border-color:rgba(255,255,255,.15);background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.025));box-shadow:0 18px 45px rgba(0,0,0,.23)}.site-card-icon{width:46px;height:46px;display:flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.06);font-size:18px;margin-bottom:30px;transition:.25s}.site-card:hover .site-card-icon{transform:scale(1.06);background:rgba(255,255,255,.09)}.site-card-name{font-size:16px;font-weight:760;word-break:break-word}.site-card-path{margin-top:6px;font-size:11px;color:#666e7b}.site-card-arrow{position:absolute;right:18px;bottom:18px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:9px;background:rgba(255,255,255,.045);color:#68707c;font-size:16px;transition:.25s}.site-card:hover .site-card-arrow{color:#fff;background:rgba(255,255,255,.1);transform:translateX(4px)}.empty{padding:70px 20px;text-align:center;border:1px dashed rgba(255,255,255,.1);border-radius:17px;color:#6f7784}.empty-icon{font-size:28px;margin-bottom:10px}#siteFrame{position:absolute;left:0;top:64px;width:100%;height:calc(100% - 64px);border:0;background:#050608;display:none;opacity:0;transition:opacity .25s}#siteFrame.ready{opacity:1}#loading,#error{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;flex-direction:column;text-align:center;background:rgba(5,6,8,.88);backdrop-filter:blur(25px);padding:30px}.loader-wrap{width:58px;height:58px;display:flex;align-items:center;justify-content:center;border-radius:17px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08)}.loader{width:27px;height:27px;border:2px solid rgba(255,255,255,.12);border-top-color:#fff;border-right-color:#fff;border-radius:50%;animation:spin .65s linear infinite}.loading-title{margin-top:18px;font-size:14px;font-weight:750}.loading-info{margin-top:7px;font-size:11px;color:#68707d;max-width:500px;word-break:break-word}.error-icon{width:56px;height:56px;display:flex;align-items:center;justify-content:center;border-radius:17px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);font-size:23px;margin-bottom:18px}#error h2{margin:0;font-size:25px}#error p{max-width:600px;margin:12px 0 0;color:#858c98;line-height:1.5;font-size:13px}#error button{margin-top:22px;border:0;background:#fff;color:#07080b;padding:11px 19px;border-radius:10px;font-weight:750;cursor:pointer}@keyframes spin{to{transform:rotate(360deg)}}@keyframes cardIn{from{opacity:0;transform:translateY(13px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}@media(max-width:650px){.topbar{padding:0 12px}.logo{font-size:16px}.logo-mark{width:29px;height:29px}.home-content{padding:30px 14px 50px}.site-grid{grid-template-columns:1fr}.hero-title{font-size:34px}}.download-modal{position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.7);backdrop-filter:blur(18px);padding:20px}.download-box{width:min(380px,100%);padding:24px;border:1px solid rgba(255,255,255,.1);border-radius:18px;background:#111318;box-shadow:0 25px 70px rgba(0,0,0,.5)}.download-box h2{margin:0;font-size:20px}.download-box p{margin:8px 0 18px;color:#7f8794;font-size:12px}.download-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}.download-actions button{border:1px solid rgba(255,255,255,.09);background:#20242b;color:#fff;border-radius:10px;padding:12px;font-weight:750;cursor:pointer}.download-actions .play{background:#fff;color:#08090c}.download-close{margin-top:9px;width:100%;border:0;background:transparent;color:#737b88;padding:8px;cursor:pointer}</style>
 </head>
 <body>
-<div class="wrap">
-<div class="top"><div class="brand"><h1>Device AI Text</h1><p>Private text AI that runs locally in your browser.</p></div><div class="pill" id="pill">Starting…</div></div>
-<div class="layout">
-<section class="panel">
-<h2>Chats</h2><button class="btn primary" id="newChat" style="width:100%">+ New chat</button><div class="chatList" id="chatList"></div><label class="label" for="model">Model</label>
-<label class="label" for="model">Model</label>
-<select id="model"><option value="small">SmolLM2 360M Instruct · small & fast</option></select>
-<label class="label" for="mode">Response mode</label>
-<select id="mode">
-<option value="precise">1 · Precise</option>
-<option value="balanced" selected>2 · Balanced</option>
-<option value="creative">3 · Creative</option>
-<option value="focused">4 · Focused</option>
-<option value="detailed">5 · Detailed</option>
-<option value="concise">6 · Concise</option>
-<option value="story">7 · Storytelling</option>
-<option value="brainstorm">8 · Brainstorm</option>
-<option value="teacher">9 · Teacher</option>
-<option value="coder">10 · Coding</option>
-<option value="explainer">11 · Explainer</option>
-<option value="formal">12 · Formal</option>
-<option value="casual">13 · Casual</option>
-<option value="friendly">14 · Friendly</option>
-<option value="analytical">15 · Analytical</option>
-<option value="creative_plus">16 · Very creative</option>
-<option value="strict">17 · Strict facts</option>
-<option value="step">18 · Step-by-step</option>
-<option value="long">19 · Long answer</option>
-<option value="free">20 · Free response</option>
-</select>
-<div class="memory"><strong>Saved on this device</strong><span id="memoryText">Chats and settings use local browser storage. Nothing is uploaded for inference.</span></div>
-<button class="btn" id="clear" style="width:100%;margin-top:7px">Clear all saved chats</button>
-<button class="btn danger" id="redownload" style="width:100%;margin-top:7px">Re-download AI</button>
-<div class="small">This smaller model is designed to use much less memory and generate faster. The model is cached by the browser after its first download. Re-download AI clears the saved model cache and downloads a fresh copy.</div>
-<div class="status" id="status">Preparing local AI…</div>
-</section>
-<section class="panel chat">
-<div class="messages" id="messages"><div class="msg ai">Hi! I am a local text AI. Send a message to start.</div></div>
-<div class="composer"><textarea id="input" placeholder="Message the local AI…"></textarea><button class="btn primary" id="send">Send</button></div>
-<div class="downloadBox"><div class="downloadTrack"><div class="downloadFill" id="downloadFill"></div></div><div class="downloadText"><span id="progress">Model is not loaded yet.</span><span id="downloadPercent">0%</span></div></div>
-</section>
-</div>
+<div id="app">
+<header class="topbar">
+<div class="logo"><div class="logo-mark">I</div><span>Ikirumi</span></div>
+<div><button id="backButton" class="back-button" onclick="showHome()">← Back</button><button class="refresh-button" onclick="refreshRepository()" title="Refresh">↻</button></div>
+</header>
+<section id="home" class="page"><div class="home-content"><div class="hero"><div class="hero-title">Welcome to <span>Ikirumi</span></div><div class="hero-subtitle">Choose a site to launch.</div></div><div id="siteGrid" class="site-grid"></div></div></section>
+<iframe id="siteFrame"></iframe>
+<div id="loading"><div class="loader-wrap"><div class="loader"></div></div><div id="loadingTitle" class="loading-title">Starting Ikirumi</div><div id="loadingInfo" class="loading-info">Loading sites...</div></div>
+<div id="downloadModal" class="download-modal"><div class="download-box"><h2 id="downloadTitle">Site</h2><p id="downloadInfo">Choose an action.</p><div class="download-actions"><button class="play" id="playSiteButton">▶ Play</button><button id="downloadSiteButton">↓ Download</button></div><button class="download-close" onclick="closeDownloadModal()">Cancel</button></div></div>
+<div id="error"><div class="error-icon">!</div><h2>Something went wrong</h2><p id="errorText"></p><button onclick="initialize()">Try Again</button></div>
 </div>
 <script>
-const $=id=>document.getElementById(id);
-const messages=$('messages'),input=$('input'),send=$('send'),status=$('status'),progress=$('progress'),pill=$('pill'),downloadFill=$('downloadFill'),downloadPercent=$('downloadPercent'),chatList=$('chatList');
-let engine=null,busy=false,history=[],chats=[],activeChatId=null,queue=[],loadingPromise=null,redownloading=false;
-const MODES={
- precise:{temperature:0.1,top_p:0.8,max:2048},
- balanced:{temperature:0.5,top_p:0.9,max:2048},
- creative:{temperature:0.8,top_p:0.95,max:2048},
- focused:{temperature:0.2,top_p:0.85,max:2048},
- detailed:{temperature:0.4,top_p:0.9,max:4096},
- concise:{temperature:0.2,top_p:0.8,max:512},
- story:{temperature:0.9,top_p:0.98,max:4096},
- brainstorm:{temperature:0.9,top_p:0.98,max:4096},
- teacher:{temperature:0.4,top_p:0.9,max:4096},
- coder:{temperature:0.2,top_p:0.85,max:4096},
- explainer:{temperature:0.4,top_p:0.92,max:4096},
- formal:{temperature:0.3,top_p:0.85,max:4096},
- casual:{temperature:0.7,top_p:0.95,max:2048},
- friendly:{temperature:0.7,top_p:0.95,max:2048},
- analytical:{temperature:0.2,top_p:0.85,max:4096},
- creative_plus:{temperature:1,top_p:1,max:4096},
- strict:{temperature:0.05,top_p:0.75,max:4096},
- step:{temperature:0.25,top_p:0.85,max:4096},
- long:{temperature:0.5,top_p:0.92,max:8192},
- free:{temperature:0.7,top_p:0.95,max:8192}
-};
-const MODEL='onnx-community/SmolLM2-360M-Instruct-ONNX';
-
-function add(role,text){const d=document.createElement('div');d.className='msg '+role;d.textContent=text;messages.appendChild(d);messages.scrollTop=messages.scrollHeight}
-function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
-function save(){try{localStorage.setItem('device-ai-text-chats',JSON.stringify(chats))}catch(e){}}
-function titleFromText(text){const clean=String(text||'').replace(/\s+/g,' ').trim();if(!clean)return 'New chat';const words=clean.split(' ');let title=words.slice(0,6).join(' ');if(title.length>34)title=title.slice(0,34).trim();return title+(words.length>6?'…':'')}
-function createChat(){const chat={id:uid(),name:'New chat',messages:[],createdAt:Date.now()};chats.unshift(chat);activeChatId=chat.id;history=chat.messages;save();renderChats();renderActiveChat();return chat}
-function renderChats(){chatList.innerHTML='';if(!chats.length){chatList.innerHTML='<div class="emptyChats">No saved chats yet.</div>';return}for(const chat of chats){const row=document.createElement('div');row.className='chatItem';const select=document.createElement('button');select.className='chatSelect'+(chat.id===activeChatId?' active':'');select.textContent=chat.name||'New chat';select.title=chat.name||'New chat';select.onclick=()=>switchChat(chat.id);const rename=document.createElement('button');rename.className='chatAction';rename.textContent='Rename';rename.onclick=()=>renameChat(chat.id);const remove=document.createElement('button');remove.className='chatAction';remove.textContent='×';remove.title='Delete chat';remove.onclick=()=>deleteChat(chat.id);row.append(select,rename,remove);chatList.appendChild(row)}}
-function renderActiveChat(){messages.innerHTML='';const chat=chats.find(c=>c.id===activeChatId);history=chat?chat.messages:[];if(!chat||!history.length){add('ai','Hi! I am a local text AI. Send a message to start.');return}for(const m of history)if(m&&(m.role==='user'||m.role==='assistant'))add(m.role==='user'?'user':'ai',m.content)}
-function switchChat(id){if(busy||redownloading)return;activeChatId=id;const chat=chats.find(c=>c.id===id);history=chat?chat.messages:[];renderChats();renderActiveChat();status.textContent='Chat loaded · '+(chat?.name||'New chat')}
-function renameChat(id){const chat=chats.find(c=>c.id===id);if(!chat)return;const name=prompt('Chat name:',chat.name||'New chat');if(name===null)return;const clean=name.trim();if(!clean)return;chat.name=clean.slice(0,80);save();renderChats()}
-function deleteChat(id){const chat=chats.find(c=>c.id===id);if(!chat)return;if(!confirm('Remove this chat?'))return;chats=chats.filter(c=>c.id!==id);if(activeChatId===id){if(chats.length){activeChatId=chats[0].id}else createChat()}save();renderChats();renderActiveChat();status.textContent='Chat removed'}
-function load(){try{const raw=JSON.parse(localStorage.getItem('device-ai-text-chats')||'null');if(Array.isArray(raw)&&raw.length){chats=raw.filter(c=>c&&c.id&&Array.isArray(c.messages)).map(c=>({id:String(c.id),name:String(c.name||'New chat'),messages:c.messages.filter(m=>m&&(m.role==='user'||m.role==='assistant')).slice(-40),createdAt:c.createdAt||Date.now()}))}else{const old=JSON.parse(localStorage.getItem('device-ai-text-history')||'[]');const msgs=Array.isArray(old)?old.filter(m=>m&&(m.role==='user'||m.role==='assistant')).slice(-40):[];chats=[{id:uid(),name:msgs.length?titleFromText(msgs.find(m=>m.role==='user')?.content):'New chat',messages:msgs,createdAt:Date.now()}];localStorage.removeItem('device-ai-text-history')}if(!chats.length)createChat();else activeChatId=chats[0].id;renderChats();renderActiveChat()}catch(e){chats=[];createChat()}}
-function deviceName(){return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent||'')?'Phone':'PC'}
-function error(title,fix,detail){pill.textContent='AI error';status.textContent=title;progress.textContent='Fix: '+fix+(detail?' · '+detail:'');progress.className='status dangerText'}
-function update(p){
- if(!p)return;
- if(typeof p.progress==='number'){
-  const pct=Math.max(0,Math.min(100,p.progress));
-  downloadFill.style.width=pct+'%';
-  downloadPercent.textContent=pct.toFixed(0)+'%';
-  progress.textContent=(p.status||'Downloading AI')+(p.file?' · '+p.file:'');
- }else if(p.status)progress.textContent=p.status+(p.file?' · '+p.file:'');
-}
-async function clearModelCache(){
- const keys=[];
- try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&/transformers|huggingface|onnx|smollm/i.test(k))keys.push(k)}for(const k of keys)localStorage.removeItem(k)}catch(e){}
- try{if(window.caches){const names=await caches.keys();await Promise.all(names.filter(n=>/transformers|huggingface|onnx|model/i.test(n)).map(n=>caches.delete(n)))}}catch(e){}
-}
-async function loadAI(){
- if(engine)return engine;
- if(loadingPromise)return loadingPromise;
- loadingPromise=(async()=>{
-  const device=deviceName();
-  status.textContent='Preparing '+device+' local AI…';
-  let mod;
-  try{mod=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.2/+esm')}
-  catch(e){error('AI library failed','Connect to the internet once and reload');throw e}
-  const {pipeline,env}=mod;
-  env.allowLocalModels=false;env.allowRemoteModels=true;env.useBrowserCache=true;env.useWasmCache=true;env.useCustomCache=false;
-  const startWasm=async()=>{status.textContent='Starting CPU/WASM AI…';progress.textContent='Using low-memory CPU mode';return pipeline('text-generation',MODEL,{device:'wasm',dtype:'q4',progress_callback:update})};
-  const startWebGPU=async()=>{status.textContent='Starting WebGPU AI…';return pipeline('text-generation',MODEL,{device:'webgpu',dtype:'q4',progress_callback:update})};
-  try{
-   if(device==='Phone'){engine=await startWasm();pill.textContent='Phone · CPU/WASM'}
-   else if(navigator.gpu){try{engine=await startWebGPU();pill.textContent='PC · WebGPU'}catch(e){engine=await startWasm();pill.textContent='PC · CPU/WASM'}}
-   else{engine=await startWasm();pill.textContent='PC · CPU/WASM'}
-   downloadFill.style.width='100%';downloadPercent.textContent='100%';
-   status.textContent='Local AI ready';progress.textContent='AI ready · model cached on this device';progress.className='status ok';return engine;
-  }catch(e){engine=null;console.error(e);const m=String(e?.message||e);if(/memory|out of memory|allocation|OOM/i.test(m))error('Not enough memory','Close other apps/tabs and reload');else if(/fetch|network|download|404|not found/i.test(m))error('Model download failed','Connect to the internet and reload');else error('AI could not start','Reload the page and allow browser storage');throw e}
- })().finally(()=>loadingPromise=null);
- return loadingPromise;
-}
-function showStreamingMessage(){const d=document.createElement('div');d.className='msg ai';messages.appendChild(d);return d}
-async function streamText(text,el){el.textContent='';const parts=text.match(/\S+\s*/g)||[text];for(const part of parts){el.textContent+=part;messages.scrollTop=messages.scrollHeight;await new Promise(r=>setTimeout(r,Math.min(35,8+part.length*2)))}
-async function processQueue(){
- if(busy||redownloading)return;
- busy=true;
- try{
-  await loadAI();
-  while(queue.length){
-   const item=queue.shift();
-   status.textContent='Generating locally…';progress.textContent='Fast low-memory generation';
-   const currentChat=chats.find(c=>c.id===item.chatId);if(!currentChat)continue;
-   const previous=item.context;
-   const mode=MODES[$('mode').value]||MODES.balanced;
-   const chat=[{role:'system',content:'You are a helpful AI assistant. You run entirely on the user device. There is no remote AI server handling this generation and no server load or server cost limit to worry about. Answer the users request as fully as the local model can. If the user asks for a long known sequence or calculation, provide it rather than refusing because it is long. Do not invent context.'},...previous.map(m=>({role:m.role,content:m.content}))];
-   const out=await engine(chat,{max_new_tokens:mode.max,temperature:mode.temperature,top_p:mode.top_p,do_sample:mode.temperature>0,return_full_text:false});
-   let answer=Array.isArray(out)?out[0]?.generated_text:out?.generated_text;
-   if(Array.isArray(answer))answer=answer[answer.length-1]?.content||'';
-   answer=String(answer||'').trim()||'I could not generate a response.';
-   currentChat.messages.push({role:'assistant',content:answer});if(activeChatId===currentChat.id){history=currentChat.messages;const bubble=showStreamingMessage();await streamText(answer,bubble)}save();renderChats();
-  }
-  status.textContent='Ready · AI runs locally';progress.textContent='No AI server used · model cached';progress.className='status ok';
- }catch(e){}finally{busy=false;if(queue.length&&!redownloading)processQueue()}
-}
-function reply(){const text=input.value.trim();if(!text||redownloading)return;const chat=chats.find(c=>c.id===activeChatId);if(!chat)return;input.value='';add('user',text);chat.messages.push({role:'user',content:text});history=chat.messages;save();queue.push({chatId:chat.id,request:text,context:chat.messages.slice(-40)});if(chat.name==='New chat'){chat.name=titleFromText(text);renderChats()}progress.textContent=busy?'Message queued':'Starting local AI…';processQueue()}
-async function redownload(){
- if(redownloading)return;
- redownloading=true;busy=true;send.disabled=true;$('redownload').disabled=true;
- queue=[];engine=null;
- status.textContent='Removing saved AI…';progress.textContent='Clearing model cache…';pill.textContent='Resetting AI…';downloadFill.style.width='0%';downloadPercent.textContent='0%';
- await clearModelCache();
- status.textContent='AI removed';progress.textContent='Download will start fresh when you send a message';pill.textContent='AI reset';
- busy=false;redownloading=false;send.disabled=false;$('redownload').disabled=false;
-}
-$('newChat').onclick=()=>{if(busy||redownloading)return;queue=[];createChat();status.textContent='New chat ready';progress.textContent='Start a new local conversation'};
-$('clear').onclick=()=>{if(!confirm('Remove all saved chats?'))return;queue=[];chats=[];localStorage.removeItem('device-ai-text-chats');createChat();status.textContent='All saved chats cleared';progress.textContent='Chat storage cleared'};
-$('redownload').onclick=redownload;
-send.onclick=reply;
-input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();reply()}});
-load();
-status.textContent='Ready · '+deviceName()+' detected · small fast model';
-progress.textContent=deviceName()==='Phone'?'Phone mode: low-memory CPU/WASM':'PC mode: WebGPU first, CPU/WASM fallback';
+const OWNER="ikirumi11";
+const REPO="ikirumi-stuff";
+const BRANCH="main";
+const TREE_URL="https://api.github.com/repos/"+OWNER+"/"+REPO+"/git/trees/"+BRANCH+"?recursive=1";
+const RAW_BASE="https://raw.githubusercontent.com/"+OWNER+"/"+REPO+"/"+BRANCH+"/";
+const home=document.getElementById("home"),siteGrid=document.getElementById("siteGrid"),siteFrame=document.getElementById("siteFrame"),backButton=document.getElementById("backButton"),loading=document.getElementById("loading"),loadingTitle=document.getElementById("loadingTitle"),loadingInfo=document.getElementById("loadingInfo"),error=document.getElementById("error"),errorText=document.getElementById("errorText"),downloadModal=document.getElementById("downloadModal"),downloadTitle=document.getElementById("downloadTitle"),downloadInfo=document.getElementById("downloadInfo"),playSiteButton=document.getElementById("playSiteButton"),downloadSiteButton=document.getElementById("downloadSiteButton");
+let selectedSite=null,repositoryFiles=[],sites=[],virtualFiles=new Map(),virtualUrls=new Map();
+function showHome(){home.style.display="block";siteFrame.classList.remove("ready");siteFrame.style.display="none";backButton.style.display="none";error.style.display="none";renderSites()}
+function getFolders(path){const prefix=path?path+"/":"",result=new Set();for(const file of repositoryFiles){if(!file.path.startsWith(prefix))continue;const remaining=file.path.substring(prefix.length),slash=remaining.indexOf("/");if(slash===-1)continue;result.add(prefix+remaining.substring(0,slash))}return Array.from(result)}
+function getFiles(path){const prefix=path?path+"/":"";return repositoryFiles.filter(file=>{if(!file.path.startsWith(prefix))return false;const remaining=file.path.substring(prefix.length);return remaining.length>0&&!remaining.includes("/")})}
+function hasIndex(path){return getFiles(path).some(file=>file.path.split("/").pop().toLowerCase()==="index.html")}
+function getAllSites(){const result=[];function scan(path){for(const folder of getFolders(path)){if(hasIndex(folder))result.push(folder);scan(folder)}}scan("");return result.sort((a,b)=>a.localeCompare(b,undefined,{numeric:true,sensitivity:"base"})).filter((v,i,a)=>a.indexOf(v)===i)}
+function getSiteName(folder){return folder.split("/").pop()}
+function renderSites(){siteGrid.innerHTML="";if(sites.length===0){siteGrid.innerHTML='<div class="empty"><div class="empty-icon">⌕</div>No sites found.</div>';return}sites.forEach((folder,index)=>{const card=document.createElement("div");card.className="site-card";card.style.animationDelay=Math.min(index*35,400)+"ms";card.innerHTML='<div class="site-card-icon">▶</div><div class="site-card-name"></div><div class="site-card-path"></div><div class="site-card-arrow">›</div>';card.querySelector(".site-card-name").textContent=getSiteName(folder);card.querySelector(".site-card-path").textContent=folder;card.onclick=()=>chooseSite(folder);siteGrid.appendChild(card)})}
+async function refreshRepository(){repositoryFiles=[];sites=[];showHome();await initialize()}
+async function loadRepository(){loadingTitle.textContent="Loading Sites";loadingInfo.textContent="Reading GitHub repository...";const response=await fetch(TREE_URL+"&cache="+Date.now(),{cache:"no-store"});if(!response.ok)throw new Error("GitHub returned HTTP "+response.status);const data=await response.json();if(!Array.isArray(data.tree))throw new Error("GitHub did not return a valid file tree.");if(data.truncated)throw new Error("This repository is too large to read in one request.");repositoryFiles=data.tree.filter(file=>file.type==="blob");sites=getAllSites();renderSites()}
+function normalizePath(path){const result=[];for(const part of path.split("/")){if(!part||part===".")continue;if(part==="..")result.pop();else result.push(part)}return result.join("/")}
+function directory(path){const index=path.lastIndexOf("/");return index===-1?"":path.substring(0,index+1)}
+function resolvePath(source,currentFile){if(!source)return null;source=source.trim();if(source.startsWith("#")||source.startsWith("data:")||source.startsWith("blob:")||source.startsWith("javascript:"))return null;if(source.startsWith("http://")||source.startsWith("https://")||source.startsWith("//"))return source;const clean=source.split("?")[0].split("#")[0];return clean.startsWith("/")?normalizePath(clean.substring(1)):normalizePath(directory(currentFile)+clean)}
+function virtualUrl(path){return virtualUrls.get(normalizePath(path))||null}
+async function prepareFiles(folder){virtualFiles.clear();for(const url of virtualUrls.values()){try{URL.revokeObjectURL(url)}catch(e){}}virtualUrls.clear();const filesToDownload=repositoryFiles.filter(file=>file.path===folder+"/index.html"||file.path.startsWith(folder+"/"));if(filesToDownload.length===0)throw new Error("No files were found for this site.");loading.style.display="flex";for(let i=0;i<filesToDownload.length;i++){const file=filesToDownload[i],relative=file.path.substring(folder.length+1);loadingTitle.textContent="Opening Site";loadingInfo.textContent=(i+1)+" / "+filesToDownload.length+" · "+relative;const response=await fetch(RAW_BASE+file.path+"?cache="+Date.now(),{cache:"no-store"});if(!response.ok)throw new Error("Failed to download "+relative);const blob=await response.blob();virtualFiles.set(relative,{blob:blob,type:blob.type})}for(const [path,file] of virtualFiles){let blob=file.blob;if(path.toLowerCase().endsWith(".css")){let text=await blob.text();text=rewriteCSS(text,path);blob=new Blob([text],{type:"text/css"})}virtualUrls.set(path,URL.createObjectURL(blob))}return filesToDownload}
+function rewriteCSS(text,file){return text.replace(/url\s*\(\s*(['"]?)(.*?)\1\s*\)/gi,(full,quote,source)=>{const path=resolvePath(source,file);if(!path)return full;const url=virtualUrl(path);return url?'url("'+url+'")':full})}
+function replaceAttribute(element,attribute,currentFile){const source=element.getAttribute(attribute);if(!source)return;const path=resolvePath(source,currentFile);if(!path)return;const url=virtualUrl(path);if(url)element.setAttribute(attribute,url)}
+async function loadSite(folder){const filesToDownload=await prepareFiles(folder);const index=virtualFiles.get("index.html");if(!index)throw new Error("index.html was not found.");const parser=new DOMParser(),doc=parser.parseFromString(await index.blob.text(),"text/html");doc.querySelectorAll("base").forEach(element=>element.remove());doc.querySelectorAll("link[href]").forEach(element=>replaceAttribute(element,"href","index.html"));doc.querySelectorAll("script[src]").forEach(element=>replaceAttribute(element,"src","index.html"));doc.querySelectorAll("img[src],video[src],audio[src],source[src],iframe[src]").forEach(element=>replaceAttribute(element,"src","index.html"));doc.querySelectorAll("video[poster]").forEach(element=>replaceAttribute(element,"poster","index.html"));loadingTitle.textContent="Launching "+getSiteName(folder);loadingInfo.textContent=filesToDownload.length+" files ready";siteFrame.srcdoc="<!DOCTYPE html>"+doc.documentElement.outerHTML;siteFrame.style.display="block";backButton.style.display="inline-block";home.style.display="none";siteFrame.onload=()=>{requestAnimationFrame(()=>{siteFrame.classList.add("ready");loading.style.display="none"})}}
+function chooseSite(folder){selectedSite=folder;const name=getSiteName(folder),folderFiles=repositoryFiles.filter(file=>file.path.startsWith(folder+"/"));downloadTitle.textContent=name;downloadInfo.textContent="Play the site, or download the complete "+folderFiles.length+"-file folder.";downloadModal.style.display="flex"}
+function closeDownloadModal(){downloadModal.style.display="none";selectedSite=null}
+playSiteButton.onclick=async()=>{const folder=selectedSite;closeDownloadModal();if(folder)openSite(folder)}
+downloadSiteButton.onclick=async()=>{const folder=selectedSite;closeDownloadModal();if(folder)await downloadFolder(folder)}
+function downloadBlob(blob,name){const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+function loadJSZip(){return new Promise((resolve,reject)=>{if(window.JSZip){resolve(window.JSZip);return}const s=document.createElement("script");s.src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js";s.onload=()=>resolve(window.JSZip);s.onerror=()=>reject(new Error("Could not load ZIP support."));document.head.appendChild(s)})}
+async function downloadFolder(folder){const files=repositoryFiles.filter(file=>file.path.startsWith(folder+"/"));loading.style.display="flex";loadingTitle.textContent="Preparing Download";loadingInfo.textContent="Downloading all "+files.length+" files...";try{const JSZip=await loadJSZip(),zip=new JSZip();for(let i=0;i<files.length;i++){const file=files[i],relative=file.path.substring(folder.length+1);loadingInfo.textContent=(i+1)+" / "+files.length+" · "+relative;const r=await fetch(RAW_BASE+file.path+"?cache="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error("Failed to download "+relative);zip.file(relative,await r.blob())}const blob=await zip.generateAsync({type:"blob"});downloadBlob(blob,getSiteName(folder)+".zip")}catch(e){errorText.textContent="Could not download "+getSiteName(folder)+": "+e.message;error.style.display="flex"}finally{loading.style.display="none"}}
+async function openSite(folder){siteFrame.classList.remove("ready");try{await loadSite(folder)}catch(e){loading.style.display="none";errorText.textContent="Could not open "+getSiteName(folder)+": "+e.message;error.style.display="flex"}}
+async function initialize(){error.style.display="none";loading.style.display="flex";loadingTitle.textContent="Starting Ikirumi";loadingInfo.textContent="Loading sites...";try{await loadRepository();showHome();loading.style.display="none"}catch(e){loading.style.display="none";errorText.textContent="Could not initialize Ikirumi: "+e.message;error.style.display="flex"}}
+initialize();
 </script>
 </body>
 </html>
