@@ -43,9 +43,21 @@ drop.ondragleave=()=>drop.style.borderColor="";
 drop.ondrop=e=>{e.preventDefault();drop.style.borderColor="";setFiles([...e.dataTransfer.files])};
 function setFiles(list){
  selected=list;
- const exe=selected.find(f=>/\.exe$/i.test(f.name));
- const hasData=selected.some(f=>/_Data[\\/]/i.test(f.webkitRelativePath||""));
- status.textContent=selected.length+" files selected"+(exe?"\\nWindows executable found: "+exe.name:"\\nNo .exe found.")+(hasData?"\\nUnity _Data folder detected.":"\\nUnity _Data folder not detected.");
+ const paths=selected.map(f=>f.webkitRelativePath||f.name);
+ const exe=selected.find(f=>/\.exe$/i.test(f.name)||/\.exe$/i.test((f.webkitRelativePath||"")));
+ const hasData=selected.some(f=>{
+  const p=(f.webkitRelativePath||f.name).replace(/\\/g,"/");
+  return /(^|\\/)\_Data(\\/|$)/i.test(p)||/_Data$/i.test(p);
+ });
+ const dataFiles=selected.filter(f=>{
+  const p=(f.webkitRelativePath||f.name).replace(/\\/g,"/");
+  return /(^|\\/)\_Data(\\/|$)/i.test(p);
+ }).length;
+ const rootNames=[...new Set(paths.map(p=>p.split("/")[0]))];
+ status.textContent=selected.length+" files selected"
+  +(exe?"\\nWindows executable found: "+exe.name:"\\nNo .exe found.")
+  +(hasData?"\\nUnity _Data folder detected ("+dataFiles+" files).":"\\nUnity _Data folder not detected.")
+  +"\\nRoot: "+(rootNames.join(", ")||"unknown");
  status.className="status "+(exe&&hasData?"ok":"bad");
  generate.disabled=!(exe&&hasData);
  folderBtn.disabled=true;zipBtn.disabled=true;
