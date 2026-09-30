@@ -5,62 +5,139 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Local Qwen3 4B AI</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#101010;color:#eee;font:15px system-ui,Arial;min-height:100vh;display:flex;justify-content:center;padding:24px}
+*{box-sizing:border-box}
+body{margin:0;background:#101010;color:#eee;font:15px system-ui,Arial;min-height:100vh;display:flex;justify-content:center;padding:24px}
 main{width:min(900px,100%);display:flex;flex-direction:column;gap:14px}
-h1{margin:0;font-size:26px}.status{color:#aaa}.chat{min-height:420px;background:#181818;border:1px solid #333;border-radius:16px;padding:18px;white-space:pre-wrap;overflow:auto}.input{display:flex;gap:10px}textarea{flex:1;min-height:80px;resize:vertical;background:#1b1b1b;color:#fff;border:1px solid #444;border-radius:12px;padding:13px;font:inherit}button{border:0;border-radius:12px;padding:0 20px;background:#fff;color:#111;font-weight:700;cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}.user{margin-bottom:18px}.user b,.ai b{display:block;margin-bottom:5px}.user b{color:#aaa}.ai b{color:#fff}
+h1{margin:0;font-size:26px}
+.status{color:#aaa}
+.chat{min-height:420px;background:#181818;border:1px solid #333;border-radius:16px;padding:18px;white-space:pre-wrap;overflow:auto}
+.input{display:flex;gap:10px}
+textarea{flex:1;min-height:80px;resize:vertical;background:#1b1b1b;color:#fff;border:1px solid #444;border-radius:12px;padding:13px;font:inherit}
+button{border:0;border-radius:12px;padding:0 20px;background:#fff;color:#111;font-weight:700;cursor:pointer}
+button:disabled{opacity:.45;cursor:not-allowed}
+.user{margin-bottom:18px}.user b,.ai b{display:block;margin-bottom:5px}.user b{color:#aaa}.ai b{color:#fff}
+#load{height:44px}
 </style>
 </head>
 <body>
 <main>
 <h1>Qwen3 4B — Offline AI</h1>
-<div class="status" id="status">Starting local AI server connection...</div>
+<div class="status" id="status">Offline mode — loading local AI engine...</div>
+<button id="load">Choose Qwen3 GGUF</button>
 <div class="chat" id="chat"></div>
 <div class="input">
 <textarea id="prompt" placeholder="Ask something..." disabled></textarea>
 <button id="send" disabled>Send</button>
 </div>
 </main>
-<script>
+
+<script type="module">
+import {Wllama} from "./wllama/esm/index.js";
+
 const status=document.getElementById("status");
 const chat=document.getElementById("chat");
 const prompt=document.getElementById("prompt");
 const send=document.getElementById("send");
-const API="http://127.0.0.1:8080/v1/chat/completions";
+const load=document.getElementById("load");
 
-async function check(){
+let wllama=null;
+let messages=[];
+
+const CONFIG_PATHS={
+default:"./wllama/esm/wasm/wllama.wasm"
+};
+
+function addMessage(type,text){
+const el=document.createElement("div");
+el.className=type;
+const b=document.createElement("b");
+b.textContent=type==="user"?"You":"Qwen3";
+el.appendChild(b);
+el.appendChild(document.createTextNode(text));
+chat.appendChild(el);
+chat.scrollTop=chat.scrollHeight;
+return el;
+}
+
+async function loadModel(file){
+load.disabled=true;
+status.textContent="Loading Qwen3 GGUF locally...";
 try{
-const r=await fetch("http://127.0.0.1:8080/health");
-if(!r.ok)throw new Error();
-status.textContent="Connected — Qwen3 GGUF is running locally.";
-prompt.disabled=false;send.disabled=false;prompt.focus();
+wllama=new Wllama(CONFIG_PATHS);
+await wllama.loadModel([file],{
+n_ctx:4096,
+n_gpu_layers:-1,
+progressCallback:({loaded,total})=>{
+if(total)status.textContent="Loading local model... "+Math.round(loaded/total*100)+"%";
+}
+});
+status.textContent="Qwen3 loaded locally — no internet connection is used.";
+prompt.disabled=false;
+send.disabled=false;
+load.textContent="Qwen3 loaded";
+prompt.focus();
 }catch(e){
-status.textContent="Start llama-server.exe with your Qwen3 .gguf file, then reload this page.";
+status.textContent="Could not load the local GGUF: "+e.message;
+load.disabled=false;
 }
 }
+
+load.onclick=()=>{
+const input=document.createElement("input");
+input.type="file";
+input.accept=".gguf";
+input.onchange=()=>{
+if(input.files&&input.files[0])loadModel(input.files[0]);
+};
+input.click();
+};
 
 async function ask(){
 const text=prompt.value.trim();
-if(!text)return;
+if(!text||!wllama)return;
 prompt.value="";
-send.disabled=true;prompt.disabled=true;
-const u=document.createElement("div");u.className="user";u.innerHTML="<b>You</b>"+escapeHtml(text);chat.appendChild(u);
-const a=document.createElement("div");a.className="ai";a.innerHTML="<b>Qwen3</b>";chat.appendChild(a);
+send.disabled=true;
+prompt.disabled=true;
+addMessage("user",text);
+
+const ai=addMessage("ai","");
+messages.push({role:"user",content:text});
+
 try{
-const r=await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
-model:"qwen3-4b",
-messages:[{role:"user",content:text}],
-temperature:.7,max_tokens:1000,stream:false
-})});
-if(!r.ok)throw new Error(await r.text());
-const data=await r.json();
-a.innerHTML="<b>Qwen3</b>"+escapeHtml(data.choices?.[0]?.message?.content||"No response.");
-}catch(e){a.innerHTML="<b>Error</b>"+escapeHtml(e.message)}
-chat.scrollTop=chat.scrollHeight;send.disabled=false;prompt.disabled=false;prompt.focus();
+const stream=await wllama.createChatCompletion({
+messages,
+temperature:.7,
+top_p:.9,
+max_tokens:1000,
+stream:true
+});
+
+let answer="";
+for await(const chunk of stream){
+const piece=chunk.currentText??chunk.choices?.[0]?.delta?.content??"";
+if(piece){
+answer=piece;
+ai.lastChild.textContent=piece;
+chat.scrollTop=chat.scrollHeight;
 }
-function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));}
+}
+messages.push({role:"assistant",content:answer});
+}catch(e){
+ai.lastChild.textContent="Error: "+e.message;
+messages.pop();
+}
+send.disabled=false;
+prompt.disabled=false;
+prompt.focus();
+}
+
 send.onclick=ask;
-prompt.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();ask()}});
-check();
+prompt.addEventListener("keydown",e=>{
+if(e.key==="Enter"&&!e.shiftKey){
+e.preventDefault();
+ask();
+}
+});
 </script>
 </body>
 </html>
