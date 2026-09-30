@@ -1,0 +1,13 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Local Text AI</title>
+<style>body{margin:0;background:#111;color:#eee;font:15px system-ui;display:grid;place-items:center;min-height:100vh}main{width:min(900px,94vw);background:#191919;padding:20px;border-radius:18px}textarea{width:100%;box-sizing:border-box;background:#222;color:#fff;border:1px solid #444;border-radius:12px;padding:14px;min-height:110px}button{margin-top:10px;padding:11px 16px;border:0;border-radius:10px;background:#fff;color:#111;font-weight:700}#out{white-space:pre-wrap;line-height:1.55;margin-top:18px}.status{opacity:.7}</style></head>
+<body><main><h1>Local Text AI</h1><div class="status" id="status">Loading model… first launch downloads the model and then caches it.</div><textarea id="prompt" placeholder="Ask the AI anything…"></textarea><button id="go">Generate</button><div id="out"></div></main>
+<script type="module">
+import {pipeline,TextStreamer} from "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1";
+const MODEL="onnx-community/Qwen2.5-1.5B-Instruct";
+let ai;
+const status=document.getElementById("status"),out=document.getElementById("out"),prompt=document.getElementById("prompt"),go=document.getElementById("go");
+async function load(){try{ai=await pipeline("text-generation",MODEL,{device:"webgpu",dtype:"q4"});status.textContent="Ready — running locally in your browser.";go.disabled=false}catch(e){status.textContent="WebGPU model loading failed: "+e.message;}}
+go.onclick=async()=>{if(!ai)return;go.disabled=true;out.textContent="";status.textContent="Generating locally…";const messages=[{role:"system",content:"You are a helpful, intelligent assistant. Give clear, useful answers."},{role:"user",content:prompt.value}];const streamer=new TextStreamer(ai.tokenizer,{skip_prompt:true,callback_function:t=>out.textContent+=t});await ai(messages,{max_new_tokens:700,temperature:.7,do_sample:true,streamer});status.textContent="Done — no server was used for inference.";go.disabled=false};
+go.disabled=true;load();
+</script></body></html>
