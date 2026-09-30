@@ -12,23 +12,23 @@
 <div class="wrap">
 <div class="top"><div class="brand">Ikirumi / Unity Build Generator</div><button class="back" onclick="history.back()">← Back</button></div>
 <div class="hero">
-<div class="title">Windows Unity Build → HTML</div>
-<div class="sub">Choose your normal Unity Windows build folder. Select the folder containing your .exe and _Data folder, then press Generate HTML game.</div>
+<div class="title">Unity Windows Build Generator</div>
+<div class="sub">Version 2 — Windows .exe workflow. Select your normal Unity Windows build and generate an offline package with the files preserved. A native .exe cannot be turned into a browser game by HTML alone.</div>
 <div class="panel">
 <div id="drop" class="drop">
-<strong>Choose your Unity WebGL build folder</strong>
-<span>Use the folder containing index.html, Build/, TemplateData/ or your WebGL loader files.</span>
+<strong>Choose your NORMAL Unity Windows build folder</strong>
+<span>Select the folder that contains your game .exe and its _Data folder. This tool now identifies native Windows builds instead of expecting WebGL files.</span>
 </div>
 <input id="picker" type="file" webkitdirectory directory multiple class="hidden">
 <div class="row">
-<button id="generate" class="primary" disabled>Generate HTML game</button>
+<button id="generate" class="primary" disabled>Generate offline package</button>
 <button id="folder" class="secondary" disabled>Download to folder</button>
 <button id="zip" class="secondary" disabled>Download ZIP</button>
 </div>
 <div id="status" class="status">No build selected.</div>
 <div class="bar"><div id="fill" class="fill"></div></div>
 <div id="files" class="files hidden"></div>
-<div class="note"><b>Important:</b> A Windows Unity .exe is native machine code. HTML/JavaScript cannot compile that .exe into WebAssembly/WebGL. A real browser version must be built from the original Unity project using Unity's WebGL build pipeline. This page does not pretend to convert it.</div>
+<div class="note"><b>Version 2 update:</b> This page now accepts a normal Windows Unity build (.exe + _Data). <b>Important:</b> A Windows Unity .exe is native machine code. HTML/JavaScript cannot compile that .exe into WebAssembly/WebGL. A real browser version must be built from the original Unity project using Unity's WebGL build pipeline. This page does not pretend to convert it.</div>
 </div>
 </div>
 </div>
@@ -85,7 +85,7 @@ async function generateGame(){
  }
  const info="This is a native Unity Windows build. A browser cannot execute the .exe or convert it to WebAssembly/WebGL with HTML/JavaScript. To create a real HTML game, build the original Unity project for WebGL with Unity, then use this tool to package the WebGL output.";
  generated.push({path:"GENERATE-HTML-INFO.txt",blob:new Blob([info],{type:"text/plain"})});
- setProgress(100,"Analysis complete. "+generated.length+" files ready. No fake conversion was performed.");
+ setProgress(100,"Version 2 complete. "+generated.length+" files ready. Native Windows build preserved; no fake conversion was performed.");
  folderBtn.disabled=false;zipBtn.disabled=false;
 }
 generate.onclick=generateGame;
