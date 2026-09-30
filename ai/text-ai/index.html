@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Offline Text AI</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#101010;color:#eee;font:15px system-ui,Arial;min-height:100vh;display:flex;justify-content:center;padding:24px}main{width:min(900px,100%);display:flex;flex-direction:column;gap:14px}h1{margin:0;font-size:26px}.status{color:#aaa}.chat{min-height:420px;max-height:65vh;background:#181818;border:1px solid #333;border-radius:16px;padding:18px;white-space:pre-wrap;overflow:auto}.input{display:flex;gap:10px}textarea{flex:1;min-height:80px;resize:vertical;background:#1b1b1b;color:#fff;border:1px solid #444;border-radius:12px;padding:13px;font:inherit}button{border:0;border-radius:12px;padding:0 20px;background:#fff;color:#111;font-weight:700;cursor:pointer;height:44px}button:disabled{opacity:.45;cursor:not-allowed}.message{margin-bottom:18px}.message b{display:block;margin-bottom:5px}.user b{color:#aaa}.ai b{color:#fff}
+</style>
+</head>
+<body>
+<main>
+<h1>Offline Text AI</h1>
+<div class="status" id="status">Choose a local GGUF model</div>
+<button id="load">Choose AI File</button>
+<div class="chat" id="chat"></div>
+<div class="input">
+<textarea id="prompt" placeholder="Ask something..." disabled></textarea>
+<button id="send" disabled>Send</button>
+</div>
+</main>
+<script type="module">
+import{Wllama}from"./wllama/esm/index.js";
+const status=document.getElementById("status"),chat=document.getElementById("chat"),prompt=document.getElementById("prompt"),send=document.getElementById("send"),load=document.getElementById("load");
+let wllama=null,messages=[];
+const config={default:"./wllama/esm/wasm/wllama.wasm"};
+function add(type,text){const e=document.createElement("div");e.className="message "+type;const b=document.createElement("b");b.textContent=type==="user"?"You":"AI";e.append(b,document.createTextNode(text));chat.appendChild(e);chat.scrollTop=chat.scrollHeight;return e}
+async function loadModel(file){load.disabled=true;status.textContent="Loading local AI...";try{wllama=new Wllama(config);await wllama.loadModel([file],{n_ctx:4096,n_gpu_layers:-1,progressCallback:({loaded,total})=>{if(total)status.textContent="Loading AI... "+Math.round(loaded/total*100)+"%"}});status.textContent="AI ready — offline";prompt.disabled=false;send.disabled=false;load.textContent="AI Loaded";prompt.focus()}catch(e){status.textContent="Could not load model";load.disabled=false;alert(e.message)}}
+load.onclick=()=>{const i=document.createElement("input");i.type="file";i.accept=".gguf";i.onchange=()=>i.files[0]&&loadModel(i.files[0]);i.click()};
+async function ask(){const text=prompt.value.trim();if(!text||!wllama)return;prompt.value="";prompt.disabled=true;send.disabled=true;add("user",text);messages.push({role:"user",content:text});const el=add("ai","");try{const stream=await wllama.createChatCompletion({messages,temperature:.7,top_p:.9,max_tokens:1500,stream:true});let answer="";for await(const chunk of stream){const piece=chunk.currentText??chunk.choices?.[0]?.delta?.content??"";if(piece){answer=piece;el.lastChild.textContent=piece;chat.scrollTop=chat.scrollHeight}}messages.push({role:"assistant",content:answer})}catch(e){el.lastChild.textContent="Error: "+e.message;messages.pop()}prompt.disabled=false;send.disabled=false;prompt.focus()}
+send.onclick=ask;prompt.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();ask()}});
+</script>
+</body>
+</html>
