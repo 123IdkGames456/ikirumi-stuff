@@ -12,8 +12,8 @@
 <div class="wrap">
 <div class="top"><div class="brand">Ikirumi / Unity Build Generator</div><button class="back" onclick="history.back()">← Back</button></div>
 <div class="hero">
-<div class="title">Unity Build → Offline HTML</div>
-<div class="sub">Choose a Unity WebGL build folder. The generator collects the complete build, creates an offline launcher, fixes local file paths where possible, and lets you download the result as a folder or ZIP.</div>
+<div class="title">Windows Unity Build → HTML</div>
+<div class="sub">Choose your normal Unity Windows build folder. Select the folder containing your .exe and _Data folder, then press Generate HTML game.</div>
 <div class="panel">
 <div id="drop" class="drop">
 <strong>Choose your Unity WebGL build folder</strong>
@@ -21,14 +21,14 @@
 </div>
 <input id="picker" type="file" webkitdirectory directory multiple class="hidden">
 <div class="row">
-<button id="generate" class="primary" disabled>Generate offline game</button>
+<button id="generate" class="primary" disabled>Generate HTML game</button>
 <button id="folder" class="secondary" disabled>Download to folder</button>
 <button id="zip" class="secondary" disabled>Download ZIP</button>
 </div>
 <div id="status" class="status">No build selected.</div>
 <div class="bar"><div id="fill" class="fill"></div></div>
 <div id="files" class="files hidden"></div>
-<div class="note"><b>Important:</b> A normal Windows/macOS Unity .exe build cannot be converted into a browser game by HTML/JavaScript. For this tool, make a <b>WebGL</b> build in Unity first. The resulting WebGL files are what this generator packages. It does not upload your game anywhere.</div>
+<div class="note"><b>Important:</b> A Windows Unity .exe is native machine code. HTML/JavaScript cannot compile that .exe into WebAssembly/WebGL. A real browser version must be built from the original Unity project using Unity's WebGL build pipeline. This page does not pretend to convert it.</div>
 </div>
 </div>
 </div>
@@ -42,12 +42,12 @@ drop.ondragover=e=>{e.preventDefault();drop.style.borderColor="#fff"};
 drop.ondragleave=()=>drop.style.borderColor="";
 drop.ondrop=e=>{e.preventDefault();drop.style.borderColor="";setFiles([...e.dataTransfer.files])};
 function setFiles(list){
- selected=list.filter(f=>f.size>=0);
- const hasIndex=selected.some(f=>f.name.toLowerCase()==="index.html");
- const hasUnity=selected.some(f=>/\\.(loader\.js|framework\.js|data|wasm|symbols\.json)$/i.test(f.name)||/\\bBuild\\b/i.test(f.webkitRelativePath||""));
- status.textContent=selected.length+" files selected"+(hasIndex?"":"\nWarning: index.html was not found. Make sure this is a Unity WebGL build.");
- status.className="status "+(hasIndex?"ok":"bad");
- generate.disabled=!hasIndex;
+ selected=list;
+ const exe=selected.find(f=>/\.exe$/i.test(f.name));
+ const hasData=selected.some(f=>/_Data[\\/]/i.test(f.webkitRelativePath||""));
+ status.textContent=selected.length+" files selected"+(exe?"\\nWindows executable found: "+exe.name:"\\nNo .exe found.")+(hasData?"\\nUnity _Data folder detected.":"\\nUnity _Data folder not detected.");
+ status.className="status "+(exe&&hasData?"ok":"bad");
+ generate.disabled=!(exe&&hasData);
  folderBtn.disabled=true;zipBtn.disabled=true;
  showFiles(selected);
 }
@@ -76,19 +76,16 @@ async function makeLauncher(){
 async function generateGame(){
  if(!selected.length)return;
  generated=[];
- const total=selected.length;
- for(let i=0;i<total;i++){
-  const f=selected[i];
-  generated.push({path:relative(f),blob:f});
-  setProgress((i/total)*85,"Generating offline package… "+(i+1)+" / "+total+"\n"+relative(f));
+ setProgress(0,"Analyzing Windows Unity build…");
+ await new Promise(r=>setTimeout(r,250));
+ for(let i=0;i<selected.length;i++){
+  generated.push({path:relative(selected[i]),blob:selected[i]});
+  setProgress(15+(i/selected.length)*80,"Processing build files… "+(i+1)+" / "+selected.length);
   await new Promise(r=>setTimeout(r,0));
  }
- const launcher=await makeLauncher();
- if(launcher){
-  const idx=generated.findIndex(x=>x.path.toLowerCase()==="index.html");
-  if(idx>=0)generated[idx]={path:"index.html",blob:launcher};
- }
- setProgress(100,"Generation complete. "+generated.length+" files are ready.");
+ const info="This is a native Unity Windows build. A browser cannot execute the .exe or convert it to WebAssembly/WebGL with HTML/JavaScript. To create a real HTML game, build the original Unity project for WebGL with Unity, then use this tool to package the WebGL output.";
+ generated.push({path:"GENERATE-HTML-INFO.txt",blob:new Blob([info],{type:"text/plain"})});
+ setProgress(100,"Analysis complete. "+generated.length+" files ready. No fake conversion was performed.");
  folderBtn.disabled=false;zipBtn.disabled=false;
 }
 generate.onclick=generateGame;
