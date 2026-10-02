@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Five Nights at Jølle</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050607;color:#d7d8d5;font-family:Arial,Helvetica,sans-serif}button{font:inherit}
+#game{position:fixed;inset:0;background:#090a09;overflow:hidden}
+#office{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 42%,#242722 0,#11130f 42%,#050605 100%);transition:filter .15s}
+#office:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 4px);opacity:.4;pointer-events:none}
+.wall{position:absolute;left:13%;right:13%;top:10%;bottom:0;border:1px solid #292c27;background:linear-gradient(90deg,#12140f,#20231d 50%,#11130f);box-shadow:inset 0 0 80px #000}
+.desk{position:absolute;left:22%;right:22%;bottom:-5%;height:28%;background:linear-gradient(#292b25,#10110e);border-top:7px solid #3b3d34;box-shadow:0 -15px 35px #000}
+.desk:before{content:"";position:absolute;left:9%;right:9%;top:20%;height:6px;background:#080908;box-shadow:0 35px 0 #171914}
+.monitor{position:absolute;left:44%;bottom:17%;width:12%;height:15%;background:#070908;border:7px solid #151713;border-radius:5px;box-shadow:0 0 18px #000}
+.monitor:after{content:"";position:absolute;inset:12%;background:#18251b;box-shadow:0 0 18px #243b27 inset}
+.door{position:absolute;top:13%;bottom:21%;width:13%;background:#090a08;border:5px solid #272a24;transition:.2s}
+.door.left{left:0;border-left:0}.door.right{right:0;border-right:0}
+.door.closed{background:linear-gradient(90deg,#070806,#34372f,#080906);box-shadow:inset 0 0 35px #000}
+.door.closed:after{content:"DOOR";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:10px;letter-spacing:3px;color:#8a8d82}
+.hall{position:absolute;top:22%;bottom:23%;width:12%;background:#020302;opacity:.9}.hall.left{left:13%}.hall.right{right:13%}
+.lightcone{position:absolute;top:17%;bottom:24%;width:22%;opacity:0;transition:.12s;pointer-events:none}.lightcone.left{left:8%;background:radial-gradient(ellipse at 20% 50%,rgba(203,204,177,.28),transparent 65%)}.lightcone.right{right:8%;background:radial-gradient(ellipse at 80% 50%,rgba(203,204,177,.28),transparent 65%)}
+.lightcone.on{opacity:1}
+.eye{position:absolute;width:7px;height:5px;border-radius:50%;background:#b5b59d;box-shadow:0 0 11px #d4d2a2;opacity:0}.eye.e1{top:46%;left:17%}.eye.e2{top:47%;right:17%}.eye.show{opacity:1}
+#clock{position:absolute;top:16px;left:18px;font-size:18px;font-weight:bold;letter-spacing:2px}
+#night{position:absolute;top:43px;left:18px;color:#777d72;font-size:11px}
+#power{position:absolute;top:16px;right:18px;text-align:right;font-size:13px}.bar{width:130px;height:8px;border:1px solid #55594f;margin-top:6px}.bar i{display:block;height:100%;width:100%;background:#a7ad99;transition:.2s}
+#usage{position:absolute;top:59px;right:18px;color:#767b70;font-size:10px;letter-spacing:2px}
+#controls{position:absolute;left:0;right:0;bottom:0;height:82px;display:flex;justify-content:space-between;align-items:center;padding:0 18px;background:linear-gradient(transparent,rgba(0,0,0,.75))}
+.sidebuttons{display:flex;gap:8px}.ctrl{border:1px solid #41443c;background:#11130f;color:#aeb1a7;padding:12px 16px;min-width:92px;cursor:pointer}.ctrl.active{background:#b6b8aa;color:#10120f}.ctrl:active{transform:scale(.97)}
+#camera{position:absolute;inset:0;background:#080a08;display:none;z-index:20}
+#camNoise{position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px 3px);pointer-events:none;z-index:5}
+#camView{position:absolute;left:5%;right:24%;top:8%;bottom:10%;border:2px solid #55594e;background:#151814;overflow:hidden}
+.camroom{position:absolute;inset:0;background:linear-gradient(#20241e 0 55%,#0a0b09 55%);display:none}
+.camroom.active{display:block}
+.camroom:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.55),transparent 35%,transparent 65%,rgba(0,0,0,.6))}
+.camlabel{position:absolute;left:14px;top:12px;color:#aeb4a6;font-size:12px;letter-spacing:2px}
+.poster{position:absolute;right:12%;top:18%;width:18%;height:32%;border:1px solid #555a4f;background:#252922;display:flex;align-items:center;justify-content:center;text-align:center;font-size:10px;color:#858a80}
+.table{position:absolute;left:12%;bottom:16%;width:45%;height:13%;background:#252820;transform:skew(-12deg)}
+.jolle{position:absolute;width:16%;height:52%;right:18%;bottom:17%;display:none;background:linear-gradient(90deg,#090a08,#292b25,#080907);border-radius:45% 45% 12% 12%;box-shadow:0 0 25px #000}
+.jolle:before{content:"";position:absolute;left:27%;right:27%;top:20%;height:12%;background:#b0b19f;border-radius:50%;box-shadow:0 0 8px #d5d4b5}
+.jolle:after{content:"";position:absolute;left:35%;right:35%;top:40%;height:5px;background:#0b0c0a}
+.jolle.show{display:block}
+#camMap{position:absolute;right:2%;top:8%;bottom:10%;width:19%;border:1px solid #41453d;background:#0b0d0b;padding:12px}
+.maptitle{font-size:10px;color:#70766c;margin-bottom:10px;letter-spacing:2px}.cambtn{display:block;width:100%;margin:6px 0;padding:8px 5px;background:#161914;border:1px solid #3b3e36;color:#9ca195;font-size:10px;cursor:pointer}.cambtn.active{background:#afb2a4;color:#10120f}
+#camHint{position:absolute;left:6%;bottom:3%;font-size:10px;color:#62685e}
+#overlay{position:absolute;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:#020302}
+#overlay.show{display:flex}.panel{text-align:center;width:min(600px,90%);padding:40px;border:1px solid #373a33;background:rgba(10,11,9,.94);box-shadow:0 25px 90px #000}.panel h1{font-size:clamp(32px,7vw,72px);letter-spacing:8px;margin:0 0 15px;color:#c7c9bd}.panel p{color:#777c72;line-height:1.7}.menuBtn{margin-top:18px;padding:13px 24px;background:#bfc2b4;border:0;color:#11130f;font-weight:bold;cursor:pointer}
+#jumpscare{position:absolute;inset:0;z-index:90;display:none;align-items:center;justify-content:center;background:#050504}.face{width:40vmin;height:58vmin;max-width:430px;background:radial-gradient(ellipse at 50% 40%,#34362f,#090a08 68%);border-radius:48% 48% 20% 20%;position:relative;animation:shake .055s infinite}.face:before{content:"";position:absolute;left:17%;top:27%;width:22%;height:10%;background:#d0cfac;box-shadow:45vmin 0 0 #d0cfac;max-width:95px;transform:translateX(0)}.face:after{content:"";position:absolute;left:30%;right:30%;bottom:18%;height:18%;background:#050504;border-radius:50% 50% 35% 35%;box-shadow:0 0 0 3px #77786d inset}
+#static{position:absolute;inset:0;z-index:110;pointer-events:none;opacity:0;background:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 4px);mix-blend-mode:screen}
+@keyframes shake{0%{transform:translate(0,0) rotate(0)}25%{transform:translate(8px,-4px) rotate(1deg)}50%{transform:translate(-7px,5px) rotate(-1deg)}75%{transform:translate(4px,2px)}} 
+#tip{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:200;width:min(520px,90%);padding:22px;background:#10120f;border:1px solid #44483f;color:#999e92;display:none}.tiptitle{color:#d1d3c9;font-weight:bold;margin-bottom:8px}
+@media(max-width:700px){.wall{left:0;right:0}.desk{left:10%;right:10%}.door{width:20%}.hall.left{left:0}.hall.right{right:0}.lightcone.left{left:0}.lightcone.right{right:0}#camView{left:3%;right:28%}.ctrl{min-width:70px;padding:11px 8px;font-size:11px}.maptitle{font-size:8px}.cambtn{font-size:8px;padding:7px 2px}}
+</style>
+</head>
+<body>
+<div id="game">
+<div id="office">
+<div class="wall"></div><div class="hall left"></div><div class="hall right"></div>
+<div class="lightcone left" id="ll"></div><div class="lightcone right" id="lr"></div>
+<div class="eye e1" id="e1"></div><div class="eye e2" id="e2"></div>
+<div class="door left" id="leftDoor"></div><div class="door right" id="rightDoor"></div>
+<div class="desk"></div><div class="monitor"></div>
+<div id="clock">12 AM</div><div id="night">NIGHT 1</div>
+<div id="power">POWER 100%<div class="bar"><i id="powerbar"></i></div></div><div id="usage">USAGE ■</div>
+<div id="controls"><div class="sidebuttons"><button class="ctrl" id="leftLight">LEFT LIGHT</button><button class="ctrl" id="leftDoorBtn">LEFT DOOR</button></div><button class="ctrl" id="camBtn">CAMERAS</button><div class="sidebuttons"><button class="ctrl" id="rightDoorBtn">RIGHT DOOR</button><button class="ctrl" id="rightLight">RIGHT LIGHT</button></div></div>
+</div>
+<div id="camera">
+<div id="camView">
+<div class="camroom active" data-cam="1"><span class="camlabel">CAM 01 · LIVING ROOM</span><div class="poster">JØLLE<br>RESEARCH<br>FILE</div><div class="table"></div><div class="jolle" id="j1"></div></div>
+<div class="camroom" data-cam="2"><span class="camlabel">CAM 02 · HALL A</span><div class="table" style="left:45%;bottom:10%;width:40%"></div><div class="jolle" id="j2"></div></div>
+<div class="camroom" data-cam="3"><span class="camlabel">CAM 03 · HALL B</span><div class="poster" style="left:10%;right:auto">OLD<br>NOTICE</div><div class="jolle" id="j3"></div></div>
+<div class="camroom" data-cam="4"><span class="camlabel">CAM 04 · STORAGE</span><div class="table" style="left:25%;width:60%"></div><div class="jolle" id="j4"></div></div>
+<div class="camroom" data-cam="5"><span class="camlabel">CAM 05 · OFFICE</span><div class="poster" style="left:20%;right:auto">TIMMY<br>WILLIAM</div><div class="jolle" id="j5"></div></div>
+</div>
+<div id="camMap"><div class="maptitle">CAMERA MAP</div><button class="cambtn active" data-cam="1">CAM 01</button><button class="cambtn" data-cam="2">CAM 02</button><button class="cambtn" data-cam="3">CAM 03</button><button class="cambtn" data-cam="4">CAM 04</button><button class="cambtn" data-cam="5">CAM 05</button></div>
+<div id="camHint">SPACE / CAMERAS · WATCH JØLLE · CLOSE THE MONITOR TO RETURN</div><div id="camNoise"></div>
+</div>
+<div id="jumpscare"><div class="face"></div></div><div id="static"></div>
+<div id="overlay" class="show"><div class="panel" id="menuPanel"><h1>FIVE NIGHTS<br>AT JØLLE</h1><p>A small night-shift horror game.<br>Survive until 6 AM. Watch the cameras. Save your power. Do not let Jølle reach you.</p><button class="menuBtn" id="startBtn">START NIGHT 1</button></div></div>
+<div id="tip"><div class="tiptitle">JØLLE IS MOVING</div><div>He uses the halls when you are not watching. Check both sides and close a door when he reaches the office.</div></div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+let night=1,hour=0,power=100,camOpen=false,currentCam=1,leftClosed=false,rightClosed=false,leftLit=false,rightLit=false,running=false,gameOver=false;
+let jollePos=1,lastMove=0,lastHour=0;
+const audioCtx=window.AudioContext?new AudioContext():null;
+function tone(freq,dur,type="sine",gain=.025){if(!audioCtx)return;const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.value=freq;g.gain.value=gain;o.connect(g);g.connect(audioCtx.destination);o.start();g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+dur);o.stop(audioCtx.currentTime+dur)}
+function setText(id,t){$(id).textContent=t}
+function updateUI(){setText("power","POWER "+Math.max(0,Math.ceil(power))+"%");$("powerbar").style.width=Math.max(0,power)+"%";setText("clock",hour===0?"12 AM":hour+" AM");setText("night","NIGHT "+night);$("leftDoor").classList.toggle("closed",leftClosed);$("rightDoor").classList.toggle("closed",rightClosed);$("leftDoorBtn").classList.toggle("active",leftClosed);$("rightDoorBtn").classList.toggle("active",rightClosed);$("leftLight").classList.toggle("active",leftLit);$("rightLight").classList.toggle("active",rightLit);$("ll").classList.toggle("on",leftLit);$("lr").classList.toggle("on",rightLit);$("usage").textContent="USAGE "+"■".repeat(1+Number(camOpen)+Number(leftClosed)+Number(rightClosed)+Number(leftLit)+Number(rightLit))}
+function moveJolle(){if(!running)return;const now=Date.now();if(now-lastMove<4200)return;lastMove=now;let chance=.42+(night*.035);if(Math.random()>chance)return;if(jollePos<6){jollePos++;tone(90+Math.random()*30,.18,"square",.018)}else if((jollePos===6&&!leftClosed)||(jollePos===7&&!rightClosed)){lose();return}else if(jollePos>=6){jollePos=Math.random()<.5?5:4}updateJolleVisual()}
+function updateJolleVisual(){for(let i=1;i<=5;i++)$("j"+i).classList.toggle("show",jollePos===i);$("e1").classList.toggle("show",leftLit&&jollePos===6);$("e2").classList.toggle("show",rightLit&&jollePos===7)}
+function chooseCam(n){currentCam=n;document.querySelectorAll(".camroom").forEach(x=>x.classList.toggle("active",Number(x.dataset.cam)===n));document.querySelectorAll(".cambtn").forEach(x=>x.classList.toggle("active",Number(x.dataset.cam)===n));tone(240,.06,"square",.012);updateJolleVisual()}
+function toggleCameras(){if(!running)return;camOpen=!camOpen;$("camera").style.display=camOpen?"block":"none";tone(camOpen?500:180,.08,"square",.015);updateUI()}
+function toggleDoor(side){if(!running||power<=0)return;if(side==="left")leftClosed=!leftClosed;else rightClosed=!rightClosed;tone(75,.12,"square",.025);updateUI()}
+function toggleLight(side){if(!running||power<=0)return;if(side==="left")leftLit=!leftLit;else rightLit=!rightLit;setTimeout(()=>{if(side==="left")leftLit=false;else rightLit=false;updateUI()},1200);tone(330,.08,"sine",.012);updateUI();updateJolleVisual()}
+function failPower(){if(power<=0){power=0;camOpen=false;leftClosed=false;rightClosed=false;leftLit=false;rightLit=false;$("camera").style.display="none";updateUI();setTimeout(()=>lose(true),1800)}}
+function lose(powerOut=false){if(gameOver)return;gameOver=true;running=false;$("jumpscare").style.display="flex";$("static").style.opacity=powerOut?.35:.85;tone(powerOut?45:35,1.2,"sawtooth",.06);setTimeout(()=>{ $("jumpscare").style.display="none";$("static").style.opacity=0;showEnd(false)},1400)}
+function showEnd(win){$("overlay").classList.add("show");$("menuPanel").innerHTML=win?'<h1>6 AM</h1><p>You survived Night '+night+'. The building is quiet... for now.</p><button class="menuBtn" id="nextBtn">'+(night<5?"START NIGHT "+(night+1):"PLAY AGAIN")+"</button>":'<h1>YOU WERE CAUGHT</h1><p>Jølle reached the office on Night '+night+'. Watch the halls more carefully.</p><button class="menuBtn" id="retryBtn">TRY AGAIN</button>';if(win){$("nextBtn").onclick=()=>{if(night<5)startNight(night+1);else startNight(1)}}else $("retryBtn").onclick=()=>startNight(night)}
+function win(){if(gameOver)return;gameOver=true;running=false;tone(520,.15,"sine",.03);setTimeout(()=>showEnd(true),500)}
+function startNight(n){night=n;hour=0;power=100;jollePos=1;lastMove=Date.now();lastHour=Date.now();camOpen=false;leftClosed=false;rightClosed=false;leftLit=false;rightLit=false;gameOver=false;running=true;$("overlay").classList.remove("show");$("camera").style.display="none";$("office").style.filter="none";updateUI();updateJolleVisual();if(audioCtx&&audioCtx.state==="suspended")audioCtx.resume();tone(180,.2,"sine",.02)}
+setInterval(()=>{if(!running)return;const drain=.055+Number(camOpen)*.045+Number(leftClosed)*.035+Number(rightClosed)*.035+Number(leftLit)*.07+Number(rightLit)*.07;power-=drain;const now=Date.now();if(now-lastHour>30000){lastHour=now;hour++;tone(180,.08,"square",.012);if(hour>=6){win();return}}moveJolle();failPower();updateUI()},1000);
+$("startBtn").onclick=()=>startNight(1);$("camBtn").onclick=toggleCameras;$("leftDoorBtn").onclick=()=>toggleDoor("left");$("rightDoorBtn").onclick=()=>toggleDoor("right");$("leftLight").onclick=()=>toggleLight("left");$("rightLight").onclick=()=>toggleLight("right");document.querySelectorAll(".cambtn").forEach(b=>b.onclick=()=>chooseCam(Number(b.dataset.cam)));
+document.addEventListener("keydown",e=>{if(e.code==="Space"){e.preventDefault();toggleCameras()}if(e.key.toLowerCase()==="a")toggleDoor("left");if(e.key.toLowerCase()==="d")toggleDoor("right");if(e.key.toLowerCase()==="q")toggleLight("left");if(e.key.toLowerCase()==="e")toggleLight("right")});
+updateUI();
+</script>
+</body>
+</html>
