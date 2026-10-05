@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Networker — Nettsider som skiller seg ut</title>
+<meta name="description" content="Networker lager moderne nettsider fra 200 til 1000 kr.">
+<style>
+:root{--bg:#f5f7fb;--surface:rgba(255,255,255,.72);--solid:#fff;--text:#11141a;--muted:#687080;--line:rgba(17,20,26,.1);--accent:#5b5cf0;--accent2:#8b5cf6;--shadow:0 24px 70px rgba(25,31,55,.1)}
+[data-theme=dark]{--bg:#08090d;--surface:rgba(18,20,28,.72);--solid:#12141b;--text:#f4f5f8;--muted:#8e96a6;--line:rgba(255,255,255,.1);--shadow:0 24px 70px rgba(0,0,0,.35)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;transition:background .35s,color .35s}button,input,textarea{font:inherit}button{cursor:pointer}a{color:inherit;text-decoration:none}
+body:before{content:"";position:fixed;inset:-30%;z-index:-2;background:radial-gradient(circle at 20% 20%,rgba(91,92,240,.15),transparent 28%),radial-gradient(circle at 80% 30%,rgba(139,92,246,.12),transparent 25%),radial-gradient(circle at 50% 90%,rgba(38,198,218,.09),transparent 28%);filter:blur(30px);animation:drift 16s ease-in-out infinite alternate}
+body:after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:70px 70px;mask-image:linear-gradient(to bottom,black,transparent 75%);opacity:.22}
+.container{width:min(1120px,calc(100% - 32px));margin:auto}.nav{position:sticky;top:12px;z-index:50;margin:12px auto 0;padding:10px 12px;border:1px solid var(--line);background:var(--surface);backdrop-filter:blur(22px);border-radius:18px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow)}.brand{display:flex;align-items:center;gap:9px;font-weight:900;margin-right:auto}.brandmark{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;color:white;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 9px 24px rgba(91,92,240,.25)}.navlinks{display:flex;gap:3px}.navlinks a,.theme{padding:10px 12px;border-radius:11px;color:var(--muted);font-size:13px;font-weight:750;transition:.2s}.navlinks a:hover,.theme:hover{background:var(--line);color:var(--text)}.theme{border:0;background:transparent}
+main{overflow:hidden}.hero{min-height:calc(100vh - 80px);display:grid;place-items:center;padding:80px 0 100px;text-align:center}.eyebrow{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--muted);font-size:12px;font-weight:800;backdrop-filter:blur(14px)}.dot{width:7px;height:7px;border-radius:50%;background:#42d392;box-shadow:0 0 16px #42d392}.hero h1{font-size:clamp(48px,8vw,92px);line-height:.98;letter-spacing:-5px;margin:24px auto 20px;max-width:900px}.gradient{background:linear-gradient(120deg,var(--text),#777dff 55%,#a76cff);-webkit-background-clip:text;background-clip:text;color:transparent}.hero p{max-width:650px;margin:0 auto;color:var(--muted);font-size:17px;line-height:1.7}.actions{display:flex;justify-content:center;gap:10px;margin-top:30px;flex-wrap:wrap}.btn{padding:13px 18px;border-radius:13px;border:1px solid var(--line);font-weight:850;font-size:13px;transition:.22s;display:inline-flex;align-items:center;gap:8px}.btn:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(0,0,0,.12)}.primary{background:var(--text);color:var(--bg);border-color:var(--text)}.secondary{background:var(--surface);color:var(--text);backdrop-filter:blur(12px)}
+.section{padding:105px 0}.section-head{display:flex;justify-content:space-between;gap:30px;align-items:end;margin-bottom:30px}.section-head h2{font-size:clamp(30px,5vw,48px);letter-spacing:-2px;margin:0}.section-head p{max-width:450px;color:var(--muted);line-height:1.6;margin:0}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.card{padding:25px;border:1px solid var(--line);border-radius:22px;background:var(--surface);backdrop-filter:blur(18px);box-shadow:var(--shadow);transition:.3s;opacity:0;transform:translateY(22px)}.card.visible{opacity:1;transform:none}.card:hover{transform:translateY(-6px);border-color:rgba(91,92,240,.3)}.icon{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(91,92,240,.16),rgba(139,92,246,.13));margin-bottom:22px;font-size:19px}.card h3{margin:0 0 9px;font-size:18px}.card p{color:var(--muted);line-height:1.65;font-size:14px;margin:0}.price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.price{position:relative}.price strong{font-size:34px;letter-spacing:-1.5px}.price small{color:var(--muted)}.price ul{list-style:none;padding:20px 0 0;margin:0;color:var(--muted);line-height:2;font-size:13px}.price li:before{content:"✓";color:#5b5cf0;font-weight:900;margin-right:9px}.popular{outline:2px solid rgba(91,92,240,.45);box-shadow:0 25px 80px rgba(91,92,240,.12)}.badge{position:absolute;right:18px;top:18px;padding:6px 9px;border-radius:999px;background:rgba(91,92,240,.13);color:#777dff;font-size:10px;font-weight:900}.team{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.person{min-height:230px;display:flex;flex-direction:column;justify-content:end}.avatar{width:64px;height:64px;border-radius:20px;display:grid;place-items:center;background:linear-gradient(135deg,#5b5cf0,#9b65ff);color:white;font-size:22px;font-weight:900;margin-bottom:auto}.role{color:#777dff;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1px}.contact{display:grid;grid-template-columns:.85fr 1.15fr;gap:20px}.contact-copy{padding:30px}.contact-copy h2{font-size:42px;letter-spacing:-2px;margin:0 0 15px}.contact-copy p{color:var(--muted);line-height:1.7}.form{display:grid;gap:12px}.field{display:grid;gap:6px}.field label{font-size:11px;font-weight:850;color:var(--muted)}.field input,.field textarea{width:100%;border:1px solid var(--line);background:var(--solid);color:var(--text);border-radius:12px;padding:12px 13px;outline:0;transition:.2s}.field input:focus,.field textarea:focus{border-color:#7378ff;box-shadow:0 0 0 4px rgba(91,92,240,.1)}textarea{min-height:120px;resize:vertical}.form .btn{justify-content:center}.note{font-size:11px;color:var(--muted);line-height:1.5;margin:0}.footer{padding:35px 0 55px;border-top:1px solid var(--line);color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:20px}.toast{position:fixed;bottom:20px;left:50%;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:var(--text);color:var(--bg);padding:12px 16px;border-radius:12px;font-size:12px;font-weight:800;z-index:100;transition:.25s}.toast.show{opacity:1;transform:translate(-50%,0)}
+@keyframes drift{to{transform:translate(3%,2%) scale(1.04)}}@media(max-width:800px){.navlinks{display:none}.hero{padding-top:70px}.hero h1{letter-spacing:-3px}.grid,.price-grid,.team,.contact{grid-template-columns:1fr}.section{padding:75px 0}.section-head{display:block}.section-head p{margin-top:12px}.contact-copy h2{font-size:34px}.footer{display:block}.footer span{display:block;margin-top:8px}}
+</style>
+</head>
+<body>
+<header class="nav container">
+<a class="brand" href="#home"><span class="brandmark">N</span><span>Networker</span></a>
+<nav class="navlinks"><a href="#tjenester">Tjenester</a><a href="#priser">Priser</a><a href="#team">Team</a><a href="#kontakt">Kontakt</a></nav>
+<button class="theme" id="theme" aria-label="Bytt tema">☾</button>
+</header>
+<main>
+<section class="hero container" id="home">
+<div>
+<div class="eyebrow"><span class="dot"></span> Vi bygger på nett</div>
+<h1>Nettsider som føles <span class="gradient">moderne.</span></h1>
+<p>Networker lager stilrene og responsive nettsider for både personer og bedrifter. Du får filene ferdig levert — du publiserer dem selv.</p>
+<div class="actions"><a class="btn primary" href="#kontakt">Send melding →</a><a class="btn secondary" href="#priser">Se priser</a></div>
+</div>
+</section>
+
+<section class="section container" id="tjenester">
+<div class="section-head"><h2>Hva vi gjør</h2><p>Fra en enkel infoside til en mer gjennomført nettside med animasjoner, effekter og mobiltilpasning.</p></div>
+<div class="grid">
+<article class="card"><div class="icon">✦</div><h3>Moderne design</h3><p>Ryddige layouts, tydelig typografi, gode detaljer og et uttrykk som passer deg eller virksomheten din.</p></article>
+<article class="card"><div class="icon">⌁</div><h3>Animasjoner</h3><p>Små bevegelser og interaktive effekter som gjør siden mer levende uten å gjøre den tung.</p></article>
+<article class="card"><div class="icon">▣</div><h3>Mobil + PC</h3><p>Vi lager siden responsiv slik at den fungerer på telefon, nettbrett og datamaskin.</p></article>
+<article class="card"><div class="icon">↗</div><h3>Ferdige filer</h3><p>Du får nettsidefilene levert. Du står selv for publisering og hosting etterpå.</p></article>
+<article class="card"><div class="icon">⚙</div><h3>Tilpasset</h3><p>Fortell oss hva du trenger, så bygger vi siden rundt innholdet, stilen og budsjettet ditt.</p></article>
+<article class="card"><div class="icon">◎</div><h3>Enkelt samarbeid</h3><p>Send oss navn, idé og budsjett. Vi tar kontakt på e-post for å finne ut hva som passer.</p></article>
+</div>
+</section>
+
+<section class="section container" id="priser">
+<div class="section-head"><h2>Fra 200–1000 kr</h2><p>Prisen varierer etter størrelsen og hvor mye som skal bygges. Vi avtaler hva som skal være med før vi starter.</p></div>
+<div class="price-grid">
+<article class="card price"><small>Enkel</small><h3>200 kr</h3><ul><li>Liten infoside</li><li>Responsivt design</li><li>Grunnleggende styling</li></ul></article>
+<article class="card price popular"><span class="badge">Mest fleksibel</span><small>Mellomstor</small><h3>500 kr</h3><ul><li>Flere seksjoner</li><li>Animasjoner og effekter</li><li>Mobil + PC</li></ul></article>
+<article class="card price"><small>Større</small><h3>1000 kr</h3><ul><li>Mer omfattende side</li><li>Mer tilpasset design</li><li>Flere funksjoner og sider</li></ul></article>
+</div>
+</section>
+
+<section class="section container" id="team">
+<div class="section-head"><h2>Teamet</h2><p>Tre personer med fokus på å lage nettsider som ser bra ut og fungerer godt.</p></div>
+<div class="team">
+<article class="card person"><div class="avatar">J</div><div class="role">Team</div><h3>Jørgen</h3><p>Design, idéer og utvikling.</p></article>
+<article class="card person"><div class="avatar">M</div><div class="role">Team</div><h3>Marcus</h3><p>Utvikling, funksjoner og detaljer.</p></article>
+<article class="card person"><div class="avatar">K</div><div class="role">Team</div><h3>Kristian</h3><p>Idéer, innhold og kvalitet.</p></article>
+</div>
+</section>
+
+<section class="section container" id="kontakt">
+<div class="card contact">
+<div class="contact-copy"><div class="eyebrow">✉ Kontakt oss</div><h2>Har du en idé?</h2><p>Send oss litt informasjon om nettsiden du ønsker. Fortell om den er til et firma eller personlig, hva du vil lage, og omtrent hvilket budsjett du har.</p><p>Vi bruker e-posten din til å svare deg og avtale mer om prosjektet.</p></div>
+<form class="form" id="form">
+<div class="field"><label>Navn</label><input id="name" required placeholder="Navnet ditt"></div>
+<div class="field"><label>Firma eller personlig</label><input id="type" required placeholder="F.eks. firma / personlig"></div>
+<div class="field"><label>Budsjett</label><input id="budget" required placeholder="F.eks. 500 kr"></div>
+<div class="field"><label>E-post</label><input id="email" type="email" required placeholder="deg@eksempel.no"></div>
+<div class="field"><label>Hva vil du lage?</label><textarea id="message" required placeholder="Beskriv kort hva du ønsker..."></textarea></div>
+<button class="btn primary" type="submit">Send forespørsel →</button>
+<p class="note">Når du trykker send, åpnes e-postappen din med informasjonen ferdig skrevet. Du må selv sende e-posten.</p>
+</form>
+</div>
+</section>
+</main>
+<footer class="container footer"><strong>Networker</strong><span>Nettsider fra 200 til 1000 kr · Du publiserer filene selv.</span></footer>
+<div class="toast" id="toast">Forespørselen er klar i e-postappen.</div>
+<script>
+const root=document.documentElement,theme=document.getElementById("theme"),saved=localStorage.getItem("networker-theme");
+function setTheme(mode){root.dataset.theme=mode;theme.textContent=mode==="dark"?"☀":"☾";localStorage.setItem("networker-theme",mode)}
+setTheme(saved||"dark");
+theme.onclick=()=>setTheme(root.dataset.theme==="dark"?"light":"dark");
+const observer=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add("visible");observer.unobserve(e.target)}}),{threshold:.12});
+document.querySelectorAll(".card").forEach((el,i)=>{el.style.transitionDelay=Math.min(i*55,330)+"ms";observer.observe(el)});
+document.getElementById("form").addEventListener("submit",e=>{
+e.preventDefault();
+const name=document.getElementById("name").value,type=document.getElementById("type").value,budget=document.getElementById("budget").value,email=document.getElementById("email").value,message=document.getElementById("message").value;
+const subject=encodeURIComponent("Ny Networker forespørsel fra "+name);
+const body=encodeURIComponent("Navn: "+name+"\nFirma eller personlig: "+type+"\nBudsjett: "+budget+"\nE-post: "+email+"\n\nHva de ønsker:\n"+message);
+window.location.href="mailto:?subject="+subject+"&body="+body;
+document.getElementById("toast").classList.add("show");setTimeout(()=>document.getElementById("toast").classList.remove("show"),3500);
+});
+</script>
+</body>
+</html>
