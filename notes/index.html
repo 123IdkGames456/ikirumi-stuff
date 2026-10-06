@@ -23,7 +23,7 @@
 <div class="toast" id="toast"></div>
 <script>
 const KEY="ikirumi_notes_v1";
-const GOOGLE_SCRIPT_URL="PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+const GOOGLE_SCRIPT_URL="https://script.google.com/macros/s/AKfycbxzLYMz4UpMf12gksj22Kia1THI9vfaTRG8VDRHQDq2hSeLTlNAfkPErfaxEUiJu8g9/exec";
 let notes=[],activeId=null,renameId=null,saveTimer=null;
 const list=document.getElementById("list"),editor=document.getElementById("editor"),fileInput=document.getElementById("fileInput"),toast=document.getElementById("toast"),renameModal=document.getElementById("renameModal"),renameInput=document.getElementById("renameInput");
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
