@@ -1,1 +1,0 @@
-(()=>{window.OfflineAI={async load(file,onProgress){throw new Error("This folder needs the bundled WebAssembly inference runtime to execute GGUF models. The UI is offline-ready, but no binary runtime is being downloaded from the internet.")}}})();
