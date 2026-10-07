@@ -1,0 +1,13 @@
+CONTACTS
+
+Ikirumi
+Role: Main dev. Idea giver. Boss
+Profile image: Images/ikirumi.png
+
+Jølle
+Role: The Inspection of jølle. Side dev. Idea giver
+Profile image: Images/jolle.png
+
+Kurs
+Role: Idea giver. Sketch drawer.
+Profile image: Images/kurs.png
