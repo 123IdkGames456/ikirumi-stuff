@@ -1,0 +1,31 @@
+name: Check Device AI
+on:
+  push:
+    paths:
+      - "device-ai-text/**"
+      - ".github/workflows/check-device-ai.yml"
+  workflow_dispatch:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check JavaScript syntax
+        run: node --check device-ai-text/app.js
+      - name: Check required HTML IDs and script paths
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const html = fs.readFileSync('device-ai-text/index.html', 'utf8');
+          const js = fs.readFileSync('device-ai-text/app.js', 'utf8');
+          const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]);
+          const refs = [...js.matchAll(/\$\('([^']+)'\)/g)].map(m => m[1]);
+          const missing = [...new Set(refs)].filter(id => !ids.includes(id) && !['downloadLatest','viewGallery'].includes(id));
+          if (!html.includes('href="styles.css') || !html.includes('src="app.js')) throw new Error('CSS or JS file reference missing');
+          if (missing.length) throw new Error('Missing HTML IDs: ' + missing.join(', '));
+          if (ids.length !== new Set(ids).size) throw new Error('Duplicate HTML IDs');
+          console.log('HTML references and IDs look valid.');
+          NODE
