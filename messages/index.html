@@ -3,54 +3,55 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#08090d">
+<meta name="theme-color" content="#08090f">
 <title>Messages · Ikirumi</title>
 <style>
-:root{color-scheme:dark;--bg:#08090d;--panel:#12141b;--panel2:#0d0f14;--line:#292d38;--text:#f4f5fa;--muted:#858d9b;--accent:#aaa0ff;--good:#6de0ae;--bad:#ff8585}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#1a1a2b 0,#08090d 58%);color:var(--text);font:15px system-ui,-apple-system,Segoe UI,sans-serif;padding:20px}
-.app{width:min(980px,100%);min-height:calc(100vh - 40px);margin:auto;display:flex;flex-direction:column}
-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:8px 0 20px}
-.brand{font-size:27px;font-weight:900;letter-spacing:-1.2px}.brand span{color:var(--accent)}.muted{color:var(--muted)}.small{font-size:12px}
-.back{color:#c5c0ff;text-decoration:none;font-size:12px}.back:hover{text-decoration:underline}
-.settings{padding:16px;background:rgba(18,20,27,.92);border:1px solid var(--line);border-radius:16px;margin-bottom:14px}
-.fields{display:grid;grid-template-columns:1fr;gap:12px}.api-field{display:none}label{display:block;margin-bottom:7px;font-size:12px;font-weight:750;color:#c4c7d2}
-input{width:100%;min-width:0;padding:12px;border:1px solid var(--line);border-radius:10px;background:#090a0f;color:var(--text);font:inherit;outline:none}input:focus{border-color:#8074dc}
-button{border:0;border-radius:10px;padding:12px 16px;background:#c2bbff;color:#11111a;font:inherit;font-weight:800;cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}.connect{margin-top:12px}
-.chat{flex:1;min-height:350px;display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--line);border-radius:18px;background:rgba(18,20,27,.94)}
-.chat-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:15px 17px;border-bottom:1px solid var(--line)}.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--bad);margin-right:7px}.status-dot.on{background:var(--good)}
-#messages{flex:1;min-height:280px;max-height:56vh;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
-.message{padding:12px 13px;border:1px solid #272a35;border-radius:13px;background:#0d0f14;overflow-wrap:anywhere}
-.meta{display:flex;justify-content:space-between;gap:12px;margin-bottom:6px;font-size:12px;color:var(--muted)}.who{color:#dedaff;font-weight:800}.body{white-space:pre-wrap;line-height:1.5}.empty{margin:auto;padding:28px;text-align:center;color:var(--muted)}
-.compose{display:flex;gap:10px;padding:14px;border-top:1px solid var(--line)}.compose input{flex:1}.feedback{padding:0 16px 13px;min-height:30px;font-size:12px;color:var(--muted)}.error{color:var(--bad)}
-@media(max-width:620px){body{padding:12px}.app{min-height:calc(100vh - 24px)}.fields{grid-template-columns:1fr}.brand{font-size:24px}#messages{max-height:none}.compose{gap:7px;padding:10px}.compose button{padding:11px 13px}}
+:root{color-scheme:dark;--bg:#08090f;--surface:#0e1018;--surface2:#131621;--surface3:#191c29;--line:#252a3a;--text:#f7f7fb;--muted:#8d93a6;--accent:#796cff;--accent2:#5949df;--good:#55dc91;--danger:#ff667a}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input{font:inherit}button{border:0;color:#fff;cursor:pointer}input{outline:0;color:#fff}.hidden{display:none!important}
+body:before{content:"";position:fixed;inset:-30%;pointer-events:none;background:radial-gradient(circle at 72% 10%,#6555ff20,transparent 28%),radial-gradient(circle at 15% 90%,#4b3de012,transparent 25%);filter:blur(20px)}
+.app{position:relative;width:100%;height:100dvh;display:flex;flex-direction:column;background:linear-gradient(135deg,#090a10,#08090f 52%,#0b0d15)}
+.top{height:76px;flex:none;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 24px;border-bottom:1px solid #ffffff0b;background:#0b0d14dc;backdrop-filter:blur(26px);z-index:2}
+.brand{display:flex;align-items:center;gap:13px;min-width:0}.logo{width:44px;height:44px;flex:none;border-radius:14px;display:grid;place-items:center;font-size:18px;font-weight:900;background:linear-gradient(145deg,#9389ff,#5645df);border:1px solid #ffffff22;box-shadow:0 12px 38px #6658ff35,0 0 0 5px #7769ff08}.title{font-size:15px;font-weight:850;letter-spacing:-.2px}.status{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);margin-top:4px}.status:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--danger);box-shadow:0 0 13px #ff667a55}.status.on:before{background:var(--good);box-shadow:0 0 13px #55dc91aa}
+.topActions{display:flex;align-items:center;gap:8px}.topActions button{height:38px;padding:0 13px;border-radius:11px;background:#141721;border:1px solid #ffffff0d;color:#cdd1dc;font-size:11px;font-weight:650;transition:transform .18s,background .18s,border-color .18s,box-shadow .18s}.topActions button:hover{transform:translateY(-1px);background:#1b1e2b;border-color:#ffffff1b;box-shadow:0 8px 24px #0004}.topActions button.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));border-color:#8d83ff;color:#fff;box-shadow:0 8px 28px #685aff35}
+.room{height:58px;flex:none;display:flex;align-items:center;gap:9px;padding:9px 24px;border-bottom:1px solid #ffffff08;background:#0b0d14b8}.room label{flex:none;color:#9299ab;font-size:11px;font-weight:700}.room input{flex:1;min-width:0;height:38px;padding:0 13px;border:1px solid #ffffff0c;background:#10131c;border-radius:11px;font-size:11px;color:#eef0f6}.room input:focus{border-color:#7064f0}.room button{height:38px;padding:0 14px;border-radius:11px;background:#171a25;border:1px solid #ffffff0d;color:#d2d5df;font-size:11px;font-weight:650}.room button:hover{background:#202431}
+.chat-head{height:51px;flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 24px;border-bottom:1px solid #ffffff08;background:#0b0d14a8}.roomTitle{display:flex;align-items:center;gap:9px;font-size:12px;font-weight:800}.roomIcon{width:27px;height:27px;border-radius:9px;display:grid;place-items:center;background:#796cff20;color:#aaa2ff}.count{font-size:10px;color:var(--muted)}
+#messages{flex:1;min-height:0;overflow:auto;padding:30px max(18px,calc((100vw - 1040px)/2));scroll-behavior:smooth}
+#messages::-webkit-scrollbar{width:8px}#messages::-webkit-scrollbar-thumb{background:#292e3e;border-radius:20px}#messages::-webkit-scrollbar-track{background:transparent}
+.empty{height:100%;min-height:170px;display:grid;place-items:center;text-align:center;color:var(--muted)}.empty>div{max-width:390px}.emptyIcon{width:76px;height:76px;margin:0 auto 18px;border-radius:24px;display:grid;place-items:center;font-size:30px;color:#a69fff;background:linear-gradient(145deg,#181a28,#10121a);border:1px solid #ffffff10;box-shadow:0 24px 70px #0008,0 0 45px #6758ff12}.emptyText{font-size:13px;line-height:1.6}
+.msg{display:flex;gap:12px;max-width:900px;margin:0 auto 20px;animation:msgIn .22s ease}.msg.mine{flex-direction:row-reverse}.avatar{width:42px;height:42px;flex:none;border-radius:14px;overflow:hidden;background:linear-gradient(145deg,#7467f7,#39309d);display:grid;place-items:center;font-size:15px;font-weight:850;color:#fff;border:1px solid #ffffff18;box-shadow:0 8px 24px #0004}.bubbleWrap{min-width:0;max-width:min(78%,720px)}.msg.mine .bubbleWrap{align-items:flex-end;display:flex;flex-direction:column}.name{font-size:10px;color:#9299ab;margin:2px 0 6px;font-weight:750;letter-spacing:.1px}.mine .name{color:#bdb6ff}.bubble{padding:12px 15px;border:1px solid #ffffff0b;background:linear-gradient(145deg,#171a24,#11141c);border-radius:17px 17px 17px 5px;box-shadow:0 10px 30px #0003}.mine .bubble{background:linear-gradient(145deg,#695cf0,#4d40bd);border-color:#8177ff;border-radius:17px 17px 5px 17px;box-shadow:0 10px 30px #5145df35}.text{white-space:pre-wrap;word-break:break-word;line-height:1.55;font-size:13.5px}
+.send{flex:none;display:flex;gap:9px;padding:14px max(18px,calc((100vw - 1040px)/2));border-top:1px solid #ffffff09;background:#0b0d14e8;backdrop-filter:blur(26px);z-index:2}.send input{height:48px;flex:1;min-width:0;padding:0 16px;border:1px solid #ffffff0d;background:#12151f;border-radius:14px;font-size:13px;box-shadow:inset 0 1px #ffffff04;transition:border-color .2s,box-shadow .2s}.send input:focus{border-color:#7165ef;box-shadow:0 0 0 3px #6c60ff12}.send input:disabled{opacity:.5}.sendBtn{width:84px;height:48px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));font-weight:800;font-size:12px;box-shadow:0 9px 28px #6659ff28;transition:.18s}.sendBtn:hover{filter:brightness(1.08);transform:translateY(-1px)}.sendBtn:disabled{opacity:.45;cursor:not-allowed}
+.feedback{flex:none;min-height:27px;padding:0 24px 10px;background:#0b0d14e8;color:#70798a;font-size:10px}.feedback.error{color:#ff8b9a}
+.toast{position:fixed;left:50%;bottom:85px;transform:translate(-50%,16px);padding:10px 15px;border-radius:12px;background:#191d28f7;border:1px solid #ffffff16;box-shadow:0 16px 45px #0009;opacity:0;pointer-events:none;transition:.22s;z-index:30;font-size:11px;color:#eef0f6}.toast.show{opacity:1;transform:translate(-50%,0)}
+@keyframes msgIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+@media(max-width:760px){.top{height:auto;min-height:70px;padding:10px 11px;gap:10px}.brand{gap:9px}.logo{width:40px;height:40px}.topActions{gap:5px}.topActions button{height:34px;padding:0 9px;font-size:10px}.room{padding:8px 10px}.room label{display:none}.chat-head{padding:0 12px}#messages{padding:20px 9px}.msg{gap:8px;margin-bottom:16px}.avatar{width:36px;height:36px;border-radius:12px}.bubbleWrap{max-width:85%}.bubble{padding:10px 12px}.send{padding:9px}.send input{height:45px}.sendBtn{height:45px;width:68px}.feedback{padding:0 12px 9px}}
+@media(max-width:440px){.title{font-size:13px}.status{font-size:10px}.topActions button{padding:0 8px}.topActions button.backButton{display:none}#messages{padding-left:6px;padding-right:6px}.bubbleWrap{max-width:82%}.room input{font-size:10px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
 </style>
 </head>
 <body>
 <main class="app">
-<header><div><a class="back" href="../">← Ikirumi</a><div class="brand">Messages<span>.</span></div><div class="muted small">A live chat connected to your assigned Discord channel</div></div><div class="muted small" id="connection"><span class="status-dot"></span>Not connected</div></header>
-<section class="settings">
-<div class="fields"><div class="api-field"><label for="api">Bot API URL</label><input id="api" readonly></div><div><label for="name">Display name</label><input id="name" maxlength="32" placeholder="Choose your name"></div></div>
-<div class="small muted" style="margin-top:10px">Your display name is saved in this browser. Messages refresh every second.</div>
-<button class="connect" id="connect" type="button">Connect</button>
-</section>
-<section class="chat">
-<div class="chat-head"><strong>School chat</strong><span id="count" class="small muted">Waiting for connection</span></div>
-<div id="messages"><div class="empty">Enter the bot API URL, choose a name, and connect.</div></div>
-<div class="compose"><input id="text" maxlength="1500" placeholder="Write a message…" disabled><button id="send" disabled>Send</button></div>
-<div class="feedback" id="feedback" role="status">The bot must be running and a channel must be assigned with /school chat.</div>
-</section>
+<header class="top">
+  <div class="brand"><div class="logo">✦</div><div><div class="title">Messages</div><div id="connection" class="status">Connecting to Discord</div></div></div>
+  <div class="topActions"><button type="button" class="backButton" id="home" onclick="location.href='../'">← Ikirumi</button><button type="button" id="reconnect" class="primary">Reconnect</button></div>
+</header>
+<div class="room"><label for="name">YOUR NAME</label><input id="name" maxlength="32" placeholder="Choose your display name" aria-label="Display name"><button id="connect" type="button">Save name</button></div>
+<div class="chat-head"><div class="roomTitle"><span class="roomIcon">✦</span>School chat</div><span id="count" class="count">Connecting…</span></div>
+<div id="messages"><div class="empty"><div><div class="emptyIcon">✦</div><div class="emptyText">Connecting to your assigned Discord channel…</div></div></div></div>
+<form class="send" id="sendForm"><input id="text" maxlength="1500" placeholder="Write a message…" autocomplete="off" disabled><button id="send" class="sendBtn" type="submit" disabled>Send</button></form>
+<div id="feedback" class="feedback" role="status">Messages refresh automatically. The bot must be running in Discord.</div>
 </main>
 <script>
 const $=id=>document.getElementById(id);
-const api=$("api"),name=$("name"),text=$("text"),send=$("send"),connect=$("connect"),messages=$("messages"),feedback=$("feedback"),connection=$("connection"),count=$("count");
+const nameInput=$("name"),textInput=$("text"),sendButton=$("send"),connectButton=$("connect"),reconnectButton=$("reconnect"),messages=$("messages"),feedback=$("feedback"),connection=$("connection"),count=$("count");
 const DEFAULT_API="https://tjwh3a3b3i.apps.bot-hosting.cloud";
-api.value=DEFAULT_API;
-name.value=localStorage.getItem("ikirumiMessagesName")||"Guest";
+const api=DEFAULT_API;
+nameInput.value=localStorage.getItem("ikirumiMessagesName")||"Guest";
 localStorage.setItem("ikirumiMessagesApi",DEFAULT_API);
 let active=false,timer=null,lastIds="";
-function base(){return api.value.trim().replace(/\/+$/,"")}
 function say(value,bad){feedback.textContent=value;feedback.className="feedback"+(bad?" error":"")}
-function setConnection(ok){connection.innerHTML='<span class="status-dot '+(ok?"on":"")+'"></span>'+(ok?"Connected":"Not connected")}
+function setConnection(ok){connection.textContent=ok?"Connected to Discord":"Not connected";connection.classList.toggle("on",ok)}
 function parseMessage(m){
 let content=String(m.content||""),display=m.author||"Discord";
 const fence=String.fromCharCode(96).repeat(3);
@@ -61,36 +62,48 @@ return {id:m.id||display+content,author:display,content:content,timestamp:m.time
 function render(rows){
 const parsed=rows.map(parseMessage),ids=parsed.map(m=>m.id).join(",");
 if(ids===lastIds)return;lastIds=ids;messages.replaceChildren();
-if(!parsed.length){const empty=document.createElement("div");empty.className="empty";empty.textContent="No messages yet. Start the conversation!";messages.appendChild(empty);count.textContent="0 messages";return}
-parsed.forEach(m=>{const item=document.createElement("article");item.className="message";const meta=document.createElement("div");meta.className="meta";const who=document.createElement("span");who.className="who";who.textContent=m.author;const when=document.createElement("span");when.textContent=m.timestamp?new Date(m.timestamp).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"";meta.append(who,when);const body=document.createElement("div");body.className="body";body.textContent=m.content;item.append(meta,body);messages.appendChild(item)});
+if(!parsed.length){const empty=document.createElement("div");empty.className="empty";const inner=document.createElement("div"),ico=document.createElement("div"),label=document.createElement("div");ico.className="emptyIcon";ico.textContent="✦";label.className="emptyText";label.textContent="No messages yet. Start the conversation!";inner.append(ico,label);empty.append(inner);messages.appendChild(empty);count.textContent="0 messages";return}
+parsed.forEach(m=>{
+const mine=m.author.toLowerCase()===nameInput.value.trim().toLowerCase();
+const item=document.createElement("article");item.className="msg"+(mine?" mine":"");
+const avatar=document.createElement("div");avatar.className="avatar";avatar.textContent=(m.author.trim().charAt(0)||"G").toUpperCase();
+const wrap=document.createElement("div");wrap.className="bubbleWrap";
+const who=document.createElement("div");who.className="name";who.textContent=mine?"You":m.author;
+const bubble=document.createElement("div");bubble.className="bubble";
+const body=document.createElement("div");body.className="text";body.textContent=m.content;
+wrap.append(who,bubble);bubble.append(body);item.append(avatar,wrap);messages.appendChild(item)
+});
 count.textContent=parsed.length+" recent messages";messages.scrollTop=messages.scrollHeight
 }
 async function poll(){
 if(!active)return;
-try{const response=await fetch(base()+"/api/messages?limit=50",{cache:"no-store"});if(!response.ok)throw new Error((await response.text())||"HTTP "+response.status);const data=await response.json();render(data.messages||[]);setConnection(true);say("Updated just now.")}
+try{const response=await fetch(api+"/api/messages?limit=50",{cache:"no-store"});if(!response.ok)throw new Error((await response.text())||"HTTP "+response.status);const data=await response.json();render(data.messages||[]);setConnection(true);say("Live · Updated just now.")}
 catch(error){setConnection(false);say("Could not load messages: "+error.message,true)}
 }
 async function sendMessage(){
-const display=name.value.trim(),content=text.value.trim();
-if(!display){say("Choose a display name first.",true);name.focus();return}
-if(!content)return;if(!active)return say("Connect first.",true);
-send.disabled=true;
-try{const response=await fetch(base()+"/api/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:display,message:content})});if(!response.ok)throw new Error((await response.text())||"HTTP "+response.status);text.value="";localStorage.setItem("ikirumiMessagesName",display);say("Message sent.");await poll()}
+const display=nameInput.value.trim(),content=textInput.value.trim();
+if(!display){say("Choose a display name first.",true);nameInput.focus();return}
+if(!content)return;if(!active)return say("Connecting to the chat…",true);
+sendButton.disabled=true;
+try{const response=await fetch(api+"/api/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:display,message:content})});if(!response.ok)throw new Error((await response.text())||"HTTP "+response.status);textInput.value="";localStorage.setItem("ikirumiMessagesName",display);say("Message sent.");await poll()}
 catch(error){say("Could not send: "+error.message,true)}
-finally{send.disabled=!active;text.disabled=!active}
+finally{sendButton.disabled=!active;textInput.disabled=!active}
 }
 async function start(){
-const url=base(),display=name.value.trim();
-if(!url){say("Enter the public bot API URL first.",true);api.focus();return}
-if(!display){say("Choose a display name first.",true);name.focus();return}
-if(timer)clearInterval(timer);active=false;send.disabled=true;text.disabled=true;connect.disabled=true;
-localStorage.setItem("ikirumiMessagesApi",url);localStorage.setItem("ikirumiMessagesName",display);
-try{const response=await fetch(url+"/api/health",{cache:"no-store"});if(!response.ok)throw new Error((await response.text())||"HTTP "+response.status);const info=await response.json();if(!info.configured)throw new Error("No Discord channel assigned. Run /school chat in Discord.");active=true;text.disabled=false;send.disabled=false;connect.textContent="Reconnect";setConnection(true);await poll();timer=setInterval(poll,1000)}
+const display=nameInput.value.trim();
+if(!display){say("Choose a display name first.",true);nameInput.focus();return}
+if(timer){clearInterval(timer);clearTimeout(timer);timer=null}
+active=false;sendButton.disabled=true;textInput.disabled=true;connectButton.disabled=true;reconnectButton.disabled=true;
+localStorage.setItem("ikirumiMessagesName",display);
+try{const response=await fetch(api+"/api/health",{cache:"no-store"});if(!response.ok)throw new Error((await response.text())||"HTTP "+response.status);const info=await response.json();if(!info.configured)throw new Error("No Discord channel assigned. Run /school chat in Discord.");active=true;textInput.disabled=false;sendButton.disabled=false;setConnection(true);await poll();timer=setInterval(poll,1000)}
 catch(error){setConnection(false);say("Connection failed: "+error.message+" — retrying automatically in 5 seconds.",true);timer=setTimeout(()=>{if(!active)start()},5000)}
-finally{connect.disabled=false}
+finally{connectButton.disabled=false;reconnectButton.disabled=false}
 }
-connect.textContent="Reconnect";connect.addEventListener("click",start);send.addEventListener("click",sendMessage);text.addEventListener("keydown",event=>{if(event.key==="Enter")sendMessage()});name.addEventListener("change",()=>localStorage.setItem("ikirumiMessagesName",name.value.trim()));api.addEventListener("change",()=>{});
-window.addEventListener("load",()=>{start()});
+connectButton.addEventListener("click",start);reconnectButton.addEventListener("click",start);
+$("sendForm").addEventListener("submit",event=>{event.preventDefault();sendMessage()});
+textInput.addEventListener("keydown",event=>{if(event.key==="Enter"){event.preventDefault();sendMessage()}});
+nameInput.addEventListener("change",()=>localStorage.setItem("ikirumiMessagesName",nameInput.value.trim()));
+window.addEventListener("load",start);
 </script>
 </body>
 </html>
