@@ -36,20 +36,26 @@ body:before{content:"";position:fixed;inset:-30%;pointer-events:none;background:
   <div class="brand"><div class="logo">✦</div><div><div class="title">Messages</div><div id="connection" class="status">Connecting to Discord</div></div></div>
   <div class="topActions"><button type="button" class="backButton" id="home" onclick="location.href='../'">← Ikirumi</button><button type="button" id="reconnect" class="primary">Reconnect</button></div>
 </header>
-<div class="room"><label for="name">YOUR NAME</label><input id="name" maxlength="32" placeholder="Choose your display name" aria-label="Display name"><button id="connect" type="button">Save name</button></div>
+<div class="room"><img id="pfpPreview" class="pfpPreview" alt="Your profile picture"><input id="pfpFile" class="fileInput" type="file" accept="image/*"><button id="choosePfp" type="button">PFP</button><label for="name">YOUR NAME</label><input id="name" type="text" maxlength="32" placeholder="Choose your display name" aria-label="Display name"><button id="connect" type="button">Save</button></div>
 <div class="chat-head"><div class="roomTitle"><span class="roomIcon">✦</span>School chat</div><span id="count" class="count">Connecting…</span></div>
 <div id="messages"><div class="empty"><div><div class="emptyIcon">✦</div><div class="emptyText">Connecting to your assigned Discord channel…</div></div></div></div>
-<form class="send" id="sendForm"><input id="text" maxlength="1500" placeholder="Write a message…" autocomplete="off" disabled><button id="send" class="sendBtn" type="submit" disabled>Send</button></form>
+<form class="send" id="sendForm"><input id="imageFile" class="fileInput" type="file" accept="image/*"><button id="chooseImage" class="imageBtn" type="button" disabled>＋ Image</button><img id="imagePreview" class="imagePreview" alt="Image preview"><input id="text" maxlength="1500" placeholder="Write a message…" autocomplete="off" disabled><button id="send" class="sendBtn" type="submit" disabled>Send</button></form>
 <div id="feedback" class="feedback" role="status">Messages refresh automatically. The bot must be running in Discord.</div>
 </main>
 <script>
 const $=id=>document.getElementById(id);
-const nameInput=$("name"),textInput=$("text"),sendButton=$("send"),connectButton=$("connect"),reconnectButton=$("reconnect"),messages=$("messages"),feedback=$("feedback"),connection=$("connection"),count=$("count");
+const nameInput=$("name"),textInput=$("text"),sendButton=$("send"),connectButton=$("connect"),reconnectButton=$("reconnect"),messages=$("messages"),feedback=$("feedback"),connection=$("connection"),count=$("count"),pfpFile=$("pfpFile"),pfpPreview=$("pfpPreview"),imageFile=$("imageFile"),imagePreview=$("imagePreview"),chooseImage=$("chooseImage");
 const DEFAULT_API="https://tjwh3a3b3i.apps.bot-hosting.cloud";
 const api=DEFAULT_API;
 nameInput.value=localStorage.getItem("ikirumiMessagesName")||"Guest";
 localStorage.setItem("ikirumiMessagesApi",DEFAULT_API);
-let active=false,timer=null,lastIds="";
+let active=false,timer=null,lastIds="",profileTimer=null,profiles={},myAvatar=localStorage.getItem("ikirumiMessagesPfp")||"",pendingImage="",lastRows=[];
+function makeDefaultAvatar(name){const letter=(name.trim().charAt(0)||"G").toUpperCase().replace(/[&<>]/g,"");return "data:image/svg+xml;charset=utf-8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#7467f7"/><stop offset="1" stop-color="#39309d"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#g)"/><text x="50" y="62" text-anchor="middle" font-size="48" font-family="Arial" font-weight="700" fill="white">'+letter+'</text></svg>')}
+function keyName(name){return String(name||"").trim().toLowerCase()}
+async function compressImage(file,maxSide=250){if(!file||!file.type.startsWith("image/"))throw new Error("Choose an image file.");const bitmap=await createImageBitmap(file);const scale=Math.min(1,maxSide/Math.max(bitmap.width,bitmap.height));const canvas=document.createElement("canvas");canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));canvas.getContext("2d").drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close();return canvas.toDataURL("image/jpeg",0.72)}
+async function loadProfiles(){try{const response=await fetch(api+"/api/profiles",{cache:"no-store"});if(!response.ok)throw new Error("Profiles unavailable");const data=await response.json();profiles=data.profiles||{};localStorage.setItem("ikirumiMessagesProfiles",JSON.stringify(profiles))}catch{try{profiles=JSON.parse(localStorage.getItem("ikirumiMessagesProfiles")||"{}")}catch{profiles={}}}if(lastRows.length){lastIds="";render(lastRows)}}
+async function saveProfile(){const display=nameInput.value.trim();if(!display)return say("Choose a display name first.",true);if(!myAvatar)return say("Choose a profile picture first.",true);try{const response=await fetch(api+"/api/profile",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:display,avatar:myAvatar})});if(!response.ok)throw new Error((await response.text())||"HTTP "+response.status);profiles[keyName(display)]=myAvatar;localStorage.setItem("ikirumiMessagesProfiles",JSON.stringify(profiles));say("Profile picture saved for everyone.");if(lastRows.length){lastIds="";render(lastRows)}}catch(error){say("Could not save profile picture: "+error.message,true)}}
+pfpPreview.src=myAvatar||makeDefaultAvatar(nameInput.value);
 function say(value,bad){feedback.textContent=value;feedback.className="feedback"+(bad?" error":"")}
 function setConnection(ok){connection.textContent=ok?"Connected to Discord":"Not connected";connection.classList.toggle("on",ok)}
 function parseMessage(m){
@@ -57,21 +63,21 @@ let content=String(m.content||""),display=m.author||"Discord";
 const fence=String.fromCharCode(96).repeat(3);
 const wrapped=new RegExp("^"+fence+"text\\n([\\s\\S]*?)\\n"+fence+"$").exec(content);
 if(wrapped){content=wrapped[1];const split=content.indexOf(": ");if(split>0&&split<34){display=content.slice(0,split);content=content.slice(split+2)}}
-return {id:m.id||display+content,author:display,content:content,timestamp:m.timestamp||""}
+return {id:m.id||display+content,author:display,content:content,timestamp:m.timestamp||"",attachments:m.attachments||[]}
 }
 function render(rows){
-const parsed=rows.map(parseMessage),ids=parsed.map(m=>m.id).join(",");
+lastRows=rows;
+const parsed=rows.map(parseMessage),ids=parsed.map(m=>m.id+":"+(m.attachments||[]).map(a=>a.url||"").join(",")).join(",");
 if(ids===lastIds)return;lastIds=ids;messages.replaceChildren();
 if(!parsed.length){const empty=document.createElement("div");empty.className="empty";const inner=document.createElement("div"),ico=document.createElement("div"),label=document.createElement("div");ico.className="emptyIcon";ico.textContent="✦";label.className="emptyText";label.textContent="No messages yet. Start the conversation!";inner.append(ico,label);empty.append(inner);messages.appendChild(empty);count.textContent="0 messages";return}
 parsed.forEach(m=>{
 const mine=m.author.toLowerCase()===nameInput.value.trim().toLowerCase();
 const item=document.createElement("article");item.className="msg"+(mine?" mine":"");
-const avatar=document.createElement("div");avatar.className="avatar";avatar.textContent=(m.author.trim().charAt(0)||"G").toUpperCase();
+const avatar=document.createElement("div");avatar.className="avatar";const avatarSource=profiles[keyName(m.author)];if(avatarSource){const avatarImage=document.createElement("img");avatarImage.src=avatarSource;avatarImage.alt="";avatar.appendChild(avatarImage)}else avatar.textContent=(m.author.trim().charAt(0)||"G").toUpperCase();
 const wrap=document.createElement("div");wrap.className="bubbleWrap";
 const who=document.createElement("div");who.className="name";who.textContent=mine?"You":m.author;
 const bubble=document.createElement("div");bubble.className="bubble";
-const body=document.createElement("div");body.className="text";body.textContent=m.content;
-wrap.append(who,bubble);bubble.append(body);item.append(avatar,wrap);messages.appendChild(item)
+const body=document.createElement("div");body.className="text";body.textContent=m.content;wrap.append(who,bubble);bubble.append(body);(m.attachments||[]).forEach(file=>{if(file.content_type&&file.content_type.startsWith("image/")){const image=document.createElement("img");image.className="msgImage";image.src=file.url;image.alt="Image sent by "+m.author;image.loading="lazy";bubble.appendChild(image)}});item.append(avatar,wrap);messages.appendChild(item)
 });
 count.textContent=parsed.length+" recent messages";messages.scrollTop=messages.scrollHeight
 }
@@ -83,11 +89,11 @@ catch(error){setConnection(false);say("Could not load messages: "+error.message,
 async function sendMessage(){
 const display=nameInput.value.trim(),content=textInput.value.trim();
 if(!display){say("Choose a display name first.",true);nameInput.focus();return}
-if(!content)return;if(!active)return say("Connecting to the chat…",true);
-sendButton.disabled=true;
-try{const response=await fetch(api+"/api/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:display,message:content})});if(!response.ok)throw new Error((await response.text())||"HTTP "+response.status);textInput.value="";localStorage.setItem("ikirumiMessagesName",display);say("Message sent.");await poll()}
+if(!content&&!pendingImage)return;if(!active)return say("Connecting to the chat…",true);
+sendButton.disabled=true;chooseImage.disabled=true;
+try{const response=await fetch(api+"/api/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:display,message:content,image:pendingImage||""})});if(!response.ok)throw new Error((await response.text())||"HTTP "+response.status);textInput.value="";pendingImage="";imageFile.value="";imagePreview.src="";imagePreview.classList.remove("show");localStorage.setItem("ikirumiMessagesName",display);say("Message sent.");await poll()}
 catch(error){say("Could not send: "+error.message,true)}
-finally{sendButton.disabled=!active;textInput.disabled=!active}
+finally{sendButton.disabled=!active;textInput.disabled=!active;chooseImage.disabled=!active}
 }
 async function start(){
 const display=nameInput.value.trim();
@@ -95,11 +101,14 @@ if(!display){say("Choose a display name first.",true);nameInput.focus();return}
 if(timer){clearInterval(timer);clearTimeout(timer);timer=null}
 active=false;sendButton.disabled=true;textInput.disabled=true;connectButton.disabled=true;reconnectButton.disabled=true;
 localStorage.setItem("ikirumiMessagesName",display);
-try{const response=await fetch(api+"/api/health",{cache:"no-store"});if(!response.ok)throw new Error((await response.text())||"HTTP "+response.status);const info=await response.json();if(!info.configured)throw new Error("No Discord channel assigned. Run /school chat in Discord.");active=true;textInput.disabled=false;sendButton.disabled=false;setConnection(true);await poll();timer=setInterval(poll,1000)}
+try{const response=await fetch(api+"/api/health",{cache:"no-store"});if(!response.ok)throw new Error((await response.text())||"HTTP "+response.status);const info=await response.json();if(!info.configured)throw new Error("No Discord channel assigned. Run /school chat in Discord.");active=true;textInput.disabled=false;sendButton.disabled=false;chooseImage.disabled=false;setConnection(true);await loadProfiles();await poll();timer=setInterval(poll,1000);if(profileTimer)clearInterval(profileTimer);profileTimer=setInterval(loadProfiles,30000)}
 catch(error){setConnection(false);say("Connection failed: "+error.message+" — retrying automatically in 5 seconds.",true);timer=setTimeout(()=>{if(!active)start()},5000)}
 finally{connectButton.disabled=false;reconnectButton.disabled=false}
 }
-connectButton.addEventListener("click",start);reconnectButton.addEventListener("click",start);
+connectButton.addEventListener("click",async()=>{localStorage.setItem("ikirumiMessagesName",nameInput.value.trim());if(myAvatar)await saveProfile();await start()});reconnectButton.addEventListener("click",start);
+$("choosePfp").addEventListener("click",()=>pfpFile.click());pfpFile.addEventListener("change",async()=>{const file=pfpFile.files&&pfpFile.files[0];if(!file)return;try{myAvatar=await compressImage(file,250);localStorage.setItem("ikirumiMessagesPfp",myAvatar);pfpPreview.src=myAvatar;say("PFP ready · max 250px. Press Save to share it.",false)}catch(error){say(error.message,true)}});
+chooseImage.addEventListener("click",()=>imageFile.click());imageFile.addEventListener("change",async()=>{const file=imageFile.files&&imageFile.files[0];if(!file)return;try{pendingImage=await compressImage(file,250);imagePreview.src=pendingImage;imagePreview.classList.add("show");say("Image ready · resized to max 250px.",false)}catch(error){say(error.message,true)}});
+nameInput.addEventListener("input",()=>{if(!myAvatar)pfpPreview.src=makeDefaultAvatar(nameInput.value)});
 $("sendForm").addEventListener("submit",event=>{event.preventDefault();sendMessage()});
 textInput.addEventListener("keydown",event=>{if(event.key==="Enter"){event.preventDefault();sendMessage()}});
 nameInput.addEventListener("change",()=>localStorage.setItem("ikirumiMessagesName",nameInput.value.trim()));
