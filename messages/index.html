@@ -90,7 +90,7 @@ function setupSettings(){
  $("changeBackgroundBtn").onclick=()=>$("backgroundInput").click();
  backgroundInput.onchange=e=>{const file=e.target.files&&e.target.files[0];if(!file)return;if(!file.type.startsWith("image/")){say("Choose an image file.",true);return}if(file.size>4*1024*1024){say("Background image must be under 4 MB.",true);return}const reader=new FileReader();reader.onload=()=>{applyGlobalBackground(reader.result);say("Background saved on this device.")};reader.readAsDataURL(file);backgroundInput.value=""};
  ["textSize","textFont","lineHeight","showNames","saveChatLocal","enterSend","messageSpacing","autoScroll","messageSound","desktopNotifications","accentColor","bubbleOpacity"].forEach(id=>{const el=$(id);if(!el)return;el.addEventListener(el.tagName==="SELECT"?"change":"input",()=>{settings.textSize=+$("textSize").value;settings.textFont=$("textFont").value;settings.lineHeight=+$("lineHeight").value;settings.showNames=$("showNames").checked;settings.saveChatLocal=$("saveChatLocal").checked;settings.enterSend=$("enterSend").checked;settings.messageSpacing=+$("messageSpacing").value;settings.autoScroll=$("autoScroll").checked;settings.messageSound=$("messageSound").checked;settings.desktopNotifications=$("desktopNotifications").checked;settings.accentColor=$("accentColor").value;settings.bubbleOpacity=+$("bubbleOpacity").value;saveSettings();applySettings();if(id==="desktopNotifications"&&settings.desktopNotifications&&"Notification"in window&&Notification.permission==="default")Notification.requestPermission();if(id==="textSize")$("textSizeValue").textContent=settings.textSize+"px";if(id==="lineHeight")$("lineHeightValue").textContent=settings.lineHeight;if(id==="messageSpacing")$("messageSpacingValue").textContent=settings.messageSpacing+"px"})});
- $("clearSavedChat").onclick=()=>{localStorage.removeItem("ikirumiMessagesSavedChat");say("Local saved chat cleared. Discord messages are unchanged.");toast("Local saved chat cleared")};
+ $("clearSavedChat").onclick=()=>{localStorage.removeItem("ikirumiMessagesSavedChat");lastIds="";lastRows=[];messages.replaceChildren();const empty=document.createElement("div");empty.className="empty";empty.textContent="Local saved chat cleared. Live Discord messages are unchanged.";messages.appendChild(empty);say("Local saved chat cleared. Discord messages are unchanged.");toast("Local saved chat cleared")};
  $("resetSettings").onclick=()=>{settings={...defaultSettings};saveSettings();applySettings();toast("Settings reset")};
  $("saveBtn").onclick=saveChatExport;$("loadBtn").onclick=()=>$("loadInput").click();
  $("loadInput").onchange=async e=>{const file=e.target.files&&e.target.files[0];if(file)await loadChatExport(file);e.target.value=""};
@@ -98,6 +98,7 @@ function setupSettings(){
 function saveChatExport(){const payload={format:"ikirumi-discord-messages",version:1,savedAt:new Date().toISOString(),messages:lastRows};const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="messages-chat-"+new Date().toISOString().slice(0,10)+".json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);say("Current Discord messages exported.")}
 async function loadChatExport(file){try{const data=JSON.parse(await file.text());if(!data||!Array.isArray(data.messages))throw new Error("Invalid chat file");const rows=data.messages.map((m,i)=>({...m,id:"import-"+i,attachments:Array.isArray(m.attachments)?m.attachments:[]}));importedPreview=true;render(rows);say("Viewing imported chat file. Reconnect to return to live Discord messages.");$("count").textContent=rows.length+" imported messages"}catch{say("Could not load that chat file.",true)}}
 function say(value,bad){feedback.textContent=value;feedback.className="feedback"+(bad?" error":"")}
+function scroll(){if(settings.autoScroll)messages.scrollTop=messages.scrollHeight}
 function setConnection(ok){connection.textContent=ok?"Connected to Discord":"Not connected";connection.classList.toggle("on",ok)}
 function parseMessage(m){
 let content=String(m.content||""),display=m.author||"Discord";
@@ -124,14 +125,14 @@ const item=document.createElement("article");item.className="msg"+(mine?" mine":
 const avatar=document.createElement("div");avatar.className="avatar";const avatarFile=(m.attachments||[]).find(file=>file.filename==="chat-pfp.jpg");if(avatarFile){const avatarImage=document.createElement("img");avatarImage.src=avatarFile.url;avatarImage.alt="";avatar.appendChild(avatarImage)}else avatar.textContent=(m.author.trim().charAt(0)||"G").toUpperCase();
 const wrap=document.createElement("div");wrap.className="bubbleWrap";
 const who=document.createElement("div");who.className="name";who.textContent=mine?"You":m.author;
-const bubble=document.createElement("div");bubble.className="bubble";
+const bubble=document.createElement("div");bubble.className="bubble";bubble.style.opacity=settings.bubbleOpacity/100;who.style.display=settings.showNames?"":"none";item.style.marginBottom=settings.messageSpacing+"px";
 const body=document.createElement("div");body.className="text";body.textContent=m.content;wrap.append(who,bubble);bubble.append(body);(m.attachments||[]).forEach(file=>{if(file.filename==="chat-pfp.jpg")return;if(file.content_type&&file.content_type.startsWith("image/")){const image=document.createElement("img");image.className="msgImage";image.src=file.url;image.alt="Image sent by "+m.author;image.loading="lazy";bubble.appendChild(image)}});item.append(avatar,wrap);messages.appendChild(item)
 });
 count.textContent=parsed.length+" recent messages";scroll()
 }
 async function poll(){
 if(!active||importedPreview)return;
-try{const response=await fetch(api+"/api/messages?limit=50",{cache:"no-store"});if(!response.ok)throw new Error((await response.text())||"HTTP "+response.status);const data=await response.json();render(data.messages||[]);setConnection(true);say("Live · Updated just now.")}
+try{const response=await fetch(api+"/api/messages?limit=50",{cache:"no-store"});if(!response.ok)throw new Error((await response.text())||"HTTP "+response.status);const data=await response.json();render(data.messages||[]);initialPollDone=true;setConnection(true);say("Live · Updated just now.")}
 catch(error){setConnection(false);say("Could not load messages: "+error.message,true)}
 }
 async function sendMessage(){
