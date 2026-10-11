@@ -13,7 +13,7 @@ header{display:flex;align-items:center;justify-content:space-between;gap:12px;fl
 .brand{font-size:27px;font-weight:900;letter-spacing:-1.2px}.brand span{color:var(--accent)}.muted{color:var(--muted)}.small{font-size:12px}
 .back{color:#c5c0ff;text-decoration:none;font-size:12px}.back:hover{text-decoration:underline}
 .settings{padding:16px;background:rgba(18,20,27,.92);border:1px solid var(--line);border-radius:16px;margin-bottom:14px}
-.fields{display:grid;grid-template-columns:2fr 1fr;gap:12px}label{display:block;margin-bottom:7px;font-size:12px;font-weight:750;color:#c4c7d2}
+.fields{display:grid;grid-template-columns:1fr;gap:12px}.api-field{display:none}label{display:block;margin-bottom:7px;font-size:12px;font-weight:750;color:#c4c7d2}
 input{width:100%;min-width:0;padding:12px;border:1px solid var(--line);border-radius:10px;background:#090a0f;color:var(--text);font:inherit;outline:none}input:focus{border-color:#8074dc}
 button{border:0;border-radius:10px;padding:12px 16px;background:#c2bbff;color:#11111a;font:inherit;font-weight:800;cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}.connect{margin-top:12px}
 .chat{flex:1;min-height:350px;display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--line);border-radius:18px;background:rgba(18,20,27,.94)}
@@ -29,7 +29,7 @@ button{border:0;border-radius:10px;padding:12px 16px;background:#c2bbff;color:#1
 <main class="app">
 <header><div><a class="back" href="../">← Ikirumi</a><div class="brand">Messages<span>.</span></div><div class="muted small">A live chat connected to your assigned Discord channel</div></div><div class="muted small" id="connection"><span class="status-dot"></span>Not connected</div></header>
 <section class="settings">
-<div class="fields"><div><label for="api">Bot API URL</label><input id="api" placeholder="https://your-bot-host.example"></div><div><label for="name">Display name</label><input id="name" maxlength="32" placeholder="Choose your name"></div></div>
+<div class="fields"><div class="api-field"><label for="api">Bot API URL</label><input id="api" readonly></div><div><label for="name">Display name</label><input id="name" maxlength="32" placeholder="Choose your name"></div></div>
 <div class="small muted" style="margin-top:10px">Your display name is saved in this browser. Messages refresh every second.</div>
 <button class="connect" id="connect" type="button">Connect</button>
 </section>
@@ -43,8 +43,10 @@ button{border:0;border-radius:10px;padding:12px 16px;background:#c2bbff;color:#1
 <script>
 const $=id=>document.getElementById(id);
 const api=$("api"),name=$("name"),text=$("text"),send=$("send"),connect=$("connect"),messages=$("messages"),feedback=$("feedback"),connection=$("connection"),count=$("count");
-api.value=localStorage.getItem("ikirumiMessagesApi")||"";
-name.value=localStorage.getItem("ikirumiMessagesName")||"";
+const DEFAULT_API="https://tjwh3a3b3i.apps.bot-hosting.cloud";
+api.value=DEFAULT_API;
+name.value=localStorage.getItem("ikirumiMessagesName")||"Guest";
+localStorage.setItem("ikirumiMessagesApi",DEFAULT_API);
 let active=false,timer=null,lastIds="";
 function base(){return api.value.trim().replace(/\/+$/,"")}
 function say(value,bad){feedback.textContent=value;feedback.className="feedback"+(bad?" error":"")}
@@ -84,10 +86,11 @@ if(!display){say("Choose a display name first.",true);name.focus();return}
 if(timer)clearInterval(timer);active=false;send.disabled=true;text.disabled=true;connect.disabled=true;
 localStorage.setItem("ikirumiMessagesApi",url);localStorage.setItem("ikirumiMessagesName",display);
 try{const response=await fetch(url+"/api/health",{cache:"no-store"});if(!response.ok)throw new Error((await response.text())||"HTTP "+response.status);const info=await response.json();if(!info.configured)throw new Error("No Discord channel assigned. Run /school chat in Discord.");active=true;text.disabled=false;send.disabled=false;connect.textContent="Reconnect";setConnection(true);await poll();timer=setInterval(poll,1000)}
-catch(error){setConnection(false);say("Connection failed: "+error.message,true)}
+catch(error){setConnection(false);say("Connection failed: "+error.message+" — retrying automatically in 5 seconds.",true);timer=setTimeout(()=>{if(!active)start()},5000)}
 finally{connect.disabled=false}
 }
-connect.addEventListener("click",start);send.addEventListener("click",sendMessage);text.addEventListener("keydown",event=>{if(event.key==="Enter")sendMessage()});name.addEventListener("change",()=>localStorage.setItem("ikirumiMessagesName",name.value.trim()));api.addEventListener("change",()=>localStorage.setItem("ikirumiMessagesApi",base()));
+connect.textContent="Reconnect";connect.addEventListener("click",start);send.addEventListener("click",sendMessage);text.addEventListener("keydown",event=>{if(event.key==="Enter")sendMessage()});name.addEventListener("change",()=>localStorage.setItem("ikirumiMessagesName",name.value.trim()));api.addEventListener("change",()=>{});
+window.addEventListener("load",()=>{start()});
 </script>
 </body>
 </html>
