@@ -221,12 +221,15 @@ async function loadChatApp2ImageLibrary(){
  }catch(error){libraryGrid.innerHTML='<div class="imageLibraryEmpty">Could not load the Chat App 2 Image Library.<br>Check your connection and try Refresh.</div>';libraryStatus.textContent="Library unavailable"}
 }
 function openChatApp2ImageLibrary(){closeAttachmentMenu();imageLibraryModal.classList.remove("hidden");loadChatApp2ImageLibrary()}
-chooseImage.addEventListener("click",()=>{
+chooseImage.addEventListener("click",event=>{
+ event.preventDefault();
+ event.stopPropagation();
  const rect=chooseImage.getBoundingClientRect();
  attachmentMenu.style.left=Math.max(8,Math.min(rect.left,window.innerWidth-245))+"px";
- attachmentMenu.style.top=Math.max(8,Math.min(rect.top-105,window.innerHeight-100))+"px";
- attachmentMenu.style.display=attachmentMenu.style.display==="block"?"none":"block";
+ attachmentMenu.style.top=Math.max(8,Math.min(rect.top-110,window.innerHeight-120))+"px";
+ attachmentMenu.style.display="block";
 });
+attachmentMenu.addEventListener("click",event=>event.stopPropagation());
 $("deviceImageOption").addEventListener("click",()=>{closeAttachmentMenu();imageFile.accept="image/*";imageFile.click()});
 $("libraryImageOption").addEventListener("click",openChatApp2ImageLibrary);
 imageFile.addEventListener("change",async()=>{const file=imageFile.files&&imageFile.files[0];if(!file)return;try{pendingImage=await compressImage(file,250);imagePreview.src=pendingImage;imagePreview.classList.add("show");say("Image ready · resized to max 250px.",false)}catch(error){say(error.message,true)}finally{imageFile.value=""}});
