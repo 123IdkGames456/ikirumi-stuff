@@ -28,13 +28,14 @@ body:before{content:"";position:fixed;inset:-30%;pointer-events:none;background:
 @media(max-width:760px){.top{height:auto;min-height:70px;padding:10px 11px;gap:10px}.brand{gap:9px}.logo{width:40px;height:40px}.topActions{gap:5px}.topActions button{height:34px;padding:0 9px;font-size:10px}.room{padding:8px 10px;gap:6px}.room label{display:none}.room button{padding:0 9px;font-size:10px}.pfpPreview{width:34px;height:34px}.chat-head{padding:0 12px}#messages{padding:20px 9px}.msg{gap:8px;margin-bottom:16px}.avatar{width:36px;height:36px;border-radius:12px}.bubbleWrap{max-width:85%}.bubble{padding:10px 12px}.send{padding:9px;gap:6px}.send input{height:45px}.sendBtn{height:45px;width:58px}.imageBtn{height:45px;padding:0 9px}.imagePreview{max-width:42px;max-height:38px}.feedback{padding:0 12px 9px}}
 @media(max-width:440px){.title{font-size:13px}.status{font-size:10px}.topActions button{padding:0 8px}.topActions button.backButton{display:none}#messages{padding-left:6px;padding-right:6px}.bubbleWrap{max-width:82%}.room input{font-size:10px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+.settingsModal{position:fixed;inset:0;z-index:55;display:grid;place-items:center;padding:18px;background:#05060bf0;backdrop-filter:blur(20px)}.settingsCard{width:min(760px,100%);max-height:min(700px,94vh);display:flex;flex-direction:column;overflow:hidden;border:1px solid #ffffff16;background:linear-gradient(145deg,#151823,#0c0f17);border-radius:24px;box-shadow:0 35px 110px #000c}.settingsHead{display:flex;align-items:center;gap:12px;padding:18px 20px;border-bottom:1px solid #ffffff0c}.settingsHead h2{margin:0;font-size:17px}.settingsClose{margin-left:auto;width:36px;height:36px;border-radius:10px;background:#ffffff0b;color:#ccd1dc;font-size:18px}.settingsTabs{display:flex;gap:7px;padding:12px 16px;border-bottom:1px solid #ffffff0c;overflow:auto}.settingsTab{flex:none}.settingsPanel{display:block}.settingRow{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid #ffffff09}.settingRow>div{flex:1;min-width:0}.settingRow b{display:block;font-size:12px}.settingRow small{display:block;margin-top:4px;color:#858c9e;font-size:10px;line-height:1.5}.settingRow input[type=range]{width:150px}.settingRow input[type=color]{width:48px;height:34px;padding:2px;border-radius:8px;border:1px solid #ffffff16;background:#11141c}.settingRow input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent)}.settingRow select{height:36px;min-width:125px;padding:0 9px;border-radius:9px;background:#11141c;color:#fff;border:1px solid #ffffff12}.dangerBtn{height:36px;padding:0 13px;border-radius:9px;background:#2a1720;border:1px solid #6b2638;color:#ff9cab;font-size:10px;font-weight:800}.settingsTab{height:38px;padding:0 13px;border-radius:10px;background:#151923;color:#9ca3b3;border:1px solid #ffffff0d;font-size:11px;font-weight:700}.settingsTab.active{background:#6659ee;color:#fff;border-color:#857bff}.settingsContent{padding:18px;overflow:auto}.settingsSection h3{margin:0 0 5px;font-size:14px}.settingsSection p{margin:0 0 16px;color:#858c9e;font-size:10px;line-height:1.6}.backgroundPreview{width:100%;height:230px;border-radius:16px;border:1px solid #ffffff12;background:#0b0d14;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:13px}.backgroundPreview span{color:#858c9e;font-size:11px}.backgroundPreview img{width:100%;height:100%;object-fit:cover}.backgroundActions{display:flex;gap:9px}.backgroundActions button{height:42px;padding:0 15px;border-radius:11px;font-size:11px;font-weight:750}.changeBackground{background:linear-gradient(135deg,var(--accent),var(--accent2))}.settingsNote{margin-top:12px;color:#70798a;font-size:10px;line-height:1.55}@media(max-width:600px){.settingsCard{border-radius:19px}.settingsContent{padding:13px}.backgroundPreview{height:190px}.settingsTabs{padding:10px}}
 </style>
 </head>
 <body>
 <main class="app">
 <header class="top">
   <div class="brand"><div class="logo">✦</div><div><div class="title">Messages</div><div id="connection" class="status">Connecting to Discord</div></div></div>
-  <div class="topActions"><button type="button" class="backButton" id="home" onclick="location.href='../'">← Ikirumi</button><button type="button" id="reconnect" class="primary">Reconnect</button></div>
+  <div class="topActions"><button type="button" class="backButton" id="home" onclick="location.href='../'">← Ikirumi</button><button type="button" id="settingsBtn">⚙ Settings</button><button type="button" id="saveBtn">Save chat</button><button type="button" id="loadBtn">Load chat</button><input id="loadInput" type="file" accept=".json,application/json" class="fileInput"><button type="button" id="reconnect" class="primary">Reconnect</button></div>
 </header>
 <div class="room"><img id="pfpPreview" class="pfpPreview" alt="Your profile picture"><input id="pfpFile" class="fileInput" type="file" accept="image/*"><button id="choosePfp" type="button">PFP</button><label for="name">YOUR NAME</label><input id="name" type="text" maxlength="32" placeholder="Choose your display name" aria-label="Display name"><button id="connect" type="button">Save</button></div>
 <div class="chat-head"><div class="roomTitle"><span class="roomIcon">✦</span>School chat</div><span id="count" class="count">Connecting…</span></div>
@@ -55,6 +56,46 @@ function keyName(name){return String(name||"").trim().toLowerCase()}
 async function compressImage(file,maxSide=250){if(!file||!file.type.startsWith("image/"))throw new Error("Choose an image file.");const bitmap=await createImageBitmap(file);const scale=Math.min(1,maxSide/Math.max(bitmap.width,bitmap.height));const canvas=document.createElement("canvas");canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));canvas.getContext("2d").drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close();return canvas.toDataURL("image/jpeg",0.72)}
 function saveProfile(){say("Your profile picture will be attached to your next messages.",false)}
 pfpPreview.src=myAvatar||makeDefaultAvatar(nameInput.value);
+
+const defaultSettings={textSize:13.5,textFont:"system",lineHeight:1.55,showNames:true,saveChatLocal:true,enterSend:true,messageSpacing:20,autoScroll:true,messageSound:false,desktopNotifications:false,saveFiles:true,accentColor:"#796cff",bubbleOpacity:100};
+let settings={...defaultSettings},globalBackground=localStorage.getItem("chat2-global-background")||"",importedPreview=false;
+function loadSettings(){try{settings={...defaultSettings,...JSON.parse(localStorage.getItem("chat2-settings")||"{}")}}catch{}applySettings()}
+function saveSettings(){localStorage.setItem("chat2-settings",JSON.stringify(settings))}
+function applySettings(){
+ const root=document.documentElement;
+ root.style.setProperty("--text-size",settings.textSize+"px");
+ root.style.setProperty("--chat-font",settings.textFont==="system"?'Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif':settings.textFont);
+ root.style.setProperty("--text-line-height",settings.lineHeight);
+ root.style.setProperty("--accent",settings.accentColor);root.style.setProperty("--accent2",settings.accentColor);
+ document.querySelectorAll(".bubble").forEach(b=>b.style.opacity=settings.bubbleOpacity/100);
+ document.querySelectorAll(".name").forEach(n=>n.style.display=settings.showNames?"":"none");
+ document.querySelectorAll(".msg").forEach(m=>m.style.marginBottom=settings.messageSpacing+"px");
+ const values={textSize:settings.textSize,textFont:settings.textFont,lineHeight:settings.lineHeight,showNames:settings.showNames,saveChatLocal:settings.saveChatLocal,enterSend:settings.enterSend,messageSpacing:settings.messageSpacing,autoScroll:settings.autoScroll,messageSound:settings.messageSound,desktopNotifications:settings.desktopNotifications,saveFiles:settings.saveFiles,accentColor:settings.accentColor,bubbleOpacity:settings.bubbleOpacity};
+ Object.entries(values).forEach(([id,value])=>{const el=$(id);if(el)el.type==="checkbox"?el.checked=!!value:el.value=value});
+ if($("textSizeValue"))$("textSizeValue").textContent=settings.textSize+"px";
+ if($("lineHeightValue"))$("lineHeightValue").textContent=settings.lineHeight;
+ if($("messageSpacingValue"))$("messageSpacingValue").textContent=settings.messageSpacing+"px";
+ if($("app"))$("app").style.background=globalBackground?'linear-gradient(#08090f55,#08090f55),url('+JSON.stringify(globalBackground)+') center/cover fixed no-repeat':'linear-gradient(135deg,#090a10,#08090f 52%,#0b0d15)';
+ if($("backgroundPreview"))$("backgroundPreview").innerHTML=globalBackground?'<img src="'+globalBackground.replace(/"/g,"&quot;")+'">':'<span>No local background</span>';
+}
+function applyGlobalBackground(data){globalBackground=data||"";if(globalBackground)localStorage.setItem("chat2-global-background",globalBackground);else localStorage.removeItem("chat2-global-background");applySettings()}
+function showSettingsTab(tab){document.querySelectorAll(".settingsTab").forEach(t=>t.classList.toggle("active",t.dataset.tab===tab));document.querySelectorAll(".settingsPanel").forEach(p=>p.classList.toggle("hidden",p.dataset.panel!==tab))}
+function setupSettings(){
+ const modal=$("settingsModal"),backgroundInput=$("backgroundInput");
+ $("settingsBtn").onclick=()=>modal.classList.remove("hidden");
+ modal.querySelector(".settingsClose").onclick=()=>modal.classList.add("hidden");
+ modal.onclick=e=>{if(e.target===modal)modal.classList.add("hidden")};
+ document.querySelectorAll(".settingsTab").forEach(t=>t.onclick=()=>showSettingsTab(t.dataset.tab));
+ $("changeBackgroundBtn").onclick=()=>$("backgroundInput").click();
+ backgroundInput.onchange=e=>{const file=e.target.files&&e.target.files[0];if(!file)return;if(!file.type.startsWith("image/")){say("Choose an image file.",true);return}if(file.size>4*1024*1024){say("Background image must be under 4 MB.",true);return}const reader=new FileReader();reader.onload=()=>{applyGlobalBackground(reader.result);say("Background saved on this device.")};reader.readAsDataURL(file);backgroundInput.value=""};
+ ["textSize","textFont","lineHeight","showNames","saveChatLocal","enterSend","messageSpacing","autoScroll","messageSound","desktopNotifications","saveFiles","accentColor","bubbleOpacity"].forEach(id=>{const el=$(id);if(!el)return;el.addEventListener(el.tagName==="SELECT"?"change":"input",()=>{settings.textSize=+$("textSize").value;settings.textFont=$("textFont").value;settings.lineHeight=+$("lineHeight").value;settings.showNames=$("showNames").checked;settings.saveChatLocal=$("saveChatLocal").checked;settings.enterSend=$("enterSend").checked;settings.messageSpacing=+$("messageSpacing").value;settings.autoScroll=$("autoScroll").checked;settings.messageSound=$("messageSound").checked;settings.desktopNotifications=$("desktopNotifications").checked;settings.saveFiles=$("saveFiles").checked;settings.accentColor=$("accentColor").value;settings.bubbleOpacity=+$("bubbleOpacity").value;saveSettings();applySettings();if(id==="desktopNotifications"&&settings.desktopNotifications&&"Notification"in window&&Notification.permission==="default")Notification.requestPermission();if(id==="textSize")$("textSizeValue").textContent=settings.textSize+"px";if(id==="lineHeight")$("lineHeightValue").textContent=settings.lineHeight;if(id==="messageSpacing")$("messageSpacingValue").textContent=settings.messageSpacing+"px"})});
+ $("clearSavedChat").onclick=()=>{localStorage.removeItem("ikirumiMessagesSavedChat");say("Local saved chat cleared. Discord messages are unchanged.");toast("Local saved chat cleared")};
+ $("resetSettings").onclick=()=>{settings={...defaultSettings};saveSettings();applySettings();toast("Settings reset")};
+ $("saveBtn").onclick=saveChatExport;$("loadBtn").onclick=()=>$("loadInput").click();
+ $("loadInput").onchange=async e=>{const file=e.target.files&&e.target.files[0];if(file)await loadChatExport(file);e.target.value=""};
+}
+function saveChatExport(){const payload={format:"ikirumi-discord-messages",version:1,savedAt:new Date().toISOString(),messages:lastRows};const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="messages-chat-"+new Date().toISOString().slice(0,10)+".json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);say("Current Discord messages exported.")}
+async function loadChatExport(file){try{const data=JSON.parse(await file.text());if(!data||!Array.isArray(data.messages))throw new Error("Invalid chat file");const rows=data.messages.map((m,i)=>({...m,id:"import-"+i,attachments:Array.isArray(m.attachments)?m.attachments:[]}));importedPreview=true;render(rows);say("Viewing imported chat file. Reconnect to return to live Discord messages.");$("count").textContent=rows.length+" imported messages"}catch{say("Could not load that chat file.",true)}}
 function say(value,bad){feedback.textContent=value;feedback.className="feedback"+(bad?" error":"")}
 function setConnection(ok){connection.textContent=ok?"Connected to Discord":"Not connected";connection.classList.toggle("on",ok)}
 function parseMessage(m){
@@ -81,7 +122,7 @@ const body=document.createElement("div");body.className="text";body.textContent=
 count.textContent=parsed.length+" recent messages";messages.scrollTop=messages.scrollHeight
 }
 async function poll(){
-if(!active)return;
+if(!active||importedPreview)return;
 try{const response=await fetch(api+"/api/messages?limit=50",{cache:"no-store"});if(!response.ok)throw new Error((await response.text())||"HTTP "+response.status);const data=await response.json();render(data.messages||[]);setConnection(true);say("Live · Updated just now.")}
 catch(error){setConnection(false);say("Could not load messages: "+error.message,true)}
 }
@@ -95,6 +136,7 @@ catch(error){say("Could not send: "+error.message,true)}
 finally{sendButton.disabled=!active;textInput.disabled=!active;chooseImage.disabled=!active}
 }
 async function start(){
+importedPreview=false;
 const display=nameInput.value.trim();
 if(!display){say("Choose a display name first.",true);nameInput.focus();return}
 if(timer){clearInterval(timer);clearTimeout(timer);timer=null}
@@ -111,7 +153,7 @@ nameInput.addEventListener("input",()=>{if(!myAvatar)pfpPreview.src=makeDefaultA
 $("sendForm").addEventListener("submit",event=>{event.preventDefault();sendMessage()});
 textInput.addEventListener("keydown",event=>{if(event.key==="Enter"){event.preventDefault();sendMessage()}});
 nameInput.addEventListener("change",()=>localStorage.setItem("ikirumiMessagesName",nameInput.value.trim()));
-window.addEventListener("load",start);
+window.addEventListener("load",()=>{loadSettings();setupSettings();start()});
 </script>
 </body>
 </html>
