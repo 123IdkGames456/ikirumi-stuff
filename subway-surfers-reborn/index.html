@@ -88,7 +88,7 @@ function makeRemoteAvatar(id,skin='cyan'){if(remoteAvatars.has(id))return remote
 function onPeerData(conn,data){if(!data||typeof data!=='object')return;
  if(data.type==='startRequest'){if(isHost)startRun();return}
  if(data.type==='waitingForHost'){setNetStatus('CONNECTED · waiting for host to start');return}
- if(data.type==='startRun'){if(!run||ended)startRun(true);return}
+ if(data.type==='startRun'){if(!run||ended)startRun(true);setNetStatus('Host started the run · playing together');return}
  if(data.type==='spawnObstacle'&&!isHost){spawnObstacle(data.kind,data.lane,data.z,true,data.id);const o=obstacles[obstacles.length-1];if(o)o.userData.netId=data.id;return}
  if(data.type==='spawnCoins'&&!isHost){spawnCoins(data.lane,true,data.fish);return}
  if(data.type==='spawnFish'&&!isHost){const g=new THREE.Group(),b=new THREE.Mesh(new THREE.SphereGeometry(.24,12,9),mats.fish);b.scale.set(1.35,.7,.65);g.add(b);const tail=new THREE.Mesh(new THREE.ConeGeometry(.17,.3,4),mat(0xffc56e));tail.rotation.z=-Math.PI/2;tail.position.x=-.34;g.add(tail);g.position.set(data.lane*2,1.3,data.z);g.userData={type:'fish',netId:data.id};scene.add(g);fish.push(g);return}
