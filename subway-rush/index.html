@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#07111f">
+<title>Subway Rush — Endless Runner</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+<header class="top"><a class="brand" href="../index.html">‹ IKIRUMI</a><div class="logo">🚇 <span>SUBWAY <b>RUSH</b></span></div><div class="wallet">🪙 <strong id="wallet">0</strong></div></header>
+<main>
+<section id="menu" class="screen menu">
+<div class="eyebrow">ENDLESS RUNNER • RUN, DODGE, COLLECT</div><h1>THE TRACK<br><span>IS YOURS.</span></h1>
+<p class="intro">Dash through the city, dodge trains, collect coins and outrun the station boss.</p>
+<div class="stats"><div><small>BEST RUN</small><strong id="best">0</strong></div><div><small>ALL-TIME COINS</small><strong id="totalCoins">0</strong></div><div><small>RUNS</small><strong id="runs">0</strong></div></div>
+<div class="menu-actions"><button id="play" class="primary">▶ START RUN</button><button id="skins">👟 SKIN SHOP</button><button id="multiplayer">👥 PLAY WITH FRIENDS</button></div>
+<div class="skin-preview" id="equippedLabel">EQUIPPED: STREET RUNNER</div><div class="controls-hint">A / D or ← / → to move · W / ↑ / SPACE to jump · S / ↓ to slide</div>
+</section>
+<section id="gameScreen" class="game-screen hidden"><canvas id="game" aria-label="Endless runner game"></canvas><div class="hud"><div class="hud-pill">SCORE <b id="score">0</b></div><div class="hud-pill">🪙 <b id="runCoins">0</b></div><div class="hud-pill boss-hud hidden" id="bossHud">BOSS <b id="bossHealth">100%</b></div><button id="pause" class="hud-pill">Ⅱ</button></div><div id="startHint" class="start-hint">TAP OR PRESS A KEY TO RUN</div><div class="touch-controls"><button data-action="left">◀</button><button data-action="jump">⬆</button><button data-action="slide">⬇</button><button data-action="right">▶</button></div><div id="runOver" class="overlay hidden"><div class="result-card"><div class="eyebrow">RUN COMPLETE</div><h2 id="resultTitle">NICE RUN!</h2><div class="result-stats"><div><small>SCORE</small><strong id="finalScore">0</strong></div><div><small>COINS EARNED</small><strong id="finalCoins">0</strong></div></div><button id="again" class="primary">↻ RUN AGAIN</button><button id="toMenu">MAIN MENU</button></div></div></section>
+<section id="shopScreen" class="screen hidden"><button class="back" data-back>← BACK</button><div class="eyebrow">THE LOOKS</div><h2>SKIN <span>SHOP</span></h2><p class="muted">Spend your collected coins. Your purchases are saved on this device.</p><div id="skinGrid" class="skin-grid"></div></section>
+<section id="friendScreen" class="screen hidden"><button class="back" data-back>← BACK</button><div class="eyebrow">MULTIPLAYER • WEBRTC PEER-TO-PEER</div><h2>RUN <span>TOGETHER.</span></h2><p class="muted">Connect directly with a friend. No game server needed. Both players must exchange the connection text below; use the same link and keep this page open.</p><div class="peer-card"><label>Your nickname</label><input id="nickname" maxlength="18" placeholder="Runner name"><div class="peer-actions"><button id="hostRoom" class="primary">CREATE INVITE</button><button id="joinRoom">JOIN FRIEND</button></div><label for="signalText">Connection text</label><textarea id="signalText" rows="5" placeholder="Create an invite, or paste your friend's connection text here…"></textarea><div class="peer-actions"><button id="copySignal">COPY TEXT</button><button id="applySignal">PROCESS / CONNECT</button></div><div id="peerStatus" class="peer-status">Not connected</div><div id="peerPlayers" class="peer-players"></div><p class="tiny">How it works: host creates invite → sends text to friend → friend pastes it and processes it → friend sends their reply text back → host pastes it and processes it. A connection may need network access allowed by your browser.</p></div></section>
+</main><footer>SUBWAY RUSH · ORIGINAL FAN-MADE RUNNER · PROGRESS SAVED LOCALLY</footer>
+</div><script src="game.js"></script></body></html>
