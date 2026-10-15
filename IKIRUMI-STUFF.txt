@@ -21,3 +21,29 @@ Named folders can display a custom name using site-names.json. For example:
 
 Each site folder must contain its own index.html to be considered ready to open.
 The root is kept clean and is used for the site folders and container configuration files.
+
+MANDATORY SITE METADATA RULES
+
+Every site folder that contains an index.html must include a site.json file in that same folder.
+
+site.json must include:
+- name: A clear display name for the site.
+- description: A short, useful description of what the site does. Aim for one or two sentences.
+- tags: An array of searchable keywords describing the site's features and subject.
+- category: One category that best fits the site, such as Games, Tools, Media, or Experiments.
+- icon: Optional short emoji or symbol used on the site card.
+
+Example site.json:
+{
+  "name": "My Game",
+  "description": "A short description of the game and what players can do.",
+  "tags": ["game", "arcade", "single-player"],
+  "category": "Games",
+  "icon": "🎮"
+}
+
+The main launcher reads site.json to show descriptions, searchable tags, categories, and icons. If metadata is missing, the launcher uses temporary inferred defaults, but every site must still receive a proper site.json file. Do not leave the inferred defaults as the final metadata.
+
+The launcher shows the site's first commit date as its added date and the latest index.html commit date as its last-updated date when GitHub provides that history. These dates come from Git history, not from guessed dates.
+
+Before adding or updating a site, verify that its name, short description, tags, and category are accurate and update site.json whenever those details change.
