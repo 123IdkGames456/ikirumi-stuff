@@ -43,12 +43,21 @@
       <div class="progress"><i id="bankProgress"></i></div>
       <div class="notice" style="margin-top:9px">Coins and owned cosmetics are stored locally in this browser. Clearing site data resets your save.</div>
     </section>
-    <section class="panel">
-      <div class="panel-head"><h2>PAINT SHOP</h2><span class="sub">COSMETICS</span></div>
+    <section class="panel" id="shopPanel" style="display:none">
+      <div class="panel-head"><h2>GARAGE CUSTOMIZATION</h2><button id="exitGarage">EXIT TO TRACK</button></div>
       <div class="tabs"><button class="active" data-shop="paint">PAINT</button><button data-shop="cars">CARS</button></div>
       <div class="shop-list" id="shopList"></div>
       <div class="section-title">HOW TO EARN</div>
       <div class="notice">Keep speed up and slide at an angle. A basic drift is around 10 coins; long, fast combos earn much more. Bank coins when you end a run or drift cleanly.</div>
+    </section>
+    <section class="panel" id="garageGate">
+      <div class="panel-head"><h2>GARAGE ENTRANCE</h2><span class="sub">DRIVE IN TO CUSTOMIZE</span></div>
+      <div class="car-preview" style="height:90px;background:linear-gradient(180deg,#303c40,#151c20);position:relative">
+        <div style="position:absolute;top:9px;font-size:10px;letter-spacing:2px;font-weight:950;color:#c7ff4a">GARAGE 01</div>
+        <div style="width:112px;height:48px;border:4px solid #aeb9bc;border-bottom:0;border-radius:8px 8px 0 0;position:absolute;bottom:0;background:repeating-linear-gradient(90deg,#20292d 0 9px,#39454a 9px 12px)"></div>
+      </div>
+      <p class="notice">You're on the drift map. Drive into the marked GARAGE entrance in the centre of the arena to enter the garage and customize your ride. The shop stays unavailable until you enter.</p>
+      <div class="small-row"><span>Current mode</span><b>DRIFT MAP</b></div>
     </section>
   </aside>
 </main>
@@ -122,10 +131,25 @@ new ResizeObserver(resize).observe(canvas);resize();
 const keys={};let paused=true,started=false,runScore=0,driftBank=0,combo=0,comboTimer=0,drifting=false,runEarned=0,lastTime=0;
 let car={x:0,y:0,angle:-Math.PI/2,vx:0,vy:0,angleVel:0};
 const particles=[];
-function resetCar(){car={x:0,y:0,angle:-Math.PI/2,vx:0,vy:0,angleVel:0};}
+function resetCar(){car={x:-160,y:0,angle:0,vx:0,vy:0,angleVel:0};}
+function enterGarage(){if(garageMode)return;if(drifting)bankDrift();garageMode=true;car={x:0,y:0,angle:-Math.PI/2,vx:0,vy:0,angleVel:0};$("shopPanel").style.display="block";$("garageGate").style.display="none";$("comboHud").textContent="GARAGE MODE";toast("WELCOME TO THE GARAGE");}
+function exitGarage(){garageMode=false;car={x:-105,y:-48,angle:0,vx:0,vy:0,angleVel:0};$("shopPanel").style.display="none";$("garageGate").style.display="block";toast("BACK TO THE DRIFT MAP");}
 function arena(){return {cx:W/2,cy:H/2,rx:Math.min(W*.38,310),ry:Math.min(H*.37,230)};}
 function worldScale(){const a=arena();return {cx:a.cx,cy:a.cy,sx:a.rx/330,sy:a.ry/250};}
 function drawBackground(){
+ if(garageMode){
+  const g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,"#293238");g.addColorStop(1,"#12181d");ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  for(let x=0;x<W;x+=48){ctx.strokeStyle="#ffffff0b";ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=48){ctx.strokeStyle="#ffffff0b";ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  const gw=Math.min(W*.72,520),gh=Math.min(H*.66,360),gx=W/2,gy=H/2;
+  ctx.fillStyle="#1a2228";ctx.fillRect(gx-gw/2,gy-gh/2,gw,gh);ctx.strokeStyle="#89959a";ctx.lineWidth=5;ctx.strokeRect(gx-gw/2,gy-gh/2,gw,gh);
+  ctx.fillStyle="#26343a";ctx.fillRect(gx-gw*.29,gy-gh*.35,gw*.58,gh*.70);
+  ctx.fillStyle="#c7ff4a";ctx.fillRect(gx-gw*.16,gy-gh*.38,gw*.32,5);
+  ctx.fillStyle="#e6ecec";ctx.textAlign="center";ctx.font="950 20px system-ui";ctx.fillText("SLIDE CLUB GARAGE",gx,gy-gh*.40);
+  ctx.font="800 11px system-ui";ctx.fillStyle="#9daeb4";ctx.fillText("CUSTOMIZE YOUR RIDE",gx,gy+gh*.43);
+  ctx.strokeStyle="#ffffff24";ctx.lineWidth=2;ctx.setLineDash([10,9]);ctx.beginPath();ctx.moveTo(gx-gw*.42,gy);ctx.lineTo(gx+gw*.42,gy);ctx.stroke();ctx.setLineDash([]);
+  return;
+ }
  const g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,"#24362e");g.addColorStop(1,"#182722");ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
  const tile=42;ctx.strokeStyle="#ffffff08";ctx.lineWidth=1;for(let x=0;x<W;x+=tile){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}for(let y=0;y<H;y+=tile){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
  const a=arena();ctx.save();ctx.translate(a.cx,a.cy);ctx.scale(a.rx/330,a.ry/250);
@@ -136,13 +160,16 @@ function drawBackground(){
  ctx.strokeStyle="#85918e";ctx.lineWidth=4;ctx.beginPath();ctx.ellipse(0,0,218,140,0,0,Math.PI*2);ctx.stroke();
  ctx.strokeStyle="#c2c8c4";ctx.lineWidth=1.5;ctx.setLineDash([12,14]);ctx.beginPath();ctx.ellipse(0,0,202,124,0,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
  ctx.fillStyle="#30473b";ctx.beginPath();ctx.ellipse(0,0,135,75,0,0,Math.PI*2);ctx.fill();
- ctx.fillStyle="#53625a";ctx.fillRect(-50,-16,100,32);ctx.fillStyle="#c5ff49";ctx.fillRect(-42,-8,84,16);
- ctx.fillStyle="#e2e8df";ctx.font="900 14px system-ui";ctx.textAlign="center";ctx.fillText("SLIDE CLUB",0,5);
+ ctx.fillStyle="#53625a";ctx.fillRect(-55,-65,110,42);ctx.fillStyle="#1b2328";ctx.fillRect(-47,-61,94,34);ctx.strokeStyle="#d7e0df";ctx.lineWidth=3;ctx.strokeRect(-55,-65,110,42);
+ ctx.fillStyle="#c7ff4a";ctx.fillRect(-38,-58,76,4);
+ ctx.fillStyle="#e2e8df";ctx.font="900 12px system-ui";ctx.textAlign="center";ctx.fillText("GARAGE",0,-42);
+ ctx.fillStyle="#c5ff49";ctx.font="900 10px system-ui";ctx.fillText("DRIVE IN",0,-72);
+ ctx.fillStyle="#e2e8df";ctx.font="900 14px system-ui";ctx.fillText("SLIDE CLUB",0,20);
  for(let i=0;i<36;i++){const ang=i/36*Math.PI*2;const x=Math.cos(ang)*320,y=Math.sin(ang)*240;ctx.fillStyle=i%2?"#e5e9e6":"#b9c3c4";ctx.fillRect(x-5,y-5,10,10);}
  ctx.restore();
 }
 function drawCar(){
- const c=activeCar(),scale=worldScale(),x=scale.cx+car.x*scale.sx,y=scale.cy+car.y*scale.sy;
+ const c=activeCar(),scale=garageMode?{cx:W/2,cy:H/2,sx:1,sy:1}:worldScale(),x=scale.cx+car.x*scale.sx,y=scale.cy+car.y*scale.sy;
  ctx.save();ctx.translate(x,y);ctx.rotate(car.angle);
  const body=colorFor();
  if(Math.hypot(car.vx,car.vy)>70){ctx.globalAlpha=.2;ctx.fillStyle=body;ctx.beginPath();ctx.ellipse(-22,0,32,12,0,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;}
@@ -159,11 +186,13 @@ function render(){
  const sc=worldScale();
  for(const p of particles){ctx.globalAlpha=Math.max(0,p.life/.65);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(sc.cx+p.x*sc.sx,sc.cy+p.y*sc.sy,p.size,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;
  drawCar();
- if(!started){ctx.fillStyle="#ffffff08";ctx.font="900 38px system-ui";ctx.textAlign="center";ctx.fillText("GET SIDEWAYS",W/2,H*.22);}
+ if(garageMode){ctx.fillStyle="#c7ff4a";ctx.font="900 12px system-ui";ctx.textAlign="center";ctx.fillText("GARAGE MODE · PAINT & CARS UNLOCKED HERE",W/2,H*.14);}
+ else if(!started){ctx.fillStyle="#ffffff08";ctx.font="900 38px system-ui";ctx.textAlign="center";ctx.fillText("GET SIDEWAYS",W/2,H*.22);}
 }
 function clamp(n,a,b){return Math.max(a,Math.min(b,n));}
 function update(dt){
  if(paused||!started)return;
+ if(garageMode){car.vx=0;car.vy=0;car.angleVel=0;return;}
  const c=activeCar();const forwardX=Math.cos(car.angle),forwardY=Math.sin(car.angle);
  const speed=Math.hypot(car.vx,car.vy),forwardSpeed=car.vx*forwardX+car.vy*forwardY;
  const steer=(keys.ArrowRight||keys.KeyD?1:0)-(keys.ArrowLeft||keys.KeyA?1:0);
@@ -180,6 +209,7 @@ function update(dt){
  car.angleVel*=Math.pow(.16,dt);car.angle+=car.angleVel*dt;
  const max=hand?410:330;const v=Math.hypot(car.vx,car.vy);if(v>max){car.vx*=max/v;car.vy*=max/v;}
  car.x+=car.vx*dt;car.y+=car.vy*dt;
+ if(Math.abs(car.x)<34&&car.y<-28&&car.y>-92&&speed<190){enterGarage();return;}
  const a=arena(),nx=car.x/Math.max(1,a.rx/330),ny=car.y/Math.max(1,a.ry/250),r=Math.hypot(nx,ny);
  if(r>1.12){const ux=nx/r,uy=ny/r;car.x=ux*330*1.11*(a.rx/330);car.y=uy*250*1.11*(a.ry/250);car.vx*=-.38;car.vy*=-.38;car.angleVel*=.5;toast("WATCH THE WALL");}
  const angleDiff=Math.atan2(Math.sin(Math.atan2(car.vy,car.vx)-car.angle),Math.cos(Math.atan2(car.vy,car.vx)-car.angle));
@@ -210,6 +240,7 @@ function pause(){if(!started)return;paused=true;if(drifting)bankDrift();$("pause
 $("startBtn").addEventListener("click",start);
 $("pauseBtn").addEventListener("click",()=>{if(paused){if(!started){start();return;}$("pauseOverlay").classList.add("hidden");paused=false;}else pause();});
 $("resumeBtn").addEventListener("click",()=>{$("pauseOverlay").classList.add("hidden");paused=false;});
+$("exitGarage").addEventListener("click",exitGarage);
 window.addEventListener("keydown",e=>{if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Space"].includes(e.code))e.preventDefault();keys[e.code]=true;if(e.code==="Escape"&&started){if(paused){paused=false;$("pauseOverlay").classList.add("hidden");}else pause();}});
 window.addEventListener("keyup",e=>keys[e.code]=false);
 window.addEventListener("blur",()=>{for(const k in keys)keys[k]=false;if(started&&!paused)pause();});
