@@ -14,8 +14,7 @@
 (()=>{
 const $=id=>document.getElementById(id),canvas=$("c"),ctx=canvas.getContext("2d"),KEY="neonPanicSave_v1";
 let save={energy:0,best:0,bestTime:0,runs:0,totalScore:0,upgrades:{}};try{const s=JSON.parse(localStorage.getItem(KEY));if(s)save={...save,...s,upgrades:s.upgrades||{}}}catch(e){}
-const upgradeDefs=[{id:"speed",name:"Overclock",desc:"+7% move speed",base:35,max:8},{id:"dash",name:"Dash Battery",desc:"Dash recharges faster",base:45,max:6},{id:"health",name:"Extra Buffer",desc:"+15 starting integrity",base:50,max:6},{id:"magnet",name:"Orb Magnet",desc+"":""}];
-upgradeDefs.pop();upgradeDefs.push({id:"magnet",name:"Orb Magnet",desc:"Collect energy from farther away",base:40,max:7});
+const upgradeDefs=[{id:"speed",name:"Overclock",desc:"+7% move speed",base:35,max:8},{id:"dash",name:"Dash Battery",desc:"Dash recharges faster",base:45,max:6},{id:"health",name:"Extra Buffer",desc:"+15 starting integrity",base:50,max:6},{id:"magnet",name:"Orb Magnet",desc:"Collect energy from farther away",base:40,max:7}];
 let W=800,H=600,dpr=1,live=false,last=0,t=0,score=0,level=1,hp=100,maxHp=100,dashCd=0,dashTime=0,invuln=0,spawn=0,enemySpawn=0,orbSpawn=0,player={x:400,y:300,vx:0,vy:0},keys={},enemies=[],orbs=[],sparks=[],screenShake=0,slow=0,notice="",lastWarning=0;
 function lv(id){return save.upgrades[id]||0}function price(u){return Math.floor(u.base*Math.pow(1.7,lv(u.id)))}function persist(){try{localStorage.setItem(KEY,JSON.stringify(save))}catch(e){}updateStats()}
 function updateStats(){$("topBest").textContent=Math.floor(save.best);$("runs").textContent=save.runs;$("bestTime").textContent=save.bestTime.toFixed(1)+"s";$("totalScore").textContent=Math.floor(save.totalScore).toLocaleString();$("energy").textContent=save.energy.toLocaleString()}
