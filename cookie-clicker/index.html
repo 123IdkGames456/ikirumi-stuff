@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cookie Clicker</title>
+<style>
+:root{color-scheme:dark;--bg:#17120f;--panel:#241b16;--panel2:#30231b;--line:#59402f;--cream:#fff0d2;--muted:#c2aa91;--gold:#ffc45e;--orange:#f58b3c}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#3b281a 0,#17120f 60%);color:var(--cream);font-family:system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}button{font:inherit;cursor:pointer;color:var(--cream);background:#493222;border:1px solid #745138;border-radius:12px;padding:11px 14px;font-weight:800;transition:transform .12s,border-color .12s}button:hover{border-color:var(--gold);transform:translateY(-1px)}button:disabled{opacity:.4;cursor:not-allowed;transform:none}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px clamp(14px,4vw,42px);border-bottom:1px solid #493324;background:#170f0bd9;position:sticky;top:0;z-index:3;backdrop-filter:blur(10px)}.brand{font-weight:1000;letter-spacing:2px}.brand span{color:var(--gold)}.save{font-size:12px;color:var(--muted)}main{max-width:1150px;margin:auto;padding:24px;display:grid;grid-template-columns:minmax(260px, .9fr) minmax(320px,1.1fr);gap:20px}.panel{background:linear-gradient(145deg,#2a2019,#201813);border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:0 18px 50px #0002}.cookie-side{text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:440px}.eyebrow{font-size:11px;letter-spacing:2px;color:var(--muted);font-weight:900}.count{font-size:clamp(34px,5vw,55px);font-weight:1000;letter-spacing:-2px;margin:8px 0 0;overflow-wrap:anywhere}.sub{color:var(--muted);font-size:14px}.cookie-button{background:transparent;border:0;padding:0;margin:25px 0 18px;border-radius:50%;line-height:0;box-shadow:none}.cookie-button:hover{transform:scale(1.06) rotate(-3deg);border:0}.cookie-button:active{transform:scale(.94)}.cookie{width:min(245px,58vw);aspect-ratio:1;filter:drop-shadow(0 14px 8px #0005);transition:transform .08s}.cookie svg{width:100%;height:100%;overflow:visible}.stats{display:flex;gap:10px;width:100%;margin-top:14px}.stat{flex:1;padding:12px 8px;background:#1a130f;border:1px solid #493324;border-radius:12px}.stat b{display:block;font-size:18px}.stat span{display:block;color:var(--muted);font-size:10px;letter-spacing:1px;margin-top:3px}.right{display:flex;flex-direction:column;gap:16px}.section-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}.section-head h2{font-size:18px;margin:0}.section-head small{color:var(--muted)}.upgrades{display:flex;flex-direction:column;gap:9px}.upgrade{display:flex;align-items:center;gap:12px;padding:12px;background:#1b140f;border:1px solid #483325;border-radius:14px}.upgrade-icon{width:48px;height:48px;flex:0 0 48px;display:grid;place-items:center;border-radius:12px;background:#39271a;font-size:26px}.upgrade-info{min-width:0;flex:1}.upgrade-info b{display:block}.upgrade-info small{display:block;color:var(--muted);font-size:12px;margin-top:3px}.buy{min-width:105px;text-align:center;padding:10px 8px}.buy small{display:block;color:#f7d69a;font-size:11px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}.tabs button.active{background:var(--gold);color:#28180b;border-color:var(--gold)}.hidden{display:none!important}.bottom{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:12px;margin-top:14px}.tiny{padding:7px 10px;font-size:12px}.float{position:fixed;pointer-events:none;z-index:5;color:#ffe09a;font-weight:1000;font-size:22px;text-shadow:0 2px 6px #000;animation:float .7s ease-out forwards}@keyframes float{to{transform:translateY(-70px);opacity:0}}.achievement{padding:11px 13px;background:#38291b;border:1px solid #745138;border-radius:12px;color:#f6dca9;font-size:13px;margin-top:12px}.empty{color:var(--muted);text-align:center;padding:20px}@media(max-width:760px){main{grid-template-columns:1fr;padding:12px}.cookie-side{min-height:350px}.panel{padding:17px}.top{padding:13px 15px}.upgrade{gap:9px}.upgrade-icon{width:40px;height:40px;flex-basis:40px}.buy{min-width:90px;font-size:12px}}
+</style>
+</head>
+<body>
+<header class="top"><div class="brand">🍪 COOKIE <span>CLICKER</span></div><div style="text-align:right"><div class="save" id="saveStatus">AUTOSAVE ON</div><div class="save">Saved on this device</div></div></header>
+<main>
+<section class="panel cookie-side">
+<div class="eyebrow">YOUR COOKIE EMPIRE</div>
+<div class="count" id="cookieCount">0</div><div class="sub">cookies baked</div>
+<button class="cookie-button" id="cookieButton" aria-label="Bake a cookie"><div class="cookie" id="cookieArt">
+<svg viewBox="0 0 240 240" role="img" aria-label="Chocolate chip cookie"><defs><radialGradient id="dough" cx="35%" cy="28%" r="75%"><stop offset="0" stop-color="#f7d28a"/><stop offset=".7" stop-color="#c9823c"/><stop offset="1" stop-color="#8c4d24"/></radialGradient></defs><circle cx="120" cy="120" r="103" fill="#75401f" opacity=".6"/><path d="M120 17 C140 15 147 29 162 29 C179 28 184 42 195 51 C211 64 206 80 217 94 C228 110 215 124 218 139 C221 157 206 165 199 179 C190 196 174 193 161 205 C146 218 132 207 117 216 C99 225 88 208 72 207 C54 206 49 188 36 177 C21 164 32 148 23 133 C15 117 27 101 28 86 C28 67 43 62 51 48 C62 31 78 39 93 28 C104 20 110 17 120 17Z" fill="url(#dough)" stroke="#f3c176" stroke-width="4"/><g fill="#4a2617"><ellipse cx="82" cy="64" rx="10" ry="13" transform="rotate(22 82 64)"/><ellipse cx="133" cy="51" rx="11" ry="8" transform="rotate(-20 133 51)"/><ellipse cx="171" cy="83" rx="9" ry="12" transform="rotate(35 171 83)"/><ellipse cx="112" cy="99" rx="12" ry="10" transform="rotate(10 112 99)"/><ellipse cx="62" cy="125" rx="11" ry="8" transform="rotate(-30 62 125)"/><ellipse cx="158" cy="133" rx="12" ry="9" transform="rotate(28 158 133)"/><ellipse cx="99" cy="164" rx="9" ry="12" transform="rotate(-12 99 164)"/><ellipse cx="178" cy="177" rx="10" ry="8" transform="rotate(-22 178 177)"/><ellipse cx="139" cy="192" rx="7" ry="9"/><ellipse cx="54" cy="87" rx="6" ry="8"/></g><g fill="#fff0cf" opacity=".45"><ellipse cx="73" cy="49" rx="22" ry="8" transform="rotate(-28 73 49)"/><ellipse cx="144" cy="32" rx="13" ry="4" transform="rotate(-15 144 32)"/></g></svg>
+</div></button>
+<div class="sub" id="clickPower">+1 cookie per click</div>
+<div class="stats"><div class="stat"><b id="cps">0</b><span>COOKIES / SEC</span></div><div class="stat"><b id="totalBaked">0</b><span>TOTAL BAKED</span></div><div class="stat"><b id="clicks">0</b><span>CLICKS</span></div></div>
+<div class="bottom"><span>Progress saves automatically.</span><button class="tiny" id="saveNow">SAVE NOW</button></div>
+<div class="bottom"><button class="tiny" id="reset">RESET SAVE</button><span>Offline earnings up to 8 hours</span></div>
+<div id="offlineNote" class="achievement hidden"></div>
+</section>
+<section class="right">
+<div class="panel"><div class="section-head"><h2>UPGRADES</h2><small>Spend cookies to grow faster</small></div><div class="tabs"><button class="active" data-tab="buildings">Buildings</button><button data-tab="clicks">Click power</button><button data-tab="special">Special</button></div><div class="upgrades" id="upgradeList"></div></div>
+<div class="panel"><div class="section-head"><h2>BAKING REPORT</h2><small>Lifetime progress</small></div><div class="stats"><div class="stat"><b id="buildingCount">0</b><span>BUILDINGS</span></div><div class="stat"><b id="upgradeCount">0</b><span>UPGRADES BOUGHT</span></div></div><div id="milestone" class="achievement">Bake your first 100 cookies to unlock your first milestone.</div></div>
+</section>
+</main>
+<script>
+(()=>{
+const KEY="cookieClickerSave_v1";
+const defs=[
+{id:"cursor",tab:"buildings",name:"Cursor",icon:"👆",desc:"An eager finger bakes cookies for you.",base:15,growth:1.15,cps:0.1},
+{id:"grandma",tab:"buildings",name:"Grandma",icon:"👵",desc:"A loving grandma and her secret recipe.",base:100,growth:1.15,cps:1},
+{id:"farm",tab:"buildings",name:"Cookie Farm",icon:"🌱",desc:"Grow the finest cookie ingredients.",base:1100,growth:1.15,cps:8},
+{id:"bakery",tab:"buildings",name:"Bakery",icon:"🏠",desc:"Fresh cookies around the clock.",base:12000,growth:1.15,cps:47},
+{id:"factory",tab:"buildings",name:"Cookie Factory",icon:"🏭",desc:"Industrial scale cookie production.",base:130000,growth:1.15,cps:260},
+{id:"bank",tab:"buildings",name:"Cookie Bank",icon:"🏦",desc:"Your money makes more cookies.",base:1400000,growth:1.15,cps:1400},
+{id:"temple",tab:"buildings",name:"Cookie Temple",icon:"🛕",desc:"Bless every batch with extra crunch.",base:20000000,growth:1.15,cps:7800},
+{id:"mine",tab:"buildings",name:"Cookie Mine",icon:"⛏️",desc:"Dig up rich chocolate deposits.",base:330000000,growth:1.15,cps:44000},
+{id:"click1",tab:"clicks",name:"Stronger Fingers",icon:"💪",desc:"Double your cookies per click.",base:50,growth:3,mult:2,max:1},
+{id:"click2",tab:"clicks",name:"Golden Touch",icon:"✨",desc:"Triple your cookies per click.",base:5000,growth:8,mult:3,max:1},
+{id:"click3",tab:"clicks",name:"Cookie Magnet",icon:"🧲",desc:"Ten times the cookies per click.",base:1000000,growth:10,mult:10,max:1},
+{id:"boost1",tab:"special",name:"Sugar Rush",icon:"🍯",desc:"Double all building production.",base:2500,growth:1,multCps:2,max:1},
+{id:"boost2",tab:"special",name:"Golden Oven",icon:"🔥",desc:"Triple all building production.",base:250000,growth:1,multCps:3,max:1},
+{id:"boost3",tab:"special",name:"Cookie Dimension",icon:"🌌",desc:"Five times all production.",base:25000000,growth:1,multCps:5,max:1}
+];
+let state={cookies:0,total:0,clicks:0,owned:{},bought:{},last:Date.now(),buildings:0};
+try{const old=JSON.parse(localStorage.getItem(KEY));if(old&&typeof old==="object")state={...state,...old,owned:old.owned||{},bought:old.bought||{}};}catch(e){}
+let tab="buildings",clickPower=1,cps=0,cpsMultiplier=1,saveTimer=0;
+const $=id=>document.getElementById(id);
+const fmt=n=>{if(!Number.isFinite(n))return "∞";if(n<1000)return Math.floor(n).toLocaleString();const units=["K","M","B","T","Qa","Qi","Sx","Sp","Oc","No","Dc"];let i=-1;while(n>=1000&&i<units.length-1){n/=1000;i++;}return n.toFixed(n>=100?0:n>=10?1:2)+units[i];};
+const cost=d=>Math.ceil(d.base*Math.pow(d.growth,state.owned[d.id]||0));
+function recalc(){clickPower=1;cps=0;cpsMultiplier=1;state.buildings=0;for(const d of defs){const n=state.owned[d.id]||0;if(d.cps)cps+=d.cps*n;state.buildings+=n;if(state.bought[d.id]){if(d.mult)clickPower*=d.mult;if(d.multCps)cpsMultiplier*=d.multCps;}}cps*=cpsMultiplier;}
+function save(){state.last=Date.now();try{localStorage.setItem(KEY,JSON.stringify(state));$("saveStatus").textContent="SAVED ✓";}catch(e){$("saveStatus").textContent="SAVE FAILED";}}
+function render(){recalc();$("cookieCount").textContent=fmt(state.cookies);$("cps").textContent=fmt(cps);$("totalBaked").textContent=fmt(state.total);$("clicks").textContent=fmt(state.clicks);$("clickPower").textContent="+"+fmt(clickPower)+" cookie"+(clickPower===1?"":"s")+" per click";$("buildingCount").textContent=fmt(state.buildings);$("upgradeCount").textContent=Object.values(state.bought).filter(Boolean).length;$("milestone").textContent=state.total>=1000000?"Milestone reached: One million cookies! 🍪":state.total>=10000?"Milestone reached: Cookie entrepreneur!":state.total>=100?"Milestone reached: First 100 cookies baked!":"Bake your first 100 cookies to unlock your first milestone.";
+const list=$("upgradeList");list.innerHTML="";const filtered=defs.filter(d=>d.tab===tab);for(const d of filtered){const owned=state.owned[d.id]||0,done=!!state.bought[d.id],price=cost(d),oneTime=!!d.max,canBuy=oneTime?(!done&&state.cookies>=d.base):state.cookies>=price;const row=document.createElement("div");row.className="upgrade";row.innerHTML='<div class="upgrade-icon">'+d.icon+'</div><div class="upgrade-info"><b>'+d.name+(oneTime&&done?' ✓':'')+'</b><small>'+d.desc+(oneTime?'':(' · Owned: '+owned))+'</small></div><button class="buy" '+(!canBuy?'disabled':'')+'><span>'+(done?'OWNED':fmt(oneTime?d.base:price))+'</span><small>'+(done?'Purchased':oneTime?'ONE TIME':'BUY')+'</small></button>';row.querySelector("button").addEventListener("click",()=>{const priceNow=oneTime?d.base:cost(d);if(oneTime&&state.bought[d.id]||state.cookies<priceNow)return;state.cookies-=priceNow;if(oneTime)state.bought[d.id]=true;else state.owned[d.id]=(state.owned[d.id]||0)+1;save();render();});list.appendChild(row);}
+}
+function bake(e){state.cookies+=clickPower;state.total+=clickPower;state.clicks++;const rect=$("cookieButton").getBoundingClientRect();const f=document.createElement("div");f.className="float";f.textContent="+"+fmt(clickPower);f.style.left=((e&&e.clientX)||rect.left+rect.width/2)+"px";f.style.top=((e&&e.clientY)||rect.top+rect.height/2)+"px";document.body.appendChild(f);setTimeout(()=>f.remove(),750);$("cookieArt").style.transform="scale(.94)";setTimeout(()=>$("cookieArt").style.transform="",75);render();}
+$("cookieButton").addEventListener("click",bake);
+document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()=>{tab=b.dataset.tab;document.querySelectorAll("[data-tab]").forEach(x=>x.classList.toggle("active",x===b));render();}));
+$("saveNow").addEventListener("click",()=>{save();render();});
+$("reset").addEventListener("click",()=>{if(confirm("Delete all cookies, buildings and upgrades saved on this device?")){state={cookies:0,total:0,clicks:0,owned:{},bought:{},last:Date.now(),buildings:0};save();render();}});
+const elapsed=Math.min(8*60*60,Math.max(0,(Date.now()-(state.last||Date.now()))/1000));recalc();if(elapsed>10&&cps>0){const earned=Math.floor(cps*elapsed);state.cookies+=earned;state.total+=earned;$("offlineNote").textContent="Welcome back! Your bakery made "+fmt(earned)+" cookies while you were away."; $("offlineNote").classList.remove("hidden");}
+render();save();
+setInterval(()=>{if(cps>0){const gain=cps/10;state.cookies+=gain;state.total+=gain;render();}if(++saveTimer%10===0)save();else $("saveStatus").textContent="AUTOSAVE ON";},100);
+window.addEventListener("beforeunload",save);
+})();
+</script>
+</body>
+</html>
