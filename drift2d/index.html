@@ -30,7 +30,7 @@
       <button class="handbrake" data-key="Space">HANDBRAKE</button>
     </div>
     <div class="toast" id="toast"></div>
-    <div class="overlay" id="startOverlay"><div class="modal"><div class="big">◈</div><div class="hud-label">WELCOME TO THE LOT</div><h1>SLIDE CLUB</h1><p>Throw the car sideways, build combos and turn every clean drift into coins. Buy paint, rims and rare builds. Your garage and bank save on this device.</p><button id="startBtn">START DRIFTING</button></div></div>
+    <div class="overlay hidden" id="startOverlay"><div class="modal"><div class="big">◈</div><div class="hud-label">WELCOME TO THE LOT</div><h1>SLIDE CLUB</h1><p>Throw the car sideways, build combos and turn every clean drift into coins. Buy paint, rims and rare builds. Your garage and bank save on this device.</p><button id="startBtn">START DRIFTING</button></div></div>
     <div class="overlay hidden" id="pauseOverlay"><div class="modal"><div class="big">Ⅱ</div><h1>PAUSED</h1><p>Your run is saved as you play.</p><button id="resumeBtn">BACK TO THE LOT</button></div></div>
   </section>
   <aside class="side">
@@ -128,11 +128,12 @@ function updateUI(){
 let W=800,H=600,dpr=1;
 function resize(){const r=canvas.getBoundingClientRect();dpr=Math.min(window.devicePixelRatio||1,2);W=Math.max(1,r.width);H=Math.max(1,r.height);canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);}
 new ResizeObserver(resize).observe(canvas);resize();
-const keys={};let paused=true,started=false,garageMode=false,runScore=0,driftBank=0,combo=0,comboTimer=0,drifting=false,runEarned=0,lastTime=0;
+const keys={};let paused=false,started=true,garageMode=false,runScore=0,driftBank=0,combo=0,comboTimer=0,drifting=false,runEarned=0,lastTime=0;
 let car={x:0,y:0,angle:-Math.PI/2,vx:0,vy:0,angleVel:0};
 const particles=[];
 renderShop();updateUI();
 function resetCar(){car={x:-160,y:0,angle:0,vx:0,vy:0,angleVel:0};}
+ resetCar();
 function enterGarage(){if(garageMode)return;if(drifting)bankDrift();garageMode=true;car={x:0,y:0,angle:-Math.PI/2,vx:0,vy:0,angleVel:0};$("shopPanel").style.display="block";$("garageGate").style.display="none";$("comboHud").textContent="GARAGE MODE";toast("WELCOME TO THE GARAGE");}
 function exitGarage(){garageMode=false;car={x:-105,y:-48,angle:0,vx:0,vy:0,angleVel:0};$("shopPanel").style.display="none";$("garageGate").style.display="block";toast("BACK TO THE DRIFT MAP");}
 function arena(){return {cx:W/2,cy:H/2,rx:Math.min(W*.38,310),ry:Math.min(H*.37,230)};}
