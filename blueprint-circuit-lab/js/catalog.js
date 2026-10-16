@@ -127,7 +127,8 @@
     ["type-name","Type name","string"],["safe-number","Safe number","number"]
   ];
   conversions.forEach(function(s){
-    addValue("convert."+s[0],s[1],"Conversions","convert",s[0],[A("value","Value","")],s[2]);
+    const fallback = s[0] === "json-parse" ? "{}" : "";
+    addValue("convert."+s[0],s[1],"Conversions","convert",s[0],[A("value","Value",fallback)],s[2]);
   });
 
   const arrays = [

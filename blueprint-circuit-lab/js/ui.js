@@ -109,11 +109,14 @@
     if(def.fields&&def.fields.length){
       const sub=document.createElement("div");sub.className="small-heading";sub.textContent="Block properties";fields.appendChild(sub);
       def.fields.forEach(function(f){
-        makeField(fields,f.label,f.type,node.data[f.id]===undefined?CB.clone(f.default):node.data[f.id],function(value){
+        const boardField=f.id==="circuitId"&&node.type==="circuit.call";
+        const fieldType=boardField?"select":f.type;
+        const fieldOptions=boardField?(CB.state.project.circuits||[]).map(function(c){return {value:c.id,label:c.name};}):f.options;
+        makeField(fields,f.label,fieldType,node.data[f.id]===undefined?CB.clone(f.default):node.data[f.id],function(value){
           node.data[f.id]=value;CB.touch("Changed "+f.label);
           if(node.type==="circuit.input"||node.type==="circuit.output"||node.type==="circuit.call"){CB.graph.render();renderCircuits();renderInspector();}
           else updateCode();
-        },{options:f.options});
+        },{options:fieldOptions});
       });
     }
     const note=document.createElement("div");note.className="inspector-note";note.textContent="A connected data pin overrides its saved default value. Use explicit conversion blocks when the input and output types differ.";card.append(fields,note);

@@ -76,7 +76,7 @@
   function moveByInput(name,speed,keys,delta){
     const sprite=findRuntimeSprite(name);if(!sprite)return;
     keys=keys||CB.state.keys;let x=0,y=0;
-    if(keys.w||keys.arrowup)x-=0,y-=1;if(keys.s||keys.arrowdown)y+=1;if(keys.a||keys.arrowleft)x-=1;if(keys.d||keys.arrowright)x+=1;
+    if(keys.w||keys.arrowup)y-=1;if(keys.s||keys.arrowdown)y+=1;if(keys.a||keys.arrowleft)x-=1;if(keys.d||keys.arrowright)x+=1;
     if(x&&y){x*=.70710678;y*=.70710678;}
     const scene=getScene();sprite.x=Math.max(0,Math.min(scene.width,sprite.x+x*Number(speed||180)*Number(delta||1/60)));
     sprite.y=Math.max(0,Math.min(scene.height,sprite.y+y*Number(speed||180)*Number(delta||1/60)));

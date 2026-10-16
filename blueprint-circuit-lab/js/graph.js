@@ -62,7 +62,7 @@
   function control(type,value,callback,opts){
     opts=opts||{};let el;
     if(type==="select"){
-      el=document.createElement("select");(opts.options||[]).forEach(function(choice){const o=document.createElement("option");o.value=String(choice);o.textContent=String(choice);el.appendChild(o);});
+      el=document.createElement("select");(opts.options||[]).forEach(function(choice){const o=document.createElement("option");if(choice&&typeof choice==="object"){o.value=String(choice.value);o.textContent=String(choice.label===undefined?choice.value:choice.label);}else{o.value=String(choice);o.textContent=String(choice);}el.appendChild(o);});
       el.value=String(value==null?"":value);
     }else if(type==="boolean"){
       el=document.createElement("input");el.type="checkbox";el.checked=!!value;
@@ -134,10 +134,15 @@
     def.outputs.forEach(function(p){body.appendChild(createPinRow(node,def,p,"out",graph));});
     if(def.fields&&def.fields.length){
       const fields=document.createElement("div");fields.className="node-fields";
-      def.fields.forEach(function(f){renderFieldRow(fields,f.label,f.type,node.data[f.id]===undefined?cloneDefault(f.default):node.data[f.id],function(v){
-        node.data[f.id]=v;CB.touch("Changed "+f.label);
-        if(node.type==="circuit.input"||node.type==="circuit.output"||node.type==="circuit.call"){render();if(CB.ui)CB.ui.renderInspector();}
-      },{options:f.options,multiline:false});});
+      def.fields.forEach(function(f){
+        const boardField=f.id==="circuitId"&&node.type==="circuit.call";
+        const fieldType=boardField?"select":f.type;
+        const fieldOptions=boardField?(CB.state.project.circuits||[]).map(function(c){return {value:c.id,label:c.name};}):f.options;
+        renderFieldRow(fields,f.label,fieldType,node.data[f.id]===undefined?cloneDefault(f.default):node.data[f.id],function(v){
+          node.data[f.id]=v;CB.touch("Changed "+f.label);
+          if(node.type==="circuit.input"||node.type==="circuit.output"||node.type==="circuit.call"){render();if(CB.ui)CB.ui.renderInspector();}
+        },{options:fieldOptions,multiline:false});
+      });
       body.appendChild(fields);
     }
     card.appendChild(body);
