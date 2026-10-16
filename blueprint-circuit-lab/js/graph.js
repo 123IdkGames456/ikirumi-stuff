@@ -229,5 +229,5 @@
     removeNode(CB.state.selectedNodeId);
   });
   window.addEventListener("resize",function(){drawWires(active());});
-  CB.graph={addNode:createNode,removeNode:removeNode,connect:connect,render:render,drawWires:drawWires,selectNode:selectNode,setZoom:setZoom,fitView:fitView,clear:clearGraph,nodeById:nodeById,getPin:getPin};
+  CB.graph={addNode:createNode,removeNode:removeNode,connect:connect,render:render,drawWires:drawWires,selectNode:selectNode,setZoom:setZoom,fitView:fitView,clear:clearGraph,nodeById:nodeById,getPin:getPin,control:control};
 })();
