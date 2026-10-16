@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Drift Kingdom 3D</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="game"></div>
+<div id="loading"><div class="loader"></div><b>DRIFT KINGDOM</b><span>Building the roads…</span></div>
+<header class="topbar"><div class="brand">DK<span>3D</span></div><div class="status"><span id="mapName">HIGHLAND COUNTY</span><i></i><span id="fps">FREE ROAM</span></div><button id="menuToggle">GARAGE / MENU ☰</button></header>
+<section class="hud" id="hud"><div class="speed"><strong id="speed">000</strong><small>KM/H</small></div><div class="hudRight"><b id="gear">N</b><span id="driftScore">DRIFT 0</span><span id="cash">¢ 2,500</span></div><div class="minimap"><canvas id="map" width="180" height="180"></canvas><small>NORTH COUNTY</small></div><div class="controlsHint">P1&nbsp; W A S D &nbsp;·&nbsp; SPACE HANDBRAKE<br>P2&nbsp; ARROW KEYS &nbsp;·&nbsp; RIGHT CTRL HANDBRAKE</div></section>
+<div id="menu" class="menu">
+<div class="menuHead"><div><small>OPEN WORLD DRIVING SIMULATOR</small><h1>DRIFT <em>KINGDOM</em></h1><p>Build your car. Find your line. Own the roads.</p></div><button id="closeMenu">✕</button></div>
+<nav class="tabs"><button class="tab active" data-tab="drive">WORLD</button><button class="tab" data-tab="garage">GARAGE</button><button class="tab" data-tab="paint">PAINT LAB</button><button class="tab" data-tab="settings">SETTINGS</button></nav>
+<div class="panel active" id="panel-drive"><div class="featureGrid"><button class="feature selected" data-world="highlands"><b>01 / HIGHLANDS</b><span>Mountain passes · Forest roads · Villages</span></button><button class="feature" data-world="coast"><b>02 / COASTLINE</b><span>Cliff roads · Beach · Harbour</span></button><button class="feature" data-world="industrial"><b>03 / INDUSTRIAL</b><span>Container yards · Long sweepers</span></button></div><div class="menuBottom"><div><b>FREE ROAM</b><p>Explore the open map and earn credits by holding a clean drift.</p></div><button class="primary" id="driveBtn">ENTER WORLD ↗</button></div></div>
+<div class="panel" id="panel-garage"><div class="garageLayout"><div class="carPreview" id="carPreview"><span>GARAGE / VEHICLE</span><b id="carTitle">KITSUNE S14</b><div class="carSilhouette">▰</div><small id="carStats">RWD · 280 HP · STREET</small></div><div class="carList" id="carList"></div></div><div class="menuBottom"><div><b id="ownedCount">1 CAR OWNED</b><p>Buy cars with credits earned from drifting.</p></div><button class="primary" id="buyCar">SELECT CAR</button></div></div>
+<div class="panel" id="panel-paint"><div class="paintLayout"><div><h3>BODY COLOUR</h3><div class="swatches" id="swatches"></div><label>Custom colour <input type="color" id="customColor" value="#d52f43"></label><h3>DRAW A DECAL</h3><p class="muted">Draw with your mouse or finger. Your design is saved locally.</p><canvas id="paintCanvas" width="480" height="190"></canvas><div class="paintActions"><button id="clearPaint">CLEAR DRAWING</button><button id="savePaint" class="primary">APPLY DESIGN</button></div></div><div class="paintInfo"><b>YOUR BUILD</b><p>Paint and your custom decal stay saved on this device. Apply your design to the selected car.</p><div id="paintCarName">KITSUNE S14</div><div class="paintChip" id="paintChip"></div></div></div></div>
+<div class="panel" id="panel-settings"><div class="settingRow"><div><b>Split screen</b><p>Two cars on one keyboard. Player 1 uses WASD, Player 2 uses arrows.</p></div><label class="switch"><input id="splitToggle" type="checkbox"><span></span></label></div><div class="settingRow"><div><b>Invert steering</b><p>Reverse left and right steering for both players.</p></div><label class="switch"><input id="invertToggle" type="checkbox"><span></span></label></div><div class="settingRow"><div><b>Camera</b><p>Switch between chase camera and cockpit-style view.</p></div><button id="cameraToggle">CHASE CAMERA</button></div><div class="settingRow"><div><b>Reset saved progress</b><p>Clears local credits, purchases and paint designs.</p></div><button id="resetSave">RESET SAVE</button></div></div>
+<footer><span>DRIFT KINGDOM 3D</span><span>PROTOTYPE BUILD · SAVES ON THIS DEVICE</span></footer>
+</div>
+<div id="toast"></div>
+<script type="module" src="game.js"></script>
+</body>
+</html>
