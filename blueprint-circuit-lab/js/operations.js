@@ -17,7 +17,7 @@
   function setPath(obj,path,value){const parts=String(path||"").split(".").filter(Boolean);if(!parts.length)return obj;let out=CB.clone(obj||{}),cur=out;for(let i=0;i<parts.length-1;i++){if(!cur[parts[i]]||typeof cur[parts[i]]!=="object")cur[parts[i]]={};cur=cur[parts[i]];}cur[parts[parts.length-1]]=value;return out;}
   CB.coerce = function(value,type){
     if(value===undefined)return null;
-    if(type==="number"||type==="integer"){const n=Number(value);return Number.isFinite(n)?(type==="integer"?Math.trunc(n):n):0;}
+    if(type==="number"||type==="integer"){const n=Number(value);return Number.isNaN(n)?0:(type==="integer"?Math.trunc(n):n);}
     if(type==="string")return value===null?"null":typeof value==="object"?JSON.stringify(value):String(value);
     if(type==="boolean")return !!value;
     if(type==="array"){if(Array.isArray(value))return value;if(typeof value==="string"){try{const p=JSON.parse(value);return Array.isArray(p)?p:[p];}catch(e){return value?[value]:[];}}return value==null?[]:[value];}
@@ -59,13 +59,13 @@
         case "modulo":if(num(b)===0)throw new Error("Modulo by zero.");return num(a)%num(b);
         case "power":return Math.pow(num(a),num(b));case "min":return Math.min(num(a),num(b));case "max":return Math.max(num(a),num(b));
         case "average":return (num(a)+num(b))/2;case "hypot":return Math.hypot(num(a),num(b));case "atan2":return Math.atan2(num(a),num(b));
-        case "clamp":return Math.min(Math.max(num(a),Math.min(num(b),num(c))),Math.max(num(a),num(b)));
-        case "lerp":return num(a)+(num(b)-num(a))*num(c);
-        case "inverse-lerp":return num(a)===num(b)?0:(num(c)-num(a))/(num(b)-num(a));
-        case "remap":return num(a)+(num(c)-num(a))*(num(b)||1);
-        case "smoothstep":{const t=Math.max(0,Math.min(1,num(c)));return t*t*(3-2*t);}
-        case "move-towards":return num(a)+(Math.sign(num(b)-num(a))*Math.min(Math.abs(num(b)-num(a)),Math.abs(num(c))));
-        case "ping-pong":{const length=Math.abs(num(b))||1,t=((num(a)%(2*length))+2*length)%(2*length);return length-Math.abs(t-length);}
+        case "clamp":return Math.min(Math.max(num(args.value),Math.min(num(args.min),num(args.max))),Math.max(num(args.min),num(args.max)));
+        case "lerp":return num(a)+(num(b)-num(a))*num(args.t);
+        case "inverse-lerp":return num(a)===num(b)?0:(num(args.value)-num(a))/(num(b)-num(a));
+        case "remap":{const span=num(args.inMax)-num(args.inMin),t=span===0?0:(num(args.value)-num(args.inMin))/span;return num(args.outMin)+(num(args.outMax)-num(args.outMin))*t;}
+        case "smoothstep":{const span=num(args.edge1)-num(args.edge0),raw=span===0?0:(num(args.value)-num(args.edge0))/span,t=Math.max(0,Math.min(1,raw));return t*t*(3-2*t);}
+        case "move-towards":return num(args.current)+(Math.sign(num(args.target)-num(args.current))*Math.min(Math.abs(num(args.target)-num(args.current)),Math.abs(num(args.maxDelta))));
+        case "ping-pong":{const length=Math.abs(num(args.length))||1,t=((num(args.time)%(2*length))+2*length)%(2*length);return length-Math.abs(t-length);}
         case "random":return num(a)+Math.random()*(num(b)-num(a));
         case "random-int":return Math.floor(num(a)+Math.random()*(num(b)-num(a)+1));
         case "factorial":{const n=Math.max(0,Math.min(170,Math.floor(num(x))));let result=1;for(let i=2;i<=n;i++)result*=i;return result;}
@@ -152,7 +152,7 @@
         case "average":return arr.length?arr.reduce(function(s,v){return s+num(v);},0)/arr.length:0;case "minimum":return arr.length?Math.min.apply(null,arr.map(num)):0;
         case "maximum":return arr.length?Math.max.apply(null,arr.map(num)):0;case "shuffle":{let out=arr.slice();for(let j=out.length-1;j>0;j--){const k=Math.floor(Math.random()*(j+1));[out[j],out[k]]=[out[k],out[j]];}return out;}
         case "range":{const start=num(args.start),count=Math.max(0,Math.min(10000,Math.floor(num(args.count)))),step=num(args.step)||1;return Array.from({length:count},function(_,j){return start+j*step;});}
-        case "zip":{const right=CB.coerce(args.second,"array");return arr.slice(0,Math.max(arr.length,right.length)).map(function(v,j){return [v,right[j]===undefined?null:right[j]];});}
+        case "zip":{const right=CB.coerce(args.other!==undefined?args.other:args.second,"array");return arr.slice(0,Math.max(arr.length,right.length)).map(function(v,j){return [v,right[j]===undefined?null:right[j]];});}
         case "enumerate":return arr.map(function(v,j){return [j,v];});case "chunk":{const n=Math.max(1,Math.min(1000,Math.floor(num(args.count))));const out=[];for(let j=0;j<arr.length;j+=n)out.push(arr.slice(j,j+n));return out;}
         case "take":return arr.slice(0,Math.max(0,num(args.count)));case "drop":return arr.slice(Math.max(0,num(args.count)));case "compact":return arr.filter(Boolean);
         case "join":return arr.join(String(args.separator));case "get":return arr[i]===undefined?null:arr[i];
@@ -181,7 +181,7 @@
         case "min":return {x:Math.min(vec(a).x,q.x),y:Math.min(vec(a).y,q.y)};case "max":return {x:Math.max(vec(a).x,q.x),y:Math.max(vec(a).y,q.y)};
         case "reflect":{const u=vec(a),n=vec(b),d=u.x*n.x+u.y*n.y;return {x:u.x-2*d*n.x,y:u.y-2*d*n.y};}
         case "project":{const u=vec(a),n=vec(b),d=n.x*n.x+n.y*n.y,k=d?(u.x*n.x+u.y*n.y)/d:0;return {x:n.x*k,y:n.y*k};}
-        case "perpendicular":return {x:-q.y,y:q.x};case "normalize":{const l=Math.hypot(p.x,p.y)||1;return {x:p.x/l,y:p.y/l};}
+        case "perpendicular":return {x:-p.y,y:p.x};case "normalize":{const l=Math.hypot(p.x,p.y)||1;return {x:p.x/l,y:p.y/l};}
         case "abs":return {x:Math.abs(p.x),y:Math.abs(p.y)};case "round":return {x:Math.round(p.x),y:Math.round(p.y)};
         case "floor":return {x:Math.floor(p.x),y:Math.floor(p.y)};case "ceil":return {x:Math.ceil(p.x),y:Math.ceil(p.y)};
         case "negate":return {x:-p.x,y:-p.y};case "perpendicular-left":return {x:p.y,y:-p.x};

@@ -3,6 +3,7 @@
   const $=function(id){return document.getElementById(id);};
   function option(value,label){const el=document.createElement("option");el.value=value;el.textContent=label;return el;}
   function updateSaveStatus(text){
+    const title=$("projectNameButton");if(title&&CB.state.project)title.textContent=CB.state.project.name||"Untitled project";
     const el=$("saveStatus");if(el)el.textContent=text|| (CB.state.dirty?"Unsaved changes":"Saved locally");
     const status=$("runtimeStatus");if(status&&CB.engine)status.textContent=CB.engine.isRunning()?"Running":"Ready";
   }

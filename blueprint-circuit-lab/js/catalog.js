@@ -55,9 +55,13 @@
     ["factorial","Factorial"],["random-sign","Random sign"]
   ];
   mathUnary.forEach(function(s){addValue("math."+s[0],s[1],"Math","math",s[0],[N("x","X",1)],"number");});
-  [["clamp","Clamp"],["lerp","Linear interpolate"],["inverse-lerp","Inverse lerp"],["remap","Remap"],["smoothstep","Smooth step"],["move-towards","Move towards"],["ping-pong","Ping-pong"]].forEach(function(s){
-    addValue("math."+s[0],s[1],"Math","math",s[0],[N("a","A",0),N("b","B",1),N("c","C",0.5)],"number");
-  });
+  addValue("math.clamp","Clamp","Math","math","clamp",[N("value","Value",5),N("min","Minimum",0),N("max","Maximum",10)],"number");
+  addValue("math.lerp","Linear interpolate","Math","math","lerp",[N("a","A",0),N("b","B",1),N("t","T",0.5)],"number");
+  addValue("math.inverse-lerp","Inverse lerp","Math","math","inverse-lerp",[N("a","A",0),N("b","B",1),N("value","Value",0.5)],"number");
+  addValue("math.remap","Remap","Math","math","remap",[N("value","Value",5),N("inMin","Input min",0),N("inMax","Input max",10),N("outMin","Output min",0),N("outMax","Output max",100)],"number");
+  addValue("math.smoothstep","Smooth step","Math","math","smoothstep",[N("edge0","Edge 0",0),N("edge1","Edge 1",1),N("value","Value",0.5)],"number");
+  addValue("math.move-towards","Move towards","Math","math","move-towards",[N("current","Current",0),N("target","Target",10),N("maxDelta","Max delta",1)],"number");
+  addValue("math.ping-pong","Ping-pong","Math","math","ping-pong",[N("time","Time",3),N("length","Length",1)],"number");
   addValue("math.random","Random float","Math","math","random",[N("a","Min",0),N("b","Max",1)],"number");
   addValue("math.random-int","Random integer","Math","math","random-int",[N("a","Min",0),N("b","Max",10)],"number");
   addValue("math.is-finite","Is finite","Math","math","is-finite",[N("x","X",1)],"boolean");
@@ -147,7 +151,6 @@
     else if (s[0]==="join") inputs=[AR("array","Array",["a","b","c"]),S("separator","Separator",", ")];
     else if (s[0]==="includes") inputs=[AR("array","Array",[1,2,3]),A("item","Item",2)];
     else inputs=[AR("array","Array",[1,2,3])];
-    if (s[0]==="zip") inputs.push(AR("second","Second array",["a","b","c"]));
     if (s[0]==="range") inputs=[N("start","Start",0),N("count","Count",10),N("step","Step",1)];
     addValue("array."+s[0],s[1],"Arrays","array",s[0],inputs,s[2]);
   });
@@ -179,7 +182,7 @@
     addValue("vector."+s[0],s[1],"Vectors","vector",s[0],[V("a","A",{x:1,y:2}),V("b","B",{x:3,y:4})],"vec2");
   });
   const vectorUnary = [
-    ["normalize","Normalize"],["abs","Absolute"],["round","Round"],["floor","Floor"],["ceil","Ceiling"],["negate","Negate"],["perpendicular-left","Perpendicular left"]
+    ["normalize","Normalize"],["abs","Absolute"],["round","Round"],["floor","Floor"],["ceil","Ceiling"],["negate","Negate"],["perpendicular","Perpendicular"],["perpendicular-left","Perpendicular left"]
   ];
   vectorUnary.forEach(function(s){addValue("vector."+s[0],s[1],"Vectors","vector",s[0],[V("value","Vector",{x:3,y:4})],"vec2");});
   [["scale","Scale", [V("value","Vector",{x:1,y:2}),N("scale","Scale",2)],"vec2"],
