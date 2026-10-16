@@ -3,7 +3,7 @@ const M=(color,roughness=.9)=>new T.MeshStandardMaterial({color,roughness});
 const colors={grass:M(0x668b56),grassDark:M(0x426d49),sand:M(0xd9c18b),cliff:M(0x887d6b),rock:M(0x77796f),water:M(0x287e9b),road:M(0x343b42),edge:M(0xe8dfc4),line:M(0xf5e9bf),barrier:M(0xf1eee4),wood:M(0x8c5938)};
 scene.background=new T.Color(0x9bcbdc);scene.fog=new T.Fog(0x9bcbdc,650,1900);
 function terrain(size,segments,height,material,offset=0){const g=new T.PlaneGeometry(size,size,segments,segments);g.rotateX(-Math.PI/2);const p=g.attributes.position;for(let i=0;i<p.count;i++){const x=p.getX(i),z=p.getZ(i);p.setY(i,height(x,z)+offset)}g.computeVertexNormals();const o=new T.Mesh(g,material);o.position.y=-.35;scene.add(o);return o}
-terrain(1900,150,(x,z)=>Math.sin(x*.006)*2+Math.cos(z*.008)*2+Math.sin((x+z)*.018)*.8,colors.grass);
+terrain(1900,150,(x,z)=>Math.sin(x*.006)*.18+Math.cos(z*.008)*.16+Math.sin((x+z)*.018)*.06,colors.grass);
 function box(x,y,z,sx,sy,sz,m,r=0){const o=new T.Mesh(new T.BoxGeometry(sx,sy,sz),m);o.position.set(x,y,z);o.rotation.y=r;scene.add(o);return o}
 const sea=new T.Mesh(new T.PlaneGeometry(2100,2100),colors.water);sea.rotation.x=-Math.PI/2;sea.position.set(690,-.55,120);scene.add(sea);
 const path=[[-540,230],[-430,160],[-320,75],[-210,30],[-110,55],[0,150],[110,230],[220,250],[310,190],[340,75],[300,-40],[190,-105],[60,-120],[-60,-70],[-140,-150],[-260,-240],[-390,-220],[-500,-120]];
