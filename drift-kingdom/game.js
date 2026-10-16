@@ -1,6 +1,6 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 import {CARS} from './cars.js';
-import {buildWorld,terrainAt} from './world.js';
+import {buildWorld,terrainAt} from './world.js?v=2';
 const $=s=>document.querySelector(s),game=$('#game'),menu=$('#menu'),toastEl=$('#toast');
 let scene,renderer,cameras=[],worldMode='highlands',worldData,activeTab='drive',selectedCar=0,credits=2500,owned=['s14'],paint='#d52f43',decalData='',split=false,invert=false,cockpit=false,driving=false,toastTimer;
 const saved=(()=>{try{return JSON.parse(localStorage.getItem('driftKingdomSave')||'{}')}catch{return {}}})();
