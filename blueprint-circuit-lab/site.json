@@ -1,0 +1,7 @@
+{
+  "name": "Blueprint Circuit Lab",
+  "description": "Build games and visual programs with a typed node graph, reusable circuit boards, live diagnostics, and local project storage. Includes 300+ blocks, a sprite scene editor, and JSON, JavaScript, Python, and standalone HTML export.",
+  "tags": ["blueprint", "visual scripting", "node editor", "game maker", "circuit board", "typed blocks", "sprites", "Python export", "HTML export", "offline projects"],
+  "category": "Tools",
+  "icon": "⟁"
+}

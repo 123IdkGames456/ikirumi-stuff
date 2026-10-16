@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Blueprint Circuit Lab</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/nodes.css">
+</head>
+<body>
+<div id="app">
+  <header class="app-header">
+    <a class="brand" href="#" aria-label="Blueprint Circuit Lab home">
+      <span class="brand-mark">⟁</span><span class="brand-copy"><strong>BLUEPRINT</strong><small>CIRCUIT LAB</small></span>
+    </a>
+    <div class="project-label"><span class="status-dot"></span><button id="projectNameButton" title="Rename project">Untitled project</button><span id="saveStatus">Local project</span></div>
+    <nav class="mode-switch" aria-label="Editor mode">
+      <button class="mode-btn active" id="codeModeButton" data-mode="code">⌘ Code Mode</button>
+      <button class="mode-btn" id="gameModeButton" data-mode="game">▧ Game Mode</button>
+    </nav>
+    <div class="header-actions">
+      <button class="toolbar-btn" id="newProjectButton" title="New project">New</button>
+      <button class="toolbar-btn" id="loadProjectButton" title="Open a device-saved project">Open</button>
+      <button class="toolbar-btn" id="importProjectButton" title="Import a project file">Import</button>
+      <button class="toolbar-btn" id="saveProjectButton" title="Save on this device">Save</button>
+      <div class="export-wrap"><button class="toolbar-btn" id="exportButton" aria-expanded="false">Export ▾</button><div class="export-menu hidden" id="exportMenu">
+        <button data-export="json">Project file (.cbx.json)</button>
+        <button data-export="js">JavaScript source (.js)</button>
+        <button data-export="py">Python file (.py)</button>
+        <button data-export="html">Standalone editor HTML</button>
+      </div></div>
+      <button class="toolbar-btn" id="settingsButton" title="Performance and execution settings">Settings</button>
+      <button class="run-btn" id="runButton">▶ Run</button>
+      <button class="stop-btn" id="stopButton" disabled>■ Stop</button>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <aside class="library-pane side-pane">
+      <div class="pane-title-row"><div><p class="eyebrow">BUILD</p><h2>Block library</h2></div><span class="count-pill" id="catalogCount">300+</span></div>
+      <label class="search-box"><span>⌕</span><input id="librarySearch" type="search" placeholder="Search 250+ blocks…" autocomplete="off"></label>
+      <select class="category-select" id="categorySelect" aria-label="Filter block category"><option value="All">All categories</option></select>
+      <div class="library-hint">Choose a block to add it to the graph. Connect an output pin to a matching input pin. Blue pins carry values; amber pins carry execution.</div>
+      <div class="block-list" id="blockList"></div>
+      <div class="library-divider"></div>
+      <div class="pane-title-row circuit-heading"><div><p class="eyebrow">REUSABLE LOGIC</p><h2>Circuit boards</h2></div><button class="icon-button" id="newCircuitButton" title="Create circuit board">＋</button></div>
+      <p class="subtle">Give a board typed inputs and outputs, then call it from another graph.</p>
+      <div class="circuit-list" id="circuitList"></div>
+      <div class="starter-actions"><button id="starterGraphButton" class="soft-btn">Load graph example</button><button id="starterGameButton" class="soft-btn">Load game example</button></div>
+    </aside>
+
+    <section class="work-column">
+      <section id="codeWorkspace" class="workspace-mode">
+        <div class="graph-toolbar">
+          <div class="graph-ident"><span class="graph-glyph">⌘</span><div><strong id="graphTitle">Main graph</strong><small id="graphSubtitle">Typed visual program</small></div></div>
+          <div class="graph-tools"><span class="zoom-label" id="zoomLabel">100%</span><button class="mini-btn" id="zoomOutButton" title="Zoom out">−</button><button class="mini-btn" id="zoomInButton" title="Zoom in">＋</button><button class="mini-btn" id="fitGraphButton">Fit graph</button><button class="mini-btn" id="validateButton">Validate</button></div>
+        </div>
+        <div class="graph-viewport" id="graphViewport">
+          <div id="graphSizer" class="graph-sizer"><div id="graphStage" class="graph-stage"><svg id="wireLayer" class="wire-layer" aria-hidden="true"></svg><div id="nodeLayer" class="node-layer"></div><div id="emptyGraph" class="empty-graph"><div class="empty-icon">⟁</div><strong>Your logic, connected.</strong><p>Add blocks from the library, then connect typed pins to build a program.</p><span>Tip: load the graph example to see a working Start → Print chain.</span></div></div></div>
+          <div class="canvas-help"><span>Drag node headers to move</span><span>Click output, then input, to connect</span><span>Delete selected node</span></div>
+        </div>
+      </section>
+
+      <section id="gameWorkspace" class="game-workspace hidden">
+        <div class="game-toolbar"><div><p class="eyebrow">SCENE EDITOR</p><h2>Game Mode</h2><p class="subtle">Arrange sprites here; use game blocks in Code Mode to control them.</p></div><div class="scene-actions"><label>Background <input id="sceneBackground" type="color" value="#111827"></label><button id="addSpriteButton" class="primary-btn">＋ Add sprite</button><button id="resetSceneButton" class="soft-btn">Reset scene</button></div></div>
+        <div class="game-editor-body">
+          <div class="scene-wrap"><div class="scene-status"><span id="gameStateLabel">EDIT MODE</span><span id="sceneSizeLabel">640 × 400</span><span class="scene-spacer"></span><span>WASD / arrows when running</span></div><canvas id="gameCanvas" width="640" height="400" aria-label="Game scene preview"></canvas><div class="scene-caption">Scene preview • click a sprite to select it • saved in the project on this device</div></div>
+          <aside class="sprite-pane"><div class="pane-title-row"><div><p class="eyebrow">ASSETS</p><h3>Quick sprites</h3></div></div><div class="sprite-palette" id="spritePalette"></div><div class="library-divider"></div><h3 class="small-heading">Selected sprite</h3><div id="spriteInspector" class="sprite-inspector"><p class="subtle">Choose a sprite in the scene or add one.</p></div></aside>
+        </div>
+      </section>
+
+      <section class="bottom-dock" id="bottomDock">
+        <div class="dock-header"><div class="dock-tabs"><button class="dock-tab active" data-dock="console">Console <span id="consoleBadge">0</span></button><button class="dock-tab" data-dock="code">Generated code</button><button class="dock-tab" data-dock="diagnostics">Diagnostics</button></div><div class="dock-actions"><span id="runtimeStatus">Ready</span><button class="mini-btn" id="clearConsoleButton">Clear</button><button class="mini-btn" id="collapseDockButton" title="Collapse panel">⌄</button></div></div>
+        <div class="dock-content" id="consolePanel"><div class="console-messages" id="consoleMessages" aria-live="polite"></div></div>
+        <div class="dock-content hidden" id="codePanel"><div class="code-panel-head"><span>Readable JavaScript project representation</span><button class="mini-btn" id="copyCodeButton">Copy</button></div><textarea id="generatedCode" spellcheck="false" readonly></textarea></div>
+        <div class="dock-content hidden" id="diagnosticsPanel"><div id="diagnosticsContent" class="diagnostics-content"><p class="subtle">Run validation to inspect graph connections and circuit references.</p></div></div>
+      </section>
+    </section>
+
+    <aside class="inspector-pane side-pane">
+      <div class="pane-title-row"><div><p class="eyebrow">DETAILS</p><h2>Inspector</h2></div><span class="inspector-mark">◈</span></div>
+      <div class="inspector-content" id="inspectorContent"><div class="inspector-empty"><div class="empty-icon">◎</div><strong>Nothing selected</strong><p>Select a node to edit values, pins and properties.</p></div></div>
+      <div class="inspector-footer"><span class="tiny-dot"></span><span>Local-first workspace</span></div>
+    </aside>
+  </main>
+</div>
+
+<input type="file" id="projectFileInput" accept=".json,.cbx.json,.html,.htm,.py,.js,.txt" hidden>
+<div class="toast-stack" id="toastStack" aria-live="polite"></div>
+
+<div class="modal-backdrop hidden" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+  <div class="modal-card">
+    <div class="modal-head"><div><p class="eyebrow">PREFERENCES</p><h2 id="settingsTitle">Editor settings</h2></div><button class="icon-button" data-close="settingsModal" aria-label="Close">×</button></div>
+    <div class="setting-row"><div><strong>Maximum frame rate</strong><p>Caps preview rendering and update events.</p></div><select id="maxFpsSetting"><option value="15">15 FPS</option><option value="30">30 FPS</option><option value="60" selected>60 FPS (default)</option><option value="120">120 FPS</option><option value="0">Uncapped</option></select></div>
+    <div class="setting-row"><div><strong>Message speed</strong><p>Delay between connected execution blocks. Instant is fastest.</p></div><select id="messageDelaySetting"><option value="0">Instant (default)</option><option value="1">1 ms · inspect timing</option><option value="10">10 ms · slow trace</option><option value="50">50 ms · step slowly</option></select></div>
+    <div class="setting-row"><div><strong>Automatic local save</strong><p>Save edits to this browser when possible.</p></div><label class="switch"><input type="checkbox" id="autoSaveSetting" checked><span></span></label></div>
+    <div class="setting-row"><div><strong>Execution safety limit</strong><p>Flow execution is capped to stop accidental infinite loops.</p></div><span class="setting-note">5,000 steps / event</span></div>
+    <div class="modal-actions"><button class="primary-btn" id="saveSettingsButton">Apply settings</button><button class="soft-btn" data-close="settingsModal">Cancel</button></div>
+  </div>
+</div>
+
+<div class="modal-backdrop hidden" id="projectsModal" role="dialog" aria-modal="true" aria-labelledby="projectsTitle">
+  <div class="modal-card wide-modal">
+    <div class="modal-head"><div><p class="eyebrow">ON THIS DEVICE</p><h2 id="projectsTitle">Saved projects</h2><p class="subtle">Projects are stored in this browser's local database. They are not uploaded to GitHub.</p></div><button class="icon-button" data-close="projectsModal" aria-label="Close">×</button></div>
+    <div id="savedProjectsList" class="saved-projects-list"></div>
+    <div class="modal-actions"><button class="primary-btn" id="newProjectFromModal">New project</button><button class="soft-btn" data-close="projectsModal">Close</button></div>
+  </div>
+</div>
+
+<div class="modal-backdrop hidden" id="circuitModal" role="dialog" aria-modal="true" aria-labelledby="circuitModalTitle">
+  <form class="modal-card compact-modal" id="circuitForm">
+    <div class="modal-head"><div><p class="eyebrow">REUSABLE LOGIC</p><h2 id="circuitModalTitle">New circuit board</h2></div><button type="button" class="icon-button" data-close="circuitModal" aria-label="Close">×</button></div>
+    <label class="field-label">Board name<input id="circuitNameInput" maxlength="64" value="Math circuit" required></label>
+    <p class="subtle">A starter board is created with a number input, an Add block, and a result output. Edit its typed pins and logic after creation.</p>
+    <div class="modal-actions"><button class="primary-btn" type="submit">Create board</button><button class="soft-btn" type="button" data-close="circuitModal">Cancel</button></div>
+  </form>
+</div>
+
+<script data-cbl-module="core" src="js/core.js"></script>
+<script data-cbl-module="catalog" src="js/catalog.js"></script>
+<script data-cbl-module="operations" src="js/operations.js"></script>
+<script data-cbl-module="diagnostics" src="js/diagnostics.js"></script>
+<script data-cbl-module="storage" src="js/storage.js"></script>
+<script data-cbl-module="graph" src="js/graph.js"></script>
+<script data-cbl-module="circuits" src="js/circuits.js"></script>
+<script data-cbl-module="game" src="js/game-view.js"></script>
+<script data-cbl-module="engine" src="js/engine.js"></script>
+<script data-cbl-module="exporters" src="js/exporters.js"></script>
+<script data-cbl-module="ui" src="js/ui.js"></script>
+<script data-cbl-module="app" src="js/app.js"></script>
+</body>
+</html>
