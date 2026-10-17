@@ -1,0 +1,24 @@
+{
+  "name": "Unity Academy",
+  "description": "A personal learning academy for Unity, C#, game development and a separate Blender 3D track. Includes a Code Lab with a Unity-style Inspector preview, Console, local progress saving and optional Gemini AI Coach.",
+  "tags": [
+    "unity",
+    "c sharp",
+    "c#",
+    "coding",
+    "programming",
+    "academy",
+    "learning",
+    "lessons",
+    "ai coach",
+    "gemini",
+    "inspector",
+    "console",
+    "blender",
+    "3d modelling",
+    "game development",
+    "local save"
+  ],
+  "category": "Tools",
+  "icon": "🎓"
+}
