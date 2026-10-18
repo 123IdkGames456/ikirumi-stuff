@@ -1,0 +1,13 @@
+{
+  "name": "Unity C# Field Guide",
+  "description": "A searchable interactive Unity and C# programming reference by Crowbar Games, with code examples, categories, and copy buttons.",
+  "category": "Tools",
+  "icon": "⌘",
+  "tags": [
+    "Unity",
+    "C#",
+    "Programming",
+    "Reference",
+    "Game Development"
+  ]
+}
