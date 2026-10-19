@@ -17,7 +17,7 @@
 <div class="folder"><div class="folder-head"><span class="folder-title">Folder 1</span><span id="count0" class="type">0 images · 0 videos</span></div><input class="pick" id="folder0" type="file" webkitdirectory directory multiple accept="image/*,video/*"><small id="name0">No folder selected</small></div>
 <div class="folder"><div class="folder-head"><span class="folder-title">Folder 2</span><span id="count1" class="type">0 images · 0 videos</span></div><input class="pick" id="folder1" type="file" webkitdirectory directory multiple accept="image/*,video/*"><small id="name1">No folder selected</small></div>
 <div class="folder"><div class="folder-head"><span class="folder-title">Folder 3</span><span id="count2" class="type">0 images · 0 videos</span></div><input class="pick" id="folder2" type="file" webkitdirectory directory multiple accept="image/*,video/*"><small id="name2">No folder selected</small></div>
-<div class="folder"><div class="folder-head"><span class="folder-title">Internet library</span><label style="display:flex;align-items:center;gap:8px"><input id="onlineToggle" type="checkbox"> On</label></div><label for="vibe" class="hint" style="display:block">Choose a vibe</label><select id="vibe" style="width:100%;margin-top:8px;padding:10px;border-radius:9px;background:#202532;color:var(--text);border:1px solid var(--line)"><option value="mixed">Mixed: funny to spooky</option><option value="funny">Funny & silly</option><option value="cute">Cute & wholesome</option><option value="weird">Weird & surprising</option><option value="scary">Scary & creepy</option><option value="dark">Dark places & eerie vibes</option></select><button id="loadOnline" style="width:100%;margin-top:10px" disabled>Load more online media</button><small id="onlineCount">Internet access off</small><p class="hint">Uses Wikimedia Commons public media search. Results load in batches while you browse; it does not download 10,000 files at once, and results depend on what the source has available.</p></div>
+<div class="folder"><div class="folder-head"><span class="folder-title">Internet library</span><label style="display:flex;align-items:center;gap:8px"><input id="onlineToggle" type="checkbox"> On</label></div><label for="vibe" class="hint" style="display:block">Choose a vibe</label><select id="vibe" style="width:100%;margin-top:8px;padding:10px;border-radius:9px;background:#202532;color:var(--text);border:1px solid var(--line)"><option value="mixed">Mixed: funny to spooky</option><option value="funny">Funny & silly</option><option value="cute">Cute & wholesome</option><option value="weird">Weird & surprising</option><option value="scary">Scary & creepy</option><option value="dark">Dark places & eerie vibes</option></select><button id="loadOnline" style="width:100%;margin-top:10px" disabled>Load more online media</button><button id="downloadOnlineZip" style="width:100%;margin-top:8px" disabled>Download loaded internet images (.ZIP)</button><small id="onlineCount">Internet access off</small><p class="hint">Uses Wikimedia Commons public media search. Results load in batches while you browse; it does not download 10,000 files at once, and results depend on what the source has available.</p></div>
 <p class="hint">Supported locally: JPG, PNG, GIF, WebP, SVG, MP4, WebM, MOV and other browser-supported image/video formats.</p><p class="hint">Tip: <span class="kbd">←</span> <span class="kbd">→</span> navigate · <span class="kbd">R</span> random</p>
 </aside>
 <main class="panel viewer"><div class="viewer-head"><div><div class="type">Now viewing</div><div id="fileTitle" class="counter">No media loaded</div></div><div id="position" class="counter">#0 of 0</div></div>
@@ -27,6 +27,7 @@
 <div id="status" class="status" aria-live="polite">Choose a folder to get started.</div></main>
 </div>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
 (function(){
 const allowed=/\.(avif|bmp|gif|heic|heif|jfif|jpe?g|png|svg|tiff?|webp|apng|mp4|webm|mov|m4v|ogv|ogg|3gp|mpeg|mpg)$/i;
@@ -47,6 +48,7 @@ function rebuild(){
  setStatus(items.length?items.length+' media files available ('+localItems().length+' local, '+(onlineEnabled?onlineItems.length+' online':'internet off')+').':'No supported media found yet.');
  $('onlineCount').textContent=onlineEnabled?(onlineItems.length+' online results loaded · more can be fetched'):'Internet access off';
  $('loadOnline').disabled=!onlineEnabled||onlineLoading;
+ $('downloadOnlineZip').disabled=!onlineItems.some(x=>/^image\\//.test(x.mime||''))||!window.JSZip;
 }
 folders.forEach((_,i)=>$('folder'+i).addEventListener('change',e=>{
  folders[i]=Array.from(e.target.files||[]);folderNames[i]=folders[i][0]?.webkitRelativePath?.split('/')[0]||'';
@@ -81,7 +83,9 @@ async function fetchOnlineBatch(){
   const data=await response.json(),pages=Object.values(data.query?.pages||{}),found=[];
   for(const page of pages){const info=page.imageinfo?.[0];if(!info||!info.url||!/^image\/|^video\//.test(info.mime||''))continue;found.push({isOnline:true,name:page.title.replace(/^File:/,''),url:info.thumburl||info.url,mime:info.mime,size:info.size||0,source:'Wikimedia Commons'});}
   const seen=new Set(onlineItems.map(x=>x.url));for(const item of found)if(!seen.has(item.url)){onlineItems.push(item);seen.add(item.url);}
+  const previousItem=current>=0?items[order[current]]:null;
   items=localItems().concat(onlineEnabled?onlineItems:[]);order=items.map((_,i)=>i);
+  if(previousItem){const preserved=items.findIndex(x=>x===previousItem);current=preserved>=0?preserved:-1;}
   $('prev').disabled=$('next').disabled=$('go').disabled=$('jumpInput').disabled=items.length===0;$('jumpInput').max=items.length||1;
   $('onlineCount').textContent=onlineItems.length+' online results loaded · batch searched: '+query;
   if(found.length===0)setStatus('No compatible image/video results in that batch. Try another vibe or load more.');
@@ -104,6 +108,36 @@ $('onlineToggle').addEventListener('change',async e=>{
  else{items=localItems();order=items.map((_,i)=>i);current=-1;rebuild();}
 });
 $('loadOnline').addEventListener('click',async()=>{await fetchOnlineBatch();items=localItems().concat(onlineEnabled?onlineItems:[]);order=items.map((_,i)=>i);$('position').textContent='#'+(current>=0?current+1:0)+' of '+items.length;});
+async function downloadOnlineZip(){
+ const images=onlineItems.filter(item=>/^image\\//.test(item.mime||''));
+ if(!images.length){setStatus('No online images have been loaded yet. Turn on Internet library and load some media first.');return}
+ if(!window.JSZip){setStatus('ZIP library did not load. Check your internet connection and reload the page.');return}
+ const button=$('downloadOnlineZip');button.disabled=true;
+ const zip=new JSZip(),usedNames=new Set();let added=0,failed=0;
+ try{
+  for(let i=0;i<images.length;i++){
+   const item=images[i];
+   setStatus('Adding image '+(i+1)+' of '+images.length+' to ZIP…');
+   try{
+    const response=await fetch(item.url);
+    if(!response.ok)throw new Error('HTTP '+response.status);
+    const blob=await response.blob();
+    if(!blob.size)throw new Error('Empty file');
+    let name=item.name.replace(/[\\\\/:*?"<>|]/g,'_').trim()||('image_'+(i+1));
+    if(!/\\.[a-z0-9]{2,8}$/i.test(name)){const ext=(blob.type.split('/')[1]||'jpg').replace('jpeg','jpg').replace(/[^a-z0-9]/gi,'');name+='.'+(ext||'jpg');}
+    let unique=name,n=2;while(usedNames.has(unique.toLowerCase())){unique=name.replace(/(\\.[^.]+)?$/,('_'+n++)+'$1')}
+    usedNames.add(unique.toLowerCase());zip.file(unique,blob);added++;
+   }catch(err){failed++}
+  }
+  if(!added){setStatus('Could not download images for the ZIP. The source may block downloads; try again later.');return}
+  setStatus('Building ZIP with '+added+' images…');
+  const blob=await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:4}},meta=>setStatus('Building ZIP… '+Math.round(meta.percent)+'%'));
+  const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='random-media-internet-images.zip';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+  setStatus('ZIP ready: '+added+' images downloaded'+(failed?' · '+failed+' could not be downloaded':'')+'. This includes the online images loaded so far.');
+ }catch(err){setStatus('ZIP creation failed: '+err.message)}
+ finally{button.disabled=!onlineItems.some(x=>/^image\\//.test(x.mime||''))||!window.JSZip;}
+}
+$('downloadOnlineZip').addEventListener('click',downloadOnlineZip);
 $('next').addEventListener('click',()=>show(current+1));$('prev').addEventListener('click',()=>show(current-1));
 $('go').addEventListener('click',()=>{const n=Number.parseInt($('jumpInput').value,10);if(!Number.isInteger(n)||n<1||n>items.length){setStatus('Enter a number from 1 to '+items.length+'.');return}show(n-1)});
 $('jumpInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('go').click()});
