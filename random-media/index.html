@@ -109,7 +109,7 @@ $('onlineToggle').addEventListener('change',async e=>{
 });
 $('loadOnline').addEventListener('click',async()=>{await fetchOnlineBatch();items=localItems().concat(onlineEnabled?onlineItems:[]);order=items.map((_,i)=>i);$('position').textContent='#'+(current>=0?current+1:0)+' of '+items.length;});
 async function downloadOnlineZip(){
- const images=onlineItems.filter(item=>/^image\\//.test(item.mime||''));
+ const images=onlineItems.filter(item=>/^image\//.test(item.mime||''));
  if(!images.length){setStatus('No online images have been loaded yet. Turn on Internet library and load some media first.');return}
  if(!window.JSZip){setStatus('ZIP library did not load. Check your internet connection and reload the page.');return}
  const button=$('downloadOnlineZip');button.disabled=true;
@@ -123,9 +123,9 @@ async function downloadOnlineZip(){
     if(!response.ok)throw new Error('HTTP '+response.status);
     const blob=await response.blob();
     if(!blob.size)throw new Error('Empty file');
-    let name=item.name.replace(/[\\\\/:*?"<>|]/g,'_').trim()||('image_'+(i+1));
-    if(!/\\.[a-z0-9]{2,8}$/i.test(name)){const ext=(blob.type.split('/')[1]||'jpg').replace('jpeg','jpg').replace(/[^a-z0-9]/gi,'');name+='.'+(ext||'jpg');}
-    let unique=name,n=2;while(usedNames.has(unique.toLowerCase())){unique=name.replace(/(\\.[^.]+)?$/,('_'+n++)+'$1')}
+    let name=item.name.replace(/[\\/:*?"<>|]/g,'_').trim()||('image_'+(i+1));
+    if(!/\.[a-z0-9]{2,8}$/i.test(name)){const ext=(blob.type.split('/')[1]||'jpg').replace('jpeg','jpg').replace(/[^a-z0-9]/gi,'');name+='.'+(ext||'jpg');}
+    let unique=name,n=2;while(usedNames.has(unique.toLowerCase())){unique=name.replace(/(\.[^.]+)?$/,('_'+n++)+'$1')}
     usedNames.add(unique.toLowerCase());zip.file(unique,blob);added++;
    }catch(err){failed++}
   }
@@ -135,7 +135,7 @@ async function downloadOnlineZip(){
   const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='random-media-internet-images.zip';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
   setStatus('ZIP ready: '+added+' images downloaded'+(failed?' · '+failed+' could not be downloaded':'')+'. This includes the online images loaded so far.');
  }catch(err){setStatus('ZIP creation failed: '+err.message)}
- finally{button.disabled=!onlineItems.some(x=>/^image\\//.test(x.mime||''))||!window.JSZip;}
+ finally{button.disabled=!onlineItems.some(x=>/^image\//.test(x.mime||''))||!window.JSZip;}
 }
 $('downloadOnlineZip').addEventListener('click',downloadOnlineZip);
 $('next').addEventListener('click',()=>show(current+1));$('prev').addEventListener('click',()=>show(current-1));
