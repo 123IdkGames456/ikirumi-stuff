@@ -14,9 +14,9 @@
 <header class="top"><div><div class="eyebrow">Your local media library</div><h1>Random Media</h1><p class="sub">Connect up to three folders. Shuffle your images and videos in one place.</p></div><button id="clearAll">Clear library</button></header>
 <div class="layout">
 <aside class="panel"><h2>Connected folders</h2><p class="sub">Choose folders from your device. Your files stay on your computer.</p>
-<div class="folder"><div class="folder-head"><span class="folder-title">Folder 1</span><span id="count0" class="type">0 files</span></div><input class="pick" id="folder0" type="file" webkitdirectory directory multiple accept="image/*,video/*"><small id="name0">No folder selected</small></div>
-<div class="folder"><div class="folder-head"><span class="folder-title">Folder 2</span><span id="count1" class="type">0 files</span></div><input class="pick" id="folder1" type="file" webkitdirectory directory multiple accept="image/*,video/*"><small id="name1">No folder selected</small></div>
-<div class="folder"><div class="folder-head"><span class="folder-title">Folder 3</span><span id="count2" class="type">0 files</span></div><input class="pick" id="folder2" type="file" webkitdirectory directory multiple accept="image/*,video/*"><small id="name2">No folder selected</small></div>
+<div class="folder"><div class="folder-head"><span class="folder-title">Folder 1</span><span id="count0" class="type">0 images · 0 videos</span></div><input class="pick" id="folder0" type="file" webkitdirectory directory multiple accept="image/*,video/*"><small id="name0">No folder selected</small></div>
+<div class="folder"><div class="folder-head"><span class="folder-title">Folder 2</span><span id="count1" class="type">0 images · 0 videos</span></div><input class="pick" id="folder1" type="file" webkitdirectory directory multiple accept="image/*,video/*"><small id="name1">No folder selected</small></div>
+<div class="folder"><div class="folder-head"><span class="folder-title">Folder 3</span><span id="count2" class="type">0 images · 0 videos</span></div><input class="pick" id="folder2" type="file" webkitdirectory directory multiple accept="image/*,video/*"><small id="name2">No folder selected</small></div>
 <p class="hint">Supported: JPG, PNG, GIF, WebP, SVG, MP4, WebM, MOV and other browser-supported image/video formats.</p><p class="hint">Tip: <span class="kbd">←</span> <span class="kbd">→</span> navigate · <span class="kbd">R</span> random</p>
 </aside>
 <main class="panel viewer"><div class="viewer-head"><div><div class="type">Now viewing</div><div id="fileTitle" class="counter">No media loaded</div></div><div id="position" class="counter">#0 of 0</div></div>
@@ -47,8 +47,9 @@ function rebuild(){
 folders.forEach((_,i)=>$('folder'+i).addEventListener('change',e=>{
  folders[i]=Array.from(e.target.files||[]);folderNames[i]=folders[i][0]?.webkitRelativePath?.split('/')[0]||'';
  $('name'+i).textContent=folderNames[i]||'No folder selected';
- const n=folders[i].filter(f=>f.type.startsWith('image/')||f.type.startsWith('video/')||allowed.test(f.name)).length;
- $('count'+i).textContent=n+' files';rebuild();
+ const selected=folders[i].filter(f=>(f.type.startsWith('image/')||f.type.startsWith('video/'))||allowed.test(f.name));
+ const images=selected.filter(f=>!isVideo(f)).length, videos=selected.filter(isVideo).length;
+ $('count'+i).textContent=images+' images · '+videos+' videos';rebuild();
 }));
 function show(index){
  if(!items.length)return;
@@ -69,7 +70,7 @@ $('random').addEventListener('click',random);
 $('next').addEventListener('click',()=>show(current+1));$('prev').addEventListener('click',()=>show(current-1));
 $('go').addEventListener('click',()=>{const n=Number.parseInt($('jumpInput').value,10);if(!Number.isInteger(n)||n<1||n>items.length){setStatus('Enter a number from 1 to '+items.length+'.');return}show(n-1)});
 $('jumpInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('go').click()});
-$('clearAll').addEventListener('click',()=>{folders.forEach((_,i)=>{folders[i]=[];folderNames[i]='';$('folder'+i).value='';$('name'+i).textContent='No folder selected';$('count'+i).textContent='0 files'});rebuild();setStatus('Library cleared. Your original files were not changed.')});
+$('clearAll').addEventListener('click',()=>{folders.forEach((_,i)=>{folders[i]=[];folderNames[i]='';$('folder'+i).value='';$('name'+i).textContent='No folder selected';$('count'+i).textContent='0 images · 0 videos'});rebuild();setStatus('Library cleared. Your original files were not changed.')});
 document.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(e.key==='ArrowRight'&&items.length)show(current+1);else if(e.key==='ArrowLeft'&&items.length)show(current-1);else if(e.key.toLowerCase()==='r')random()});
 window.addEventListener('beforeunload',disposeUrl);
 })();
