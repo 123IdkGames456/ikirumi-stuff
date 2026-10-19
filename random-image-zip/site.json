@@ -1,0 +1,14 @@
+{
+  "name": "Random Image ZIP",
+  "description": "Choose a number of random internet images and download them together in a ZIP file, with source and licence details.",
+  "tags": [
+    "images",
+    "download",
+    "zip",
+    "random",
+    "internet",
+    "Wikimedia Commons"
+  ],
+  "category": "Media",
+  "icon": "↧"
+}
