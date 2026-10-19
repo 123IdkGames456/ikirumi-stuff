@@ -1,0 +1,15 @@
+{
+  "name": "Random Media",
+  "description": "Connect up to three local folders and browse their images and videos together. Shuffle randomly, move to the previous or next file, or jump to an exact media number.",
+  "tags": [
+    "media",
+    "random",
+    "image viewer",
+    "video player",
+    "folder picker",
+    "gallery",
+    "local files"
+  ],
+  "category": "Media",
+  "icon": "🎲"
+}
