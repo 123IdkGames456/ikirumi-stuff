@@ -1,0 +1,17 @@
+{
+  "name": "Duel Arena 3D",
+  "description": "A first-person 3D 1v1 shooter against an AI bot. Fight through rounds, track the score, and switch between pistol, shotgun, and knife.",
+  "tags": [
+    "3D",
+    "FPS",
+    "shooter",
+    "1v1",
+    "AI bot",
+    "pistol",
+    "shotgun",
+    "knife",
+    "WASD"
+  ],
+  "category": "Games",
+  "icon": "🎯"
+}
