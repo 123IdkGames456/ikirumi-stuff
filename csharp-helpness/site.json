@@ -1,0 +1,13 @@
+{
+  "name": "C# Helpness",
+  "description": "A rule-based, offline C# code explainer and likely-error checker with beginner-friendly fixes. No AI.",
+  "category": "Developer Tools",
+  "tags": [
+    "C#",
+    "coding",
+    "debugging",
+    "Unity",
+    "offline"
+  ],
+  "icon": "⌘"
+}
