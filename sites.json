@@ -73,7 +73,9 @@
     "unity-csharp-book/index.html",
     "unity-csharp-book/site.json",
     "zero-hour/index.html",
-    "zombie-survival/index.html"
+    "zombie-survival/index.html",
+    "csharp-code/index.html",
+    "csharp-code/site.json"
   ],
   "sites": [
     "blueprint-circuit-lab",
@@ -102,6 +104,7 @@
     "unity-csharp-academy",
     "unity-csharp-book",
     "zero-hour",
-    "zombie-survival"
+    "zombie-survival",
+    "csharp-code"
   ]
 }
