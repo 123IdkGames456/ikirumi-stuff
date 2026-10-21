@@ -37,7 +37,21 @@
   </section>
   <footer class="footer"><a class="footer-brand" href="./">ikirumi stuff<span>®</span></a><span>A little corner for making things.</span><a href="https://github.com/123IdkGames456/ikirumi-stuff" target="_blank" rel="noreferrer">View repository ↗</a></footer>
 </main>
-<section id="projectView" class="project-view" hidden><div class="project-toolbar"><button id="backButton" class="back-button">← <span>All projects</span></button><div id="activeProjectName" class="active-project-name"></div><div class="toolbar-actions"><button id="openNewTab" class="toolbar-button">Open in new tab ↗</button><button id="downloadButton" class="toolbar-button download-button">↓ Download project</button></div></div><iframe id="projectFrame" title="Project preview" allow="fullscreen; clipboard-read; clipboard-write" loading="eager"></iframe></section>
+<section id="projectView" class="project-view" hidden aria-label="Project viewer">
+  <iframe id="projectFrame" title="Project preview" allow="fullscreen; clipboard-read; clipboard-write" loading="eager"></iframe>
+  <div class="viewer-menu-wrap">
+    <button id="viewerMenuToggle" class="viewer-menu-toggle" aria-expanded="false" aria-controls="viewerMenu" aria-label="Open project menu" title="Project menu"><span class="menu-dots"><i></i><i></i><i></i></span><span class="menu-button-label">Menu</span><span class="menu-chevron">⌄</span></button>
+    <div id="viewerMenu" class="viewer-menu" hidden>
+      <div class="viewer-menu-heading"><span class="viewer-menu-mark">i</span><div><strong id="activeProjectName">Project</strong><small>PROJECT CONTROLS</small></div><button id="viewerMenuClose" class="viewer-menu-close" aria-label="Close menu">×</button></div>
+      <button id="refreshPageButton" class="viewer-menu-item"><span class="menu-item-icon">↻</span><span><strong>Refresh page</strong><small>Reload this project</small></span><kbd>R</kbd></button>
+      <button id="downloadButton" class="viewer-menu-item"><span class="menu-item-icon">↓</span><span><strong>Download project</strong><small>Save project files as ZIP</small></span></button>
+      <button id="openNewTab" class="viewer-menu-item"><span class="menu-item-icon">↗</span><span><strong>Open in new tab</strong><small>Open outside the launcher</small></span></button>
+      <div class="viewer-menu-divider"></div>
+      <button id="refreshLibraryButton" class="viewer-menu-item"><span class="menu-item-icon">⟳</span><span><strong>Refresh library</strong><small>Update the project list</small></span></button>
+      <button id="exitPageButton" class="viewer-menu-item exit-item"><span class="menu-item-icon">←</span><span><strong>Exit project</strong><small>Return to Ikirumi Stuff</small></span><kbd>Esc</kbd></button>
+    </div>
+  </div>
+</section>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" defer></script>
 <script src="./app.js" defer></script>
