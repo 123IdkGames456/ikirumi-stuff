@@ -1,0 +1,14 @@
+{
+  "name": "Local AI",
+  "description": "A local-first AI chat interface for Ollama with model downloads, saved conversations, custom instructions, memory notes, and adjustable generation settings.",
+  "category": "Media",
+  "icon": "✳",
+  "tags": [
+    "AI",
+    "Local AI",
+    "Chat",
+    "Offline",
+    "Privacy",
+    "Models"
+  ]
+}
