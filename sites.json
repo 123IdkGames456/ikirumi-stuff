@@ -83,7 +83,9 @@
     "loop-infinite/index.html",
     "loop-infinite/site.json",
     "local-ai/index.html",
-    "local-ai/site.json"
+    "local-ai/site.json",
+    "html-preview/index.html",
+    "html-preview/site.json"
   ],
   "sites": [
     "blueprint-circuit-lab",
@@ -116,6 +118,7 @@
     "csharp-code",
     "website-maker",
     "loop-infinite",
-    "local-ai"
+    "local-ai",
+    "html-preview"
   ]
 }
