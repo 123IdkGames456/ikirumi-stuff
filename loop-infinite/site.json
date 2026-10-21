@@ -1,0 +1,13 @@
+{
+  "name": "LOOP — Infinite Playground",
+  "description": "An endless arcade playground with procedural waves, upgrades, combos, squishy jiggle physics, and touch controls.",
+  "category": "Games",
+  "icon": "🫧",
+  "tags": [
+    "Game",
+    "Endless",
+    "Arcade",
+    "Physics",
+    "Playable"
+  ]
+}
