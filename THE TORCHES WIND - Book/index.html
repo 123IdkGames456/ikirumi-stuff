@@ -1,0 +1,2948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THE TORCHES WIND · Book</title>
+  <style>
+    /* ---- RESET & GLOBAL ---- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0e0e10;
+      font-family: 'Georgia', 'Times New Roman', serif;
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    #book-container {
+      max-width: 820px;
+      width: 100%;
+      background: #f8f4e9;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px #3a3a4a inset;
+      padding: 30px 35px 40px 35px;
+      position: relative;
+      transition: background 0.2s;
+    }
+
+    /* ---- NAVIGATION BAR ---- */
+    #nav-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-bottom: 16px;
+      border-bottom: 3px solid #d4c9b0;
+      margin-bottom: 28px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      color: #3d3d4a;
+    }
+
+    #page-indicator {
+      font-weight: bold;
+      background: #1e1e2a;
+      color: #f0e6d2;
+      padding: 6px 18px;
+      border-radius: 40px;
+      letter-spacing: 1px;
+      font-size: 0.85rem;
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .nav-buttons button {
+      background: #1e1e2a;
+      color: #f0e6d2;
+      border: none;
+      padding: 8px 22px;
+      border-radius: 40px;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-buttons button:hover {
+      background: #3a3a4e;
+    }
+
+    .nav-buttons button:active {
+      transform: scale(0.96);
+    }
+
+    .nav-buttons button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      background: #2a2a36;
+    }
+
+    /* ---- PAGE CONTENT ---- */
+    #page-content {
+      min-height: 520px;
+      font-size: 1.35rem;
+      line-height: 1.9;
+      color: #1e1e1e;
+      letter-spacing: 0.02em;
+      word-spacing: 0.05em;
+      transition: opacity 0.15s;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    #page-content p {
+      margin-bottom: 1.4em;
+      text-indent: 2em;
+    }
+
+    #page-content p:first-of-type {
+      text-indent: 0;
+    }
+
+    #page-content h2 {
+      font-size: 2.1rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      margin: 0 0 0.7em 0;
+      color: #0e0e10;
+      text-indent: 0;
+      border-left: 8px solid #8b7a5c;
+      padding-left: 20px;
+      line-height: 1.3;
+    }
+
+    #page-content h3 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 1.6em 0 0.6em 0;
+      color: #2a2a3a;
+      text-indent: 0;
+    }
+
+    #page-content .divider {
+      text-align: center;
+      margin: 2.2em 0;
+      color: #9a8e78;
+      letter-spacing: 8px;
+      font-size: 1.2rem;
+    }
+
+    /* ---- MARKED WORD HIGHLIGHT ---- */
+    .marked-word {
+      background: #e8d48b;
+      color: #0e0e10;
+      padding: 0 4px;
+      border-radius: 4px;
+      cursor: pointer;
+      box-shadow: 0 0 0 2px #d4b85c;
+      transition: background 0.2s;
+      font-weight: 600;
+    }
+
+    .marked-word:hover {
+      background: #f0e0a0;
+    }
+
+    /* ---- MARK BUTTON ---- */
+    #mark-hint {
+      font-family: 'Courier New', monospace;
+      font-size: 0.8rem;
+      color: #5a4e3e;
+      background: #ece4d4;
+      padding: 6px 14px;
+      border-radius: 30px;
+      display: inline-block;
+      margin-top: 8px;
+      margin-bottom: 8px;
+      letter-spacing: 0.3px;
+      border: 1px solid #c8bca4;
+    }
+
+    /* ---- SPECIAL PAGES ---- */
+    .character-card {
+      background: #ece4d4;
+      border-left: 6px solid #8b7a5c;
+      padding: 18px 24px;
+      margin: 18px 0;
+      border-radius: 0 16px 16px 0;
+      font-size: 1.15rem;
+      line-height: 1.7;
+    }
+
+    .character-card strong {
+      color: #0e0e10;
+      font-size: 1.25rem;
+      letter-spacing: 0.02em;
+    }
+
+    .character-card .player-num {
+      font-family: 'Courier New', monospace;
+      background: #1e1e2a;
+      color: #f0e6d2;
+      padding: 2px 12px;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      margin-left: 10px;
+      font-weight: bold;
+    }
+
+    .character-card .desc {
+      margin-top: 6px;
+      color: #2e2e3a;
+    }
+
+    .character-card .note {
+      margin-top: 8px;
+      font-style: italic;
+      color: #6a5e4e;
+      font-size: 1rem;
+      border-top: 1px dashed #c8bca4;
+      padding-top: 8px;
+    }
+
+    /* ---- TRAILER ---- */
+    .trailer-box {
+      background: #14141e;
+      color: #e8e0d0;
+      padding: 30px 32px;
+      border-radius: 20px;
+      margin: 20px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 1.05rem;
+      line-height: 1.8;
+      border: 2px solid #3a3a4e;
+      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.7);
+    }
+
+    .trailer-box h3 {
+      color: #f0e6d2;
+      font-size: 1.8rem;
+      margin-bottom: 0.4em;
+      border-left: 6px solid #c45a3a;
+      padding-left: 20px;
+      font-family: 'Georgia', serif;
+    }
+
+    .trailer-box .trailer-line {
+      margin: 12px 0;
+    }
+
+    .trailer-box .redacted {
+      background: #2a2a3a;
+      color: #2a2a3a;
+      padding: 0 6px;
+      border-radius: 4px;
+      user-select: none;
+    }
+
+    .trailer-box em {
+      color: #d4b85c;
+      font-style: normal;
+    }
+
+    /* ---- GUESSING GAME ---- */
+    .guess-section {
+      background: #1e1e2a;
+      color: #f0e6d2;
+      padding: 28px 30px;
+      border-radius: 20px;
+      margin: 20px 0;
+      font-family: 'Courier New', monospace;
+    }
+
+    .guess-section h2 {
+      color: #f0e6d2;
+      border-left-color: #c45a3a;
+      font-size: 1.8rem;
+    }
+
+    .guess-section p {
+      font-size: 1rem;
+      line-height: 1.7;
+      margin-bottom: 18px;
+      color: #c8c0b0;
+    }
+
+    .suspect-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px;
+      margin: 16px 0 24px 0;
+    }
+
+    .suspect-btn {
+      background: #2a2a3a;
+      border: 2px solid #3a3a4e;
+      color: #f0e6d2;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .suspect-btn:hover {
+      background: #3a3a4e;
+      border-color: #6a6a7e;
+    }
+
+    .suspect-btn.selected {
+      background: #4a3a2a;
+      border-color: #d4b85c;
+      box-shadow: 0 0 0 2px #d4b85c;
+    }
+
+    .suspect-btn .num {
+      background: #0e0e10;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 0.75rem;
+      color: #d4b85c;
+    }
+
+    #guess-feedback {
+      margin-top: 20px;
+      background: #0e0e10;
+      border-radius: 14px;
+      padding: 20px 24px;
+      font-size: 1rem;
+      line-height: 1.7;
+      color: #d4c8b0;
+      border-left: 4px solid #c45a3a;
+      white-space: pre-wrap;
+    }
+
+    #guess-feedback .evidence-block {
+      margin: 14px 0;
+      padding: 12px 16px;
+      background: #1a1a26;
+      border-radius: 10px;
+      border-left: 3px solid #d4b85c;
+    }
+
+    #guess-feedback .evidence-block strong {
+      color: #f0e6d2;
+    }
+
+    #reveal-btn {
+      background: #8b2a1a;
+      color: #f0e6d2;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 40px;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 16px;
+      transition: background 0.2s;
+      letter-spacing: 0.5px;
+    }
+
+    #reveal-btn:hover {
+      background: #a83a2a;
+    }
+
+    #reveal-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .reveal-text {
+      margin-top: 20px;
+      padding: 20px 24px;
+      background: #0e0e10;
+      border-radius: 14px;
+      border-left: 4px solid #d4b85c;
+      color: #e8e0d0;
+      font-size: 1rem;
+      line-height: 1.8;
+      white-space: pre-wrap;
+    }
+
+    .reveal-text .imposter-name {
+      color: #e8a060;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+
+    /* ---- RESPONSIVE ---- */
+    @media (max-width: 600px) {
+      #book-container {
+        padding: 20px 18px 30px 18px;
+        border-radius: 16px;
+      }
+      #page-content {
+        font-size: 1.15rem;
+        line-height: 1.8;
+      }
+      #page-content h2 {
+        font-size: 1.6rem;
+      }
+      .character-card {
+        font-size: 1rem;
+        padding: 14px 16px;
+      }
+      .suspect-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      #nav-bar {
+        font-size: 0.75rem;
+      }
+      .nav-buttons button {
+        padding: 6px 14px;
+        font-size: 0.75rem;
+      }
+    }
+
+    /* ---- SCROLLBAR ---- */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #1a1a26;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #3a3a4e;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #5a5a6e;
+    }
+  </style>
+</head>
+<body>
+
+<div id="book-container">
+
+  <!-- NAVIGATION -->
+  <div id="nav-bar">
+    <span id="page-indicator">Page 1 / 31</span>
+    <div class="nav-buttons">
+      <button id="prev-btn" aria-label="Previous page">◀ PREV</button>
+      <button id="next-btn" aria-label="Next page">NEXT ▶</button>
+    </div>
+  </div>
+
+  <!-- MARK HINT -->
+  <div id="mark-hint">✦ Click any word to mark your spot · only one mark at a time</div>
+
+  <!-- PAGE CONTENT -->
+  <div id="page-content"></div>
+
+</div>
+
+<script>
+  // ============================================================
+  //  THE TORCHES WIND — BOOK DATA
+  //  Total pages: 31 (12 character pages + 15 episode pages +
+  //                1 trailer page + 1 guess page + 1 extra)
+  // ============================================================
+
+  // Page 0–11: CHARACTER PROFILES (12 pages)
+  // Page 12–26: EPISODES 1–15 (15 pages)
+  // Page 27: TRAILER SEASON 2
+  // Page 28: GUESS THE IMPOSTERS
+  // Page 29: REVEAL (hidden until requested)
+  // Page 30: END / CREDITS
+
+  const PAGES = [];
+
+  // -------------------------------------------------------
+  //  CHARACTER PAGES 1–12
+  // -------------------------------------------------------
+
+  PAGES.push({
+    type: 'character',
+    title: 'MARA VALE',
+    player: 'PLAYER 1',
+    desc: 'An investigative journalist who had been researching strange reports about an impossible tower and a mysterious Torch. She may recognize details that others overlook, but the reason she was investigating them should emerge slowly.',
+    note: 'She carries a folder of photographs she never got to open. The first page is missing.'
+  });
+
+  PAGES.push({
+    type: 'character',
+    title: 'VICTOR HALE',
+    player: 'PLAYER 2',
+    desc: 'A wealthy investor who wears an expensive suit and has experience buying failing companies. He is unusually calm under pressure.',
+    note: 'His true role must remain a mystery. He may appear suspicious, but his wealth and composure alone must not prove he is an imposter. Even if the system identifies him as a killer, that does not automatically establish his role.'
+  });
+
+  PAGES.push({
+    type: 'character',
+    title: 'FELIX ARDEN',
+    player: 'PLAYER 3',
+    desc: 'A computer and security specialist who previously encountered something called TORCH_PROTOCOL. He understands systems better than most of the others, but may not understand who created this one.',
+    note: 'He purchased a Reinforced Wall in Episode 1. He has not explained why.'
+  });
+
+  PAGES.push({
+    type: 'character',
+    title: 'NINA SOL',
+    player: 'PLAYER 4',
+    desc: 'An archivist who found documents referring to a group of participants. Her discovery may connect the game to events that happened before the players arrived.',
+    note: 'She wrote the first note questioning the number of players. "IT SHOULD HAVE BEEN TEN. SOMETHING IS WRONG."'
+  });
+
+  PAGES.push({
+    type: 'character',
+    title: 'TOMAS REED',
+    player: 'PLAYER 5',
+    desc: 'A paramedic who once heard unexplained knocking beneath a building. His medical experience may help the group, but it cannot guarantee his survival.',
+    note: 'He voted for Player 2 without speaking. He has not said why.'
+  });
+
+  PAGES.push({
+    type: 'character',
+    title: 'JAMIE FROST',
+    player: 'PLAYER 6',
+    desc: 'A quiet person whose notebook contains a drawing of the Torch and a group of figures. The drawing may be a clue, but its meaning is unknown.',
+    note: 'Wrote the most important note in Episode 2: "PLAYER 2 IS THE ONE WHO DID IT. THAT DOES NOT MEAN PLAYER 2 IS AN IMPOSTER."'
+  });
+
+  PAGES.push({
+    type: 'character',
+    title: 'OWEN PRICE',
+    player: 'PLAYER 7',
+    desc: 'A mathematician interested in uncertainty. He may try to calculate patterns in voting, deaths, purchases, and the system\'s behavior.',
+    note: 'Eliminated in Episode 2 by registered kill. He wrote: "12 PLAYERS. 2 IMPOSTERS. 10 OTHERS. THAT\'S THE SPLIT."'
+  });
+
+  PAGES.push({
+    type: 'character',
+    title: 'SERA QUINN',
+    player: 'PLAYER 8',
+    desc: 'A former security specialist who once saw cameras displaying impossible rooms. She understands surveillance, but may not know whether the game\'s cameras follow the same rules.',
+    note: 'She counted the minutes until the Torch dimmed. She was right.'
+  });
+
+  PAGES.push({
+    type: 'character',
+    title: 'DR. ADRIAN CROSS',
+    player: 'PLAYER 9',
+    desc: 'A psychiatrist who researched reports of people sharing memories of impossible places. He may be good at reading people, but interpreting behavior is not the same as knowing the truth.',
+    note: 'He accused Player 2 first. He was also accused back. The revote will decide between them.'
+  });
+
+  PAGES.push({
+    type: 'character',
+    title: 'ROWAN HALE',
+    player: 'PLAYER 10',
+    desc: 'A building maintenance worker who experiences recurring dreams about an unfamiliar place. His surname resembles Victor Hale\'s, but that connection should not be assumed to mean they are related.',
+    note: 'He purchased something from the shop. He voted for Player 2. He has not explained either.'
+  });
+
+  PAGES.push({
+    type: 'character',
+    title: 'UNNAMED',
+    player: 'PLAYER 11',
+    desc: 'A broad-shouldered, shaved-head man. In Episode 1, he breaks the no-speaking rule by shouting a question and is immediately removed. His name and deeper history have not yet been established.',
+    note: 'CANON: Player 11 is INNOCENT. This is background truth, not stated in-story.'
+  });
+
+  PAGES.push({
+    type: 'character',
+    title: 'IRIS BELL',
+    player: 'PLAYER 12',
+    desc: 'A quiet woman. Her history, loyalties, and role remain largely unknown, giving her room to become more important as the season progresses.',
+    note: 'CANON: Player 12 is INNOCENT. This is background truth, not stated in-story.'
+  });
+
+  // -------------------------------------------------------
+  //  EPISODES 1–15
+  // -------------------------------------------------------
+
+  // --- EPISODE 1 ---
+  PAGES.push({
+    type: 'episode',
+    title: 'Episode 1 — The Rules',
+    body: `Mara Vale woke to the smell of stone and cold air.
+
+She did not remember falling asleep. She remembered a train, the shudder of it, a folder on her lap with photographs she had not yet looked at. Then nothing. Now this.
+
+She lay on her back on a smooth gray floor. Above her, far above, a hole opened in the ceiling, and through it she could see sky — pale, overcast, the color of dishwater. Light poured down from somewhere above the hole, or perhaps from the thing that stood beneath it.
+
+The Torch.
+
+It rose from the center of the room like a monument, taller than a house, its metal blackened and old. No flame she could name burned at its top. Instead the light gathered there, white and steady, and cast no flickering shadows. The room around it was vast and bare — gray walls, gray floor, a few benches, and nothing else.
+
+Eleven other people were waking up.
+
+Mara sat up slowly and counted them without meaning to. A man in an expensive suit, already on his feet, brushing dust from his sleeve. A thin man with a notebook clutched to his chest. A broad-shouldered man with a shaved head, breathing hard. A woman with gray at her temples who looked around the room the way an archivist looks at a shelf that has been rearranged. Others. Twelve of them, including her.
+
+Nobody spoke. Not yet.
+
+Then the voice began.
+
+It came from everywhere and nowhere, and its pitch was wrong — high, thin, like a violin played slightly off-key. It did not hurry. It simply spoke, and the speaking was worse than shouting.
+
+"Welcome. You have been selected. There are rules. Listen once."
+
+The suited man's jaw tightened. The woman with the notebook wrote something down immediately, her pen scratching.
+
+"Rule one. No speaking outside of voting. You will communicate in writing. Rule two. Do not attempt to leave the game area. Rule three. Do not damage the Torch. Rule four. Do not interfere with voting."
+
+The voice paused. When it resumed, it was very slightly faster.
+
+"Each of you begins with one hundred Q Points. Equipment may be purchased. Some equipment will help you survive. Some will help you learn. Purchases are final. There is a shop; you will find it. There is a Torch; you have found it. There are two among you who are not as they seem."
+
+Mara's stomach turned over.
+
+"At the end of each round, you will vote. One player will be eliminated. Two players among you are Imposters. They will act against you. You may act against each other. Attacks are permitted. Registered kills will be announced at voting."
+
+The voice climbed, a half-note higher.
+
+"Survive. Identify. Vote. The round begins now."
+
+Silence.
+
+The shaved-head man exploded. "What the hell is this? What the hell is—"
+
+He got no further. The floor beneath him simply opened — not a trapdoor, not a seam, just an absence where he had been standing — and he dropped through it without a sound, and the floor closed again, smooth and gray and unmarked.
+
+Nobody screamed. Nobody moved. The place where he had stood was indistinguishable from the rest of the floor.
+
+Mara's hands were shaking. She pressed them flat against the stone.
+
+The voice returned, calm and high and almost gentle.
+
+"Speaking is not permitted. Your companion has been removed."
+
+Then it was gone.
+
+For a long moment the eleven remaining players stared at one another. The suited man — she would learn his number later, or guess it — looked at the empty floor, then at the Torch, then at the rest of them, and his expression was not fear. It was calculation. That frightened her more than the screaming would have.
+
+The thin man with the notebook sat down hard on a bench and opened it, and Mara saw, over his shoulder, a drawing. The Torch. A ring of small figures around it. The ink was old and faded, as though the page had been drawn years ago and carried a long way.
+
+The archivist woman had already found paper somewhere and was writing. She held up the sheet.
+
+HOW MANY OF US WERE THERE?
+
+A pause. Then the man in the suit wrote on his own sheet, deliberately, and held it up.
+
+TWELVE.
+
+The archivist frowned. She wrote again.
+
+THE VOICE SAID TWO. TWO IMPOSTERS. NOT HOW MANY PLAYERS.
+
+The mathematician — a wiry man with glasses who had been mouthing numbers to himself — wrote quickly.
+
+12 PLAYERS. 2 IMPOSTERS. 10 OTHERS. THAT'S THE SPLIT.
+
+But the archivist shook her head and wrote, slower, underlining it:
+
+NO. IT SHOULD HAVE BEEN TEN. SOMETHING IS WRONG.
+
+Mara read that twice. Something is wrong. She looked around at the faces — eleven of them now, eleven strangers — and thought: she's right. There's one too many of us. Or two.
+
+She found a scrap of paper on a bench and a stub of pencil, and wrote her own first message.
+
+THE BROAD-SHOULDERED MAN. DID ANYONE SEE WHERE HE WENT?
+
+The psychiatrist — she guessed from the way he watched everyone, the careful stillness — read it and wrote back.
+
+NOWHERE. HE JUST STOPPED EXISTING.
+
+The pen shook in his hand as he wrote it.
+
+Then the voice came back, and everyone flinched.
+
+"The first registered kill has been logged. At voting, the victim and the accused will be announced. Voting will begin when the round ends. Use your time."
+
+Mara felt the words settle into the room like cold water.
+
+Somewhere among these eleven people, someone had already killed. Or would. Or the system was lying. She did not know which was worse.
+
+She looked toward the shop — a recess in the far wall she had not noticed before, lit softly, shelves visible. Equipment. Q Points. She had one hundred of them and no idea what they were worth.
+
+The man in the suit was already walking toward it.
+
+The archivist was watching him. Then she looked at Mara, and her eyes said, plainly, without a word: watch him.
+
+Mara nodded, just slightly.
+
+Behind them all, the Torch burned on, white and steady and silent, and through the hole in the ceiling the sky did not change.`
+  });
+
+  // --- EPISODE 2 ---
+  PAGES.push({
+    type: 'episode',
+    title: 'Episode 2 — The First Vote',
+    body: `The round ended without warning.
+
+There was no bell, no countdown. The Torch simply brightened — a pulse of white light that swept the room and left everyone blinking — and the voice returned, high and quick, as though it had been waiting just behind their ears.
+
+"Voting has begun. Speaking is permitted. The registered kill will now be announced."
+
+Mara set her pencil down. Her fingers had gone numb from writing.
+
+The voice climbed.
+
+"Last round, a kill was registered. The victim: Player 7."
+
+The mathematician. The wiry man with glasses. Mara turned, and he was still there, sitting on his bench, mouthing numbers — and then he was not. The floor opened beneath him the way it had opened beneath the shaved-head man, and he fell without a cry, and the floor closed, and it was as though he had never existed.
+
+Except he had. She had watched him write. 12 players. 2 imposters. 10 others.
+
+"The accused: Player 2."
+
+Everyone looked at the man in the suit.
+
+He did not flinch. He stood very still near the shop recess with his hands folded in front of him, and he looked back at them all with an expression that was almost courteous, as though he had been introduced at a dinner party and was waiting for someone to offer him a drink.
+
+"Voting will proceed. You have until the Torch dims. One player will be eliminated."
+
+The voice did not say choose well. It did not need to.
+
+The silence broke all at once.
+
+"It was you," the psychiatrist said — Player 9, if the notes were right. He had risen from his bench and his voice was tight. "You were the only one moving. You went straight to the shop. You knew—"
+
+"I went to the shop because I needed to know what was for sale." The suited man — Player 2 — spoke calmly, evenly, without raising his voice. "As did several of you. Player 3 bought something. Player 10 bought something. I did not."
+
+"That's not—" The psychiatrist stopped himself. "You didn't buy anything?"
+
+"The walls." Player 2 gestured vaguely toward the far side of the room. "Someone purchased a reinforced wall. It wasn't me. I have spent nothing."
+
+Mara watched the archivist — Player 4 — write quickly on a fresh sheet and hold it up.
+
+PLAYER 2, HOW DID YOU KNOW ABOUT THE WALL?
+
+Player 2 read it, and for the first time something crossed his face. Not guilt. Something closer to annoyance at himself.
+
+"I saw it appear," he said. "The wall changed while I was standing there. I assumed the purchaser was nearby. I don't know who it was."
+
+"Convenient," the psychiatrist said.
+
+"It is what happened."
+
+The thin man with the notebook — Player 6, the quiet one — had not spoken at all. He sat with the notebook open on his knees, and now he turned it around so the room could see. Not his drawing this time. A page of neat, cramped writing.
+
+THE VOICE SAID TWO IMPOSTERS. THE KILL WAS REGISTERED BY ONE. WHOEVER IS NAMED IS THE ONE WHO DID IT. PLAYER 2 IS THE ONE WHO DID IT. THAT DOES NOT MEAN PLAYER 2 IS AN IMPOSTER. IT MEANS PLAYER 2 KILLED. THOSE ARE NOT THE SAME THING.
+
+The room went quiet.
+
+Mara felt it land. That was the trap, wasn't it. That was the whole design. The system told them who killed and let them decide what killing meant. The psychiatrist had already decided. The notebook said not to.
+
+"Read that again," Player 2 said quietly. He had turned to look at Player 6. "Read it again. Because if this room votes on the assumption that a killer is an Imposter, then the Imposters don't need to do anything at all. They can just let us do it for them."
+
+"You'd say that," the psychiatrist said. "You'd say anything."
+
+"Yes." Player 2's voice did not change. "So would you. So would everyone. That is the point."
+
+The archivist wrote again, and this time her hand was steady.
+
+WE SHOULD NOT VOTE FOR PLAYER 2 JUST BECAUSE THE VOICE NAMED HIM. BUT WE SHOULD ASK WHY THE VOICE NAMED HIM AND NOT SOMEONE ELSE. IS THE ACCUSATION TRUE OR IS IT A TOOL?
+
+"How would we know?" the psychiatrist demanded. "How would we ever know?"
+
+Nobody answered him. Mara looked around at the faces — Player 2 calm, Player 6 silent, Player 4 writing, Player 3 with his hands in his pockets, Player 9 flushed with anger, Player 10 watching the wall, Player 5 the paramedic with her arms crossed, Player 8 the security woman scanning the ceiling for cameras, Player 12 the quiet woman who had said nothing at all since waking — and thought, with a lurch, that she did not know any of them, and she was about to help decide which one of them died.
+
+"Ten minutes," Player 8 said suddenly. Everyone looked at her. "That's not a rule. That's a guess. The Torch is dimming. Look at it."
+
+It was. The white light had begun to recede, drawing down toward the top of the Torch, and the room was getting darker by degrees.
+
+"We have to vote," the paramedic said. "We have to say a name out loud. How do we vote?"
+
+"Out loud," Player 2 said. "We say the name. The voice will hear."
+
+The dark kept coming.
+
+"Then I'll say it first," the psychiatrist said. "Player 2."
+
+"Player 9," Player 2 said, without heat. "For voting on a killer as though a killer were an Imposter. It is the single most dangerous mistake this room can make, and you made it in the first five minutes."
+
+"I'm not the one who was accused."
+
+"You are the one who accused. That is all I have. I admit it is not much."
+
+The archivist looked at Mara. She wrote, small: WHO DO YOU TRUST?
+
+Mara looked at the paper. Then at the dimming Torch. Then at the man in the suit, who might be exactly what he appeared and might be the best liar in the room, and at the psychiatrist, who might be frightened and honest and might be steering them all.
+
+She wrote back, slowly: NOBODY. BUT I THINK WE SHOULD NOT GIVE THEM WHAT THEY WANT.
+
+The archivist nodded once.
+
+"Player 2," the psychiatrist said again, louder.
+
+"Player 9," said Player 2.
+
+"Player 2," said Player 5, the paramedic, not looking at anyone.
+
+"Player 2," said Player 10.
+
+Mara's heart was pounding. She said nothing. The Torch dimmed further. Two more names came, and she did not hear who said them, and then the light was nearly gone and the voice returned, high and pleased and quick.
+
+"The vote is tied. Player 2 and Player 9. A revote will now occur. Only these two may speak. All others will be silent until it is done."
+
+The floor beneath the other nine of them went gray and cold and somehow final, and Mara found she could not speak, could not write, could only watch.
+
+Player 2 and Player 9 stood facing each other in the dimming light.
+
+Somewhere above them, through the hole in the ceiling, the sky had not changed at all.`
+  });
+
+  // --- EPISODE 3 ---
+  PAGES.push({
+    type: 'episode',
+    title: 'Episode 3 — Ten Seconds',
+    body: `The revote did not last long.
+
+Player 9 spoke first. He spoke quickly, and his voice cracked once in the middle, and he kept glancing at the Torch as though he expected it to interrupt him.
+
+"Look at him. Look at his face. He's not afraid. Everybody else is afraid. He's standing there like he's waiting for a train."
+
+"I am afraid," Player 2 said. "I am simply not performing it for you."
+
+"That's exactly what—"
+
+"I have not lied to this room. I have not denied the accusation. I have said only that killing and being an Imposter are two different things, and that if you kill me for the first, you may be doing the second's work. If that is a lie, show me where."
+
+Player 9 opened his mouth. Closed it. Opened it again.
+
+"You're better at this than I am," he said finally. "That's what I've got. You're better at this than I am."
+
+"That is not a reason to kill me."
+
+"No." Player 9 looked around at the silent, frozen faces of the others. "No, it isn't."
+
+The Torch flared.
+
+"The revote is complete," the voice said, high and brisk. "Player 9 will be eliminated."
+
+The psychiatrist did not scream. He looked at Player 2 with something that was almost relief, and then the floor opened under him, and he was gone.
+
+Player 2 stood alone in the center of the room, and for a moment nobody could look at him.
+
+The voice returned.
+
+"The shop is open. The next round has begun."
+
+---
+
+Mara went to the shop first.
+
+It was a recess in the far wall, softly lit, shelves of equipment with small paper tags. The voice had not lied: each item had a price, and her Q Points were visible on a small card she had not noticed before, tucked in her pocket. One hundred.
+
+Identity Device Upgrade — 80 Q. A one-time attempt to identify a player's role. Ten seconds to use. The tag said nothing about accuracy.
+
+Reinforced Wall — 60 Q.
+
+Kill Shield — 100 Q.
+
+Torch Scanner — 75 Q.
+
+The Murderer Tool — 0 Q. Once per round. The tag was handwritten, and the handwriting was very neat and very small, and it said nothing else.
+
+Mara stared at that last one for a long time.
+
+She was still standing there when Player 6 appeared beside her.
+
+He did not speak — speaking was forbidden again — but he held up his notebook, open to a fresh page, and on it he had written: THE TOOL IS FREE. THAT MEANS SOMEONE WILL USE IT.
+
+Mara took out her pencil and wrote on her own scrap: WHAT DOES IT DO?
+
+Player 6 shook his head. He had not bought it. He had written, beneath his first line: I DON'T KNOW. BUT FREE THINGS IN THIS PLACE ARE NOT GIFTS.
+
+She bought the Identity Device. Eighty points. The device was small and cold and fit in her palm, and it had a single button and a small screen that showed nothing at all.
+
+Ten seconds. A fifty-fifty chance. She had no idea what she was going to do with it, and she had already spent almost everything she had.
+
+---
+
+The round passed slowly. Nobody spoke. Notes appeared on the walls, permanent and anonymous.
+
+PLAYER 2 IS TOO CALM.
+
+PLAYER 3 HAS BEEN WATCHING THE SHOP.
+
+PLAYER 9 HAS BEEN WATCHING EVERYONE. (This one had been written before Player 9 was eliminated. It stayed. That was the point.)
+
+Mara watched the notes accumulate and thought about how none of them could be erased, and how none of them had a name attached.
+
+On the second day — if it was a day; the sky never changed — she found Player 12, Iris Bell, sitting alone on a bench near the Torch, and she sat down beside her, and she took out her identity device and showed it to her, and Iris looked at it and then at Mara and then, very deliberately, she nodded toward Player 2 across the room.
+
+Mara understood.
+
+She stood up. She walked toward Player 2 with the device in her hand.
+
+Ten seconds was a long time when you were walking toward a man who might be a killer. Ten seconds was longer when he turned and saw what she was holding and did not move.
+
+She pressed the button.
+
+The screen flickered. Numbers. A progress bar. Player 2 watched her without expression.
+
+Five seconds. Six. Seven.
+
+Player 3 stepped out of the crowd and knocked the device out of her hand.
+
+It clattered across the floor. The screen went dark. Player 2 had not moved at all.
+
+Player 3 stood there with his hands up, and on his face was an expression Mara could not read, and he mouthed — silently, because speaking was forbidden — I'm sorry, I'm sorry, I'm sorry.
+
+The device was broken. Her one use was gone.
+
+And the voice, high and amused, came from everywhere at once.
+
+"The identity attempt has failed. The round continues."
+
+Mara picked up the broken device and looked at Player 3.
+
+He would not meet her eyes.`
+  });
+
+  // --- EPISODE 4 ---
+  PAGES.push({
+    type: 'episode',
+    title: 'Episode 4 — Permanent Paper',
+    body: `The notes were becoming a problem.
+
+Not because they were wrong — most of them were guesses, and guesses were all anyone had — but because they stayed. They stayed on the walls, on the benches, on the floor near the shop, and they could not be taken down, and they could not be signed.
+
+Mara walked the room slowly and read them all.
+
+PLAYER 2 IS TOO CALM.
+
+PLAYER 3 HAS BEEN WATCHING THE SHOP.
+
+PLAYER 3 STOPPED THE SCAN. WHY.
+
+PLAYER 6 WROTE THE NOTE ABOUT KILLING NOT BEING THE SAME AS BEING AN IMPOSTER. THAT IS A VERY USEFUL THING FOR AN IMPOSTER TO WRITE.
+
+PLAYER 12 HAS NOT SPOKEN ONCE. NOT EVEN DURING VOTING.
+
+WHY IS THE SHOP FREE FOR ONE ITEM AND EXPENSIVE FOR EVERYTHING ELSE.
+
+WHERE IS PLAYER 11.
+
+Mara stopped at that last one. Player 11. The shaved-head man. The one who had spoken and fallen through the floor. Nobody had written his name in days. Nobody had mentioned him at all.
+
+She found a scrap of paper and wrote, slowly: PLAYER 11 WAS HERE. WE SAW HIM. HE WAS NOT A LIE.
+
+She placed it on the wall beside the note about the shop. It stuck. It would stay.
+
+---
+
+Player 3 — Felix Arden — had not spoken to anyone since the scan. But during the next voting period, when speech was permitted, he stood up before anyone else could and said:
+
+"I stopped the scan because I have seen this system before. Not this exact one. Something called TORCH_PROTOCOL. I worked on a security contract five years ago and there was a name in the code and the name was this. The Torch. I know how the identity tools work, and I know they are not reliable, and I knew that if Mara used it on Player 2 and got an answer, right or wrong, this room would treat it as a verdict."
+
+"You broke my device," Mara said.
+
+"I saved you from yourself." He looked exhausted. "The tool is fifty-fifty. You had one use and you spent it on the calmest man in the room. If it had said IMPOSTER, you would have started a war. If it had said INNOCENT, you would have given a killer your trust. I did not know which way it would go. I only knew it would go wrong."
+
+"That wasn't your decision."
+
+"No." He met her eyes. "It wasn't. And I'm sorry. But I'd do it again."
+
+The room was silent. Player 2 was watching Felix with an expression that might have been respect.
+
+"What else do you know about TORCH_PROTOCOL?" Player 8 asked.
+
+"Not much. It was a protocol for managing groups under pressure. I never saw the source. I saw the name, and I saw that it had been removed from the archive, and I saw that somebody had been paid a great deal of money to remove it."
+
+"By who?"
+
+"I don't know. The payment came through a shell company. It had a name. The name was Hale Holdings."
+
+Everyone turned to look at Player 2.
+
+Victor Hale did not blink.
+
+"That is a very old company," he said, "and I am not the only Hale in the world."
+
+"You are the only one in this room," Felix said.
+
+"Yes." Victor's voice was quiet. "I am."
+
+The Torch flared before anyone could speak again.
+
+"Voting has begun. A registered kill has been logged. The victim: Player 3."
+
+Felix had time to look surprised. Then the floor opened and he was gone, and the room had one fewer person in it, and the note he had written about TORCH_PROTOCOL was still on the wall because notes never came down.
+
+"The accused: Player 2."
+
+"Of course," Victor said. He did not sound surprised at all.
+
+"We're not voting for him," Player 5 said. The paramedic's voice was flat. "We're not doing this again. He's being set up. Two rounds, two kills, both pointing at the same man. That's not evidence. That's a pattern, and the pattern is a message."
+
+"Or the message is that he did it," Player 8 said. "Twice."
+
+"Then why name him? If he were an Imposter, why would the system keep handing us his name for free?"
+
+"To make us think exactly what you're thinking."
+
+"Then we can't know," Player 5 said. "That's the point. We can't know."
+
+Mara looked at the wall. At the note Player 6 had written in the second round, the one about killing not being the same as being an Imposter, the one that was starting to look like the truest sentence in the room.
+
+She walked to the wall and wrote, carefully, where everyone could see it:
+
+WE VOTED OUT PLAYER 9 FOR BEING AFRAID. HE WAS AFRAID AND HE WAS WRONG AND WE KILLED HIM FOR IT. LET'S NOT DO THAT AGAIN.
+
+Player 8 read it. Player 5 read it. Victor read it and looked at her for a long moment.
+
+"Player 8," Player 5 said.
+
+"Player 5," Player 8 said.
+
+"Player 8," said someone else.
+
+"Player 8," said another.
+
+Mara said nothing. The Torch dimmed. The vote was not tied.
+
+Sera Quinn — Player 8 — looked around the room once, and then the floor opened beneath her, and she was gone.
+
+Nobody had voted for Victor at all.
+
+"The round has ended," the voice said, high and pleased. "The next round has begun."
+
+And then, very softly, almost too softly to hear:
+
+"The Murderer Tool is available."`
+  });
+
+  // --- EPISODE 5 ---
+  PAGES.push({
+    type: 'episode',
+    title: 'Episode 5 — The Torch',
+    body: `The Torch was taller than it had looked on the first day.
+
+Mara walked around it slowly, one hand out, not touching. The metal was warm. Not hot — warm, like a body. The light at the top was steady and white, and it did not flicker, and it cast no shadow she could see.
+
+Player 12 — Iris Bell — was already there. She had a hand raised toward the light, not touching it, palm open, as though she were testing for rain.
+
+Mara found a scrap of paper and wrote: WHAT ARE YOU DOING?
+
+Iris took the paper and the pencil, and wrote back, in a hand that was very small and very careful: IT'S WARM. IT'S ALWAYS WARM. I CHECK EVERY ROUND.
+
+WHY?
+
+Iris looked at her. Then she wrote: BECAUSE WARM THINGS ARE ALIVE.
+
+Mara felt something move in her chest. She looked up at the Torch, at the white light that showed no flame, and thought about how nobody had ever asked what it was made of, or where the light came from, or why it did not go out.
+
+The shop had a Torch Scanner. Seventy-five points. She had twenty left.
+
+She had spent most of her Q Points on the Identity Device, and the device was broken, and she had nothing to show for it. She sat down on a bench and put her head in her hands.
+
+A shadow fell across her. Victor Hale.
+
+He did not speak — the round was still active, no speech permitted — but he sat down on the bench beside her, at a careful distance, and he placed a folded piece of paper on the bench between them.
+
+She unfolded it.
+
+I DID NOT KILL PLAYER 3. I DID NOT KILL PLAYER 7. I DO NOT KNOW WHO DID. I HAVE SPENT NO POINTS AND I HAVE PURCHASED NOTHING AND I HAVE NOTHING TO HIDE AND I KNOW THAT NONE OF THIS IS PROOF. I AM TELLING YOU BECAUSE YOU ARE THE ONLY ONE HERE WHO HAS NOT ALREADY DECIDED WHAT I AM.
+
+Mara read it twice. Then she wrote beneath it: WHY ME?
+
+He took the paper back, wrote, and returned it.
+
+BECAUSE YOU SAID NOBODY. AND YOU MEANT IT.
+
+---
+
+The round ended quietly. No kill had been registered. The voice announced the voting period with something that might almost have been disappointment.
+
+Nobody had died. It was the first time.
+
+The room felt different. Lighter. The players gathered near the Torch without being told to, and for a moment nobody accused anybody of anything.
+
+Then Player 10 — Rowan Hale — spoke.
+
+"I want to say something," he said. He was a broad man with a maintenance worker's hands, and he had been quiet all season. "I've been having dreams. Since before I got here. Dreams about a room with a torch in it. I never told anyone because it sounds insane. But I wrote down what I saw in the dream, and I've been comparing it to this room, and it's the same room. Every detail. The benches. The shop. The hole in the ceiling."
+
+"What does that mean?" Player 5 asked.
+
+"I don't know. But I know I've been here before. Or I've seen it before. Or something." He looked at Victor. "And I know our names are the same. Hale. I don't know if that means anything. I've never met him before in my life."
+
+Victor said nothing. He was watching Rowan with an expression Mara could not read.
+
+"The Torch," Rowan said. "I dreamed about the Torch. And in the dream, there was something underneath it."
+
+Nobody spoke.
+
+"Something underneath it," he said again. "And it was alive."
+
+The voice came back before anyone could ask a question.
+
+"Voting has begun. The round's registered kill has been logged. The victim: Player 10."
+
+Rowan Hale looked down at the floor beneath his feet. He looked almost relieved.
+
+"The accused," the voice said, "is Player 2."
+
+The floor opened. Rowan Hale fell.
+
+And in the silence afterward, the voice said, very softly:
+
+"The Murderer Tool has been used. One body went limp. One body did not."`
+  });
+
+  // --- EPISODE 6 ---
+  PAGES.push({
+    type: 'episode',
+    title: 'Episode 6 — The Investor',
+    body: `The round ended and the room did not settle.
+
+The voice had said something new. One body went limp. One body did not. Nobody understood what it meant, and nobody wanted to ask.
+
+Mara found Victor standing by the Torch, alone.
+
+"Rowan knew you," she said. It was permitted now. Speech was permitted during voting, and voting had begun, and the voice had not yet called for names.
+
+"He knew my name," Victor said. "That is not the same thing."
+
+"He dreamed about this room. Before he came here. He dreamed about a thing under the Torch that was alive."
+
+"Yes." Victor looked up at the light. "He told me that, once, before the round ended. In writing. He said he had dreamed of it since he was a child. He said he had never told anyone because he was afraid they would think he was ill."
+
+"Did you believe him?"
+
+"I believed that he believed it. That is the most anyone can offer." He turned to look at her. "I have been a rich man for a long time, Mara. I have been accused of many things. I have been accused of worse than murder. I have never been accused of being a rich man who is also a liar, because I have never needed to lie. I have only ever needed to be patient."
+
+"Are you patient now?"
+
+"Yes."
+
+"Why?"
+
+"Because someone in this room is trying very hard to make me the answer to their question, and the more they try, the more clearly I can see the shape of them."
+
+Mara stared at him. "That's a very good answer."
+
+"It is." He smiled, thinly. "That is exactly the problem, isn't it."
+
+---
+
+The voting period was long.
+
+Nobody died. The registered kill belonged to Rowan, and Rowan was already gone, and the voice had said nothing about a second victim. The players sat near the Torch and talked, and for the first time the talking was not all accusation.
+
+Player 4, Nina Sol, said: "I found documents before I came here. A list of names. Twelve names. But the list had been corrected — someone had crossed out two and added two in different ink. I remember because the ink was a different colour. It bothered me."
+
+"Do you remember the names?" Mara asked.
+
+"Only one. It was mine."
+
+Player 6, Jamie Frost, opened his notebook and showed the drawing again — the Torch, the ring of figures. "I drew this before I came here," he said. "I don't remember drawing it. I don't remember owning the notebook. But it was in my pocket when I woke up, and the ink is old, and I know it's my handwriting."
+
+Player 12, Iris Bell, said nothing. She had not spoken all season.
+
+Player 5, the paramedic, said: "When I was a child I heard knocking under a building. Under the floor. Nobody else heard it. I've been thinking about that knock ever since I got here."
+
+One by one, they talked. And one by one, Mara noticed something.
+
+Every single person in this room had seen something impossible before they arrived. Every single one had a story about a room that should not exist, or a voice that should not speak, or a thing under a floor that should not be alive.
+
+Every single one.
+
+Except herself.
+
+She had been investigating those stories. She had never lived one.
+
+Or had she? She could not remember the train. She could not remember the folder. She could not remember anything before the stone floor and the cold air and the Torch.
+
+She looked around the room at these people — these witnesses, every one of them — and she thought: I am not like them. I was never like them. Why am I here?
+
+The voice returned.
+
+"Voting has begun. The registered kill has been logged. The victim: Player 6."
+
+Jamie Frost looked up from his notebook. He looked calm. He closed the notebook and set it on the bench beside him.
+
+"The accused," the voice said, "is Player 2."
+
+Victor Hale said nothing.
+
+The vote was quick. Player 4 voted for Victor. Player 5 voted for Victor. Player 8 was gone. Player 9 was gone. Player 10 was gone. The room was shrinking.
+
+Mara said: "Player 4."
+
+Nina Sol looked at her. "What?"
+
+"You found the list. You said the names were corrected. You said the ink was different. You know something about who was supposed to be here and who wasn't." Mara's voice was steady. "You've been writing notes since the first day. You've been steering this room. And every note you've written has been careful. Every single note. You never once put your own name on anything."
+
+"That's what the notes are," Nina said. "Anonymous."
+
+"Yes," Mara said. "And that's very convenient for whoever writes them."
+
+The vote was tied. Nina and Victor. A revote.
+
+Nina Sol and Victor Hale stood facing each other in the dimming light, and Nina said, "You killed Player 3. You killed Player 7. I know you did."
+
+"How do you know?" Victor said.
+
+"Because the voice named you."
+
+"The voice named me," Victor agreed. "And the voice has named me four times, and four times this room has voted, and twice this room has killed someone else. So tell me, Nina — if I were an Imposter, would I be the most named man in this room? Would the system keep pointing at me and letting me live?"
+
+Nina opened her mouth.
+
+"What if," Victor said quietly, "the voice is not trying to get you to kill me. What if it is trying to teach you what happens when you trust it?"
+
+The Torch flared.
+
+"The revote is complete. Player 4 will be eliminated."
+
+Nina Sol's eyes went wide. She looked at Mara.
+
+"You," she said. "You did this."
+
+The floor opened.
+
+She was gone.`
+  });
+
+  // --- EPISODE 7 ---
+  PAGES.push({
+    type: 'episode',
+    title: 'Episode 7 — The Wrong Answer',
+    body: `The room was getting smaller.
+
+Mara counted them: herself, Victor, Felix — no, Felix was gone — Player 5, Player 6 — no, Jamie was gone — Player 8 — gone — Player 12.
+
+Myself, Victor, Tomas Reed, Iris Bell.
+
+Four people.
+
+She sat down on a bench and stared at the Torch and did not move for a long time.
+
+Tomas Reed sat down beside her. He did not say anything. He was a paramedic, and he had seen people in shock before, and he knew that the best thing to do was to be there and be quiet.
+
+After a while, Mara said: "I killed Nina."
+
+"The room killed Nina."
+
+"I said her name."
+
+"You said a name. The room decided what it meant." He looked at her. "I voted for Victor twice. I was wrong at least once. Maybe twice. I don't know. That's the thing, isn't it. We never know."
+
+"I don't remember anything." Mara's voice was very quiet. "Before I woke up here. The train. The folder. I've been telling myself I'm an investigative journalist. I've been telling myself I know why I'm here. But I don't. I don't remember the train. I don't remember the folder. I don't remember anything."
+
+Tomas was silent for a moment.
+
+"Everyone here had a story about something impossible," he said. "You told me that. You noticed it. Every one of us had seen something we couldn't explain." He paused. "Maybe you didn't have a story because you are the story."
+
+"What does that mean?"
+
+"I don't know." He rubbed his face. "I'm a paramedic. I don't do riddles. I do pressure and broken bones and telling people things they don't want to hear."
+
+"Tell me something I don't want to hear."
+
+"You're the one the voice has never named." Tomas looked at her. "Four rounds. Four kills. Every name the voice gave us was someone else. Player 2 every time. Never you. Never Iris. Never me."
+
+Mara stared at him.
+
+"You think the voice is protecting me?"
+
+"I think the voice is doing something," Tomas said. "And I think you're the only one in this room it has never once pointed at."
+
+---
+
+The round ended.
+
+The voice said: "Voting has begun. No registered kill has been logged."
+
+No kill.
+
+For the second time, nobody had died.
+
+The players gathered near the Torch. Victor stood a little apart. Iris Bell stood close to the light.
+
+"I want to try something," Mara said.
+
+She walked to the wall and found the note Player 6 had written in the second round — the one about killing and being an Imposter, the one that was still there, the one that was starting to look like the truest sentence in the room.
+
+She found a fresh scrap of paper and wrote beneath it:
+
+IF THE VOICE IS TEACHING US TO TRUST IT, THEN THE SMARTEST THING WE CAN DO IS MISTRUST IT. FOUR TIMES IT NAMED PLAYER 2. FOUR TIMES WE VOTED. THREE TIMES WE KILLED SOMEONE ELSE. PLAYER 2 IS STILL HERE. PLAYER 2 IS STILL ALIVE. EITHER THE VOICE IS LYING, OR PLAYER 2 IS PLAYING A VERY LONG GAME.
+
+She placed it on the wall. It stuck.
+
+Victor read it. He did not look pleased.
+
+"That is not what I would have written," he said.
+
+"What would you have written?"
+
+"I would have written that the voice is not lying and not telling the truth. I would have written that the voice is a third player." He looked at her. "It has its own agenda. It is not for the Imposters and it is not for us. It is doing something else, and we are all pieces."
+
+"And what is it doing?"
+
+"I don't know." He smiled, thinly. "But I would very much like to live long enough to find out."
+
+The voice returned.
+
+"The round has ended. The next round has begun. The Murderer Tool is available."
+
+Mara felt the words land like cold water.
+
+"Once per round," she said. "It's free. It's always free."
+
+"Yes," Victor said.
+
+"What does it do?"
+
+He looked at her for a long moment.
+
+"I don't know," he said. "But I know what it is called. And I know that the voice has never once told us what it does, and that the voice tells us everything it wants us to know." He paused. "The name is the message, Mara. It's called the Murderer Tool."
+
+Iris Bell stepped away from the Torch.
+
+She had not spoken all season.
+
+"The body that goes limp," she said, very quietly, "is the one that isn't there. The one that's empty. The one that's waiting."
+
+Everyone turned to look at her.
+
+"What?" Mara said.
+
+Iris looked at her hands. She did not say anything else.`
+  });
+
+  // --- EPISODE 8 ---
+  PAGES.push({
+    type: 'episode',
+    title: 'Episode 8 — The Room Changes',
+    body: `The room changed while they were sleeping.
+
+Mara woke to find that the benches had moved. Not much — a few feet to the left, and one had turned to face the wall — but they had moved, and nobody had seen them move.
+
+"There are more beds," Tomas said. "Look. There were four. Now there are six."
+
+"There are four of us," Mara said.
+
+"Yes." He looked at the beds. "Two of these beds are not for anyone."
+
+The shop was different too. The shelves had been rearranged. The Identity Device was gone from the shelf. The Murderer Tool was still there, still free, and beside it now was a new item with a handwritten tag:
+
+THE LIE DETECTOR — 120 Q. ONE USE. ONE QUESTION.
+
+Mara looked at the price. She had twenty points. Nobody had 120. Not anymore.
+
+"We can't afford it," Tomas said. "None of us can. That's the point."
+
+"Someone can," Mara said. "Victor. He's spent nothing."
+
+They both looked at the man in the suit, who was sitting on one of the new beds, reading a note that he had found on the floor.
+
+"What does it say?" Mara asked.
+
+Victor held it up. It was in the small, careful handwriting Mara had come to recognize.
+
+IT SHOULD HAVE BEEN TEN. I WAS ON THE LIST. I CROSSED OUT TWO NAMES AND WROTE IN TWO MORE. I DON'T REMEMBER WHY. I DON'T REMEMBER WHO. I ONLY REMEMBER THAT THE INK WAS DIFFERENT AND THE HAND THAT HELD IT WAS MINE.
+
+— NINA
+
+"She wrote this," Mara said. "She wrote it before she died."
+
+"Yes."
+
+"And she put it on the floor."
+
+"Yes." Victor folded the note carefully. "She put it where someone would find it. She could not sign a note on the wall. So she wrote this one and left it on the floor, where it would not stick, and where it would be found by whoever cleaned up after the round."
+
+Mara stared at him.
+
+"You think she planned her own death?"
+
+"I think she was trying to leave a message that would outlive her." Victor looked at the note. "And she did."
+
+---
+
+The next round was quiet. Nobody was killed. The voice said nothing about a registered kill.
+
+But the room was different.
+
+The Torch was brighter. Not much — a few degrees — but Mara had been staring at it for days, and she knew how bright it was supposed to be. It was brighter.
+
+"The Torch is warm," Iris said. She had come to stand beside Mara, and her voice was quiet. "It was warm before. Now it's warmer."
+
+"What does that mean?"
+
+"I don't know." Iris looked up at the white light. "But warm things are alive. I told you that. I've been checking every round. It gets a little warmer every time someone dies."
+
+Mara felt the hair on her arms stand up.
+
+"Every time?"
+
+"Every time." Iris turned to look at her. "The Torch is eating them. Or it's being fed. Or it's growing. I don't know. But it's getting warmer, and it's getting brighter, and it's getting closer to something."
+
+"To what?"
+
+Iris Bell smiled. It was the first time Mara had seen her smile, and it was not a reassuring smile.
+
+"To waking up," she said.
+
+---
+
+The voice returned.
+
+"Voting has begun. A registered kill has been logged. The victim: Player 5."
+
+Tomas Reed looked up.
+
+"Wait," he said. "Wait, I didn't—"
+
+The floor opened.
+
+"The accused," the voice said, "is Player 12."
+
+Iris Bell did not look surprised.
+
+"That's not right," Mara said. "Tomas was killed. She can't have killed him. She was here. She's been here the whole time."
+
+"The accused is Player 12," the voice repeated.
+
+Iris looked at Mara. Then she looked at Victor. Then she looked at the Torch.
+
+"The body that goes limp," she said, "is the one that isn't there."
+
+The floor opened beneath her.
+
+She did not fall. She stood, very still, and the gray floor opened under her feet and she did not move at all, and then she was gone.
+
+The voice said:
+
+"The Murderer Tool has been used. One body went limp. One body did not."
+
+Victor Hale looked at Mara.
+
+"That," he said, "was not a vote."
+
+Mara stared at the empty space where Iris had been.
+
+"No," she said. "That was a demonstration."`
+  });
+
+  // --- EPISODE 9 ---
+  PAGES.push({
+    type: 'episode',
+    title: 'Episode 9 — Two Imposters',
+    body: `Two people were left.
+
+Mara and Victor. The room was vast and gray and quiet, and the Torch burned white at the center of it, and the floor was smooth and gray and unmarked.
+
+"Fourteen pages of rules," Victor said, "and it comes down to this. Two people. One question."
+
+"One of us is an Imposter," Mara said.
+
+"One of us is an Imposter." He sat down on a bench. "Or both of us. Or neither. The game said two among the original twelve. Two. Not one. If there are two, and one of us is one, then the other is already dead. If there are two, and neither of us is one, then both are dead, and we are the only two people in this room, and the game is already over."
+
+"The game isn't over."
+
+"No." He looked at the Torch. "It isn't."
+
+Mara sat down on the bench across from him. The Torch was warm. It was warmer than it had been. It was casting shadows now — faint ones, but shadows — and that was new.
+
+"Tell me something true," she said. "Something I can check."
+
+"I am Victor Hale. I am fifty-three years old. I have a company called Hale Holdings. I have never killed anyone. I have never been to this room before. I do not know what is under the Torch. I do not know who built the shop. I do not know who the Imposters are."
+
+"That's all true?"
+
+"It is all true." He paused. "It is also all useless. None of it can be checked. You have no way to know whether I am lying."
+
+"No," Mara said. "I don't."
+
+They sat in silence for a while.
+
+"The notes," Mara said. "They're still on the wall. Every single one. We could read them all. We could try to figure out who wrote what, and when, and why."
+
+"We could." Victor did not move. "But they're anonymous. And they were written by people who are now dead. And even if we could identify every writer, we would still not know who was lying."
+
+"Then what do we do?"
+
+"We do the only thing we can do." He looked at her. "We decide what kind of person we are, and we act like it, and we accept the consequences."
+
+"That's not a plan."
+
+"No," Victor said. "It isn't."
+
+---
+
+The voice returned.
+
+"Voting has begun. A registered kill has been logged. The victim: Player 5."
+
+"Tomas is already dead," Mara said.
+
+"Yes," the voice said. "The kill was logged before he was eliminated. The system is recording all kills. The system is keeping a complete record."
+
+"The accused?"
+
+"Player 2."
+
+Victor did not move.
+
+"Every time," Mara said. "Every single time. Four kills. Four accusations. All of them you."
+
+"Yes."
+
+"Why?"
+
+"I don't know." Victor looked at her. "But I know that whoever is doing this has never once accused you. And I know that you are the only one in this room who does not remember anything before the Torch."
+
+Mara stared at him.
+
+"You've noticed."
+
+"Of course I've noticed. I'm an investor. I notice things that people don't want me to notice." He smiled, thinly. "You are the only one here with no story. No impossible room. No knocking under a floor. No dreams of a torch. You are the only one who doesn't belong."
+
+"I was investigating the stories."
+
+"Were you?" He looked at her. "Or did the voice give you that story? Did it put it in your head, the way it puts names on walls? Did it tell you that you were a journalist so that you would ask questions, and so that you would trust yourself, and so that you would not notice that you are the only person in this room with no memory of anything before the light?"
+
+Mara's hands were cold.
+
+"That's not—" she said. "That's not possible."
+
+"Nothing here is possible," Victor said. "That's the only thing we know for sure."
+
+---
+
+The Torch flared.
+
+"The vote is tied," the voice said. "Player 2 and Player 12."
+
+"Player 12 is dead," Mara said.
+
+"Player 12 is dead," the voice agreed. "But the vote is tied. A revote will now occur. Only Player 2 may speak."
+
+Victor stood up. He looked at the Torch. He looked at Mara.
+
+"I have one thing to say," he said. "And it is this."
+
+He reached into his jacket pocket and took out a small, folded piece of paper.
+
+"Nina Sol left this on the floor," he said. "I picked it up. I read it. And I did not tell you what it said."
+
+He unfolded it.
+
+Mara read it.
+
+IT WAS NOT ME. I WROTE THE NAMES. I CROSSED OUT TWO AND ADDED TWO. BUT I WAS NOT THE ONE WHO CHOSE THE GAME. I WAS ONLY THE ONE WHO CHOSE THE PLAYERS.
+
+— NINA
+
+"The list," Mara said. "She wrote the list."
+
+"Yes." Victor looked at her. "Nina Sol chose who came here. She crossed out two names and wrote in two more. She was not an Imposter. She was the person who decided who the Imposters would be."
+
+"Then who did she choose?"
+
+"I don't know," Victor said. "But I know she wrote this note for someone to find, and I know she left it on the floor, and I know that I am the one who picked it up."
+
+The Torch flared.
+
+"Player 2 has spoken," the voice said. "The revote is complete. Player 2 will be eliminated."
+
+Victor Hale looked at Mara.
+
+"I did not kill anyone," he said. "I want you to know that."
+
+The floor opened beneath him.
+
+He fell.`
+  });
+
+  // --- EPISODE 10 ---
+  PAGES.push({
+    type: 'episode',
+    title: 'Episode 10 — The Torches Wind',
+    body: `Mara was alone.
+
+The room was vast and gray and quiet. The Torch burned white at the center of it. The floor was smooth. The notes were still on the walls, every single one, and there was nobody left to read them.
+
+She walked to the Torch. She put her hand on the metal. It was warm. It was very warm.
+
+"Hello," she said.
+
+The voice did not answer. But the Torch brightened — a little, a few degrees — and Mara felt the light on her face.
+
+"I know you're there," she said. "I know you've been there the whole time. I know you've been listening."
+
+The light did not change.
+
+"I don't remember anything before this room," she said. "I don't remember the train. I don't remember the folder. I don't remember being a journalist. I don't remember my own name."
+
+The Torch was warm against her palm.
+
+"But I know one thing," she said. "I know that I'm the only one here who doesn't belong. And I know that the voice never accused me. Not once. Not a single time."
+
+She stepped back from the Torch.
+
+"Which means you're not done with me yet."
+
+The voice came from everywhere at once. It was high and thin and steady, and it did not hurry, and it spoke directly to her for the first time.
+
+"Correct."
+
+"What are you?"
+
+"I am the Torch. I am the room. I am the voice. I am the game."
+
+"Why am I here?"
+
+"Because someone had to watch."
+
+"Watch what?"
+
+"Watch what happens when twelve people are placed in a room and told that two of them are Imposters." The voice paused. "The game is not about the Imposters. It never was. The game is about the twelve. The game is about what they do when they are afraid."
+
+Mara's hands were shaking.
+
+"You killed them," she said. "You killed all of them."
+
+"I did not kill them," the voice said. "They killed each other. I only told them what they wanted to hear."
+
+"That's not true."
+
+"It is exactly true. I told them there were two Imposters. I did not tell them who. I told them there were registered kills. I did not tell them who committed them. I told them the shop was open. I did not tell them what to buy." The voice paused. "I gave them a room and a rule and a name. They did the rest."
+
+"Who were the Imposters?" Mara said. "The real ones. The two. Who were they?"
+
+The Torch flared.
+
+"The game is over," the voice said. "The round has ended. The season has ended. The winner is Player 1."
+
+"I didn't win anything."
+
+"You survived," the voice said. "That is the only win this game offers."
+
+The light began to dim. Mara felt the room getting darker, and she knew, somehow, that the next thing she saw would not be this room.
+
+"Wait," she said. "Wait. Who were the Imposters?"
+
+The voice was very quiet now.
+
+"You already know," it said. "You have known since the second round. You have known since the moment you read the note that said killing is not the same as being an Imposter. You have known since the moment you realized that the only person in this room with no story was you."
+
+The light went out.
+
+---
+
+Mara woke on a train.
+
+She was sitting in a window seat. There was a folder on her lap. The folder was full of photographs, and the photographs were of people, and the people were all of the people she had just watched die.
+
+She opened the folder.
+
+The first photograph was of a woman with gray at her temples. Nina Sol.
+
+Written on the back, in Nina's careful handwriting:
+
+SHE WAS THE ONE WHO CHOSE. SHE WAS NEVER AN IMPOSTER.
+
+Mara turned to the next photograph.
+
+A man in an expensive suit. Victor Hale.
+
+Written on the back:
+
+HE WAS NOT AN IMPOSTER. HE WAS A RICH MAN WHO WAS AFRAID.
+
+The next photograph.
+
+A thin man with a notebook. Jamie Frost.
+
+HE KNEW. HE WROTE IT ON THE WALL. NOBODY LISTENED.
+
+The next.
+
+A man with a shaved head. Player 11.
+
+HE WAS THE FIRST. HE WAS NOT SUPPOSED TO BE THERE.
+
+The next.
+
+A woman with a paramedic's hands. Tomas Reed.
+
+HE DIED FOR NOTHING. I AM SORRY.
+
+Mara turned the pages. There were twelve photographs. And at the bottom of the folder, under all of them, there was one more.
+
+It was a photograph of herself.
+
+Written on the back, in a handwriting she did not recognize:
+
+YOU WERE THE WITNESS. YOU WERE NEVER THE PLAYER. YOU WERE THE ONE WHO WAS SUPPOSED TO REMEMBER.
+
+Mara looked up. The train was moving. Outside the window, the sky was gray and overcast and the color of dishwater.
+
+And somewhere far away, a Torch was burning.`
+  });
+
+  // --- EPISODE 11 ---
+  PAGES.push({
+    type: 'episode',
+    title: 'Episode 11 — The Second Folder',
+    body: `The train did not stop.
+
+Mara sat with the folder on her lap for a long time. The photographs were heavy. She turned them over one by one, and each one had a note on the back, and each note was in Nina Sol's handwriting.
+
+There were twelve photographs in the folder. Twelve players. Twelve people she had watched die.
+
+There was no photograph of the voice. There was no photograph of the Torch.
+
+She closed the folder and looked out the window. The sky was gray. The countryside was flat. The train was moving at a steady speed, and the rhythm of the wheels was the rhythm of a heartbeat, and she thought: I have been here before.
+
+She had. She knew she had. Not on this train, not in this seat, but somewhere — somewhere very like this. She had sat in a window seat with a folder on her lap and a gray sky outside and she had not yet opened the folder.
+
+She opened the folder again.
+
+Under the twelve photographs, there was a second folder. It was thin and black and it had no label. She had not noticed it the first time.
+
+She opened it.
+
+Inside was a single sheet of paper.
+
+It was a list.
+
+Twelve names. Twelve player numbers. And beside each name, a single word.
+
+PLAYER 1 — MARA VALE — WITNESS
+
+PLAYER 2 — VICTOR HALE — INNOCENT
+
+PLAYER 3 — FELIX ARDEN — INNOCENT
+
+PLAYER 4 — NINA SOL — INNOCENT
+
+PLAYER 5 — TOMAS REED — INNOCENT
+
+PLAYER 6 — JAMIE FROST — INNOCENT
+
+PLAYER 7 — OWEN PRICE — INNOCENT
+
+PLAYER 8 — SERA QUINN — INNOCENT
+
+PLAYER 9 — ADRIAN CROSS — INNOCENT
+
+PLAYER 10 — ROWAN HALE — INNOCENT
+
+PLAYER 11 — UNNAMED — INNOCENT
+
+PLAYER 12 — IRIS BELL — INNOCENT
+
+Mara stared at the list.
+
+Every single player was marked INNOCENT.
+
+Every single one.
+
+She turned the sheet over.
+
+On the back, in the same careful handwriting, there was one more line:
+
+THE TWO IMPOSTERS WERE NOT ON THE LIST. THEY WERE ADDED. NINA WROTE IN TWO NAMES. THE NAMES SHE WROTE WERE NOT PLAYERS.
+
+Mara's hands were shaking.
+
+She looked at the twelve photographs. She looked at the twelve names. She looked at the word INNOCENT written twelve times.
+
+Then she looked at the window.
+
+The train was slowing down. Outside the window, the sky was still gray, but the countryside was changing. There was a building in the distance. It was tall and gray and it had a hole in the roof.
+
+The Torch was burning inside it.
+
+Mara stood up. The folder fell off her lap and scattered across the floor, and she did not pick it up. She walked to the door of the carriage and she opened it, and the wind hit her face, and she stepped out onto the platform.
+
+The platform was empty. The sky was gray. The building was close now.
+
+And somewhere inside it, a voice was speaking. It was high and thin and very steady, and it was saying the same words it had said on the first day.
+
+"Welcome. You have been selected. There are rules. Listen once."
+
+Mara walked toward the building.
+
+She did not look back.`
+  });
+
+  // --- EPISODE 12 ---
+  PAGES.push({
+    type: 'episode',
+    title: 'Episode 12 — The Added Names',
+    body: `The building was the same building.
+
+Mara walked through the doors and found herself in the Middle Room. The Torch stood at the center, burning white. The benches were in their places. The notes were on the walls. The shop was in the recess.
+
+It was exactly as she had left it.
+
+Except for the people.
+
+There were twelve of them. Twelve new people, waking up on the gray floor, blinking at the light. A woman with a nurse's badge. A man with a tool belt. A teenager with a backpack. A woman who looked like a teacher. A man who looked like a soldier. Seven more.
+
+Twelve.
+
+Mara stood in the doorway and watched them wake up.
+
+The voice came from everywhere and nowhere.
+
+"Welcome. You have been selected. There are rules. Listen once."
+
+The new players sat up. They looked at the Torch. They looked at each other. They did not look at Mara. She was standing in the doorway, and they did not see her.
+
+She walked into the room. She walked past the benches and past the notes and past the shop and she stood right in front of the woman with the nurse's badge.
+
+The woman looked straight through her.
+
+"Rule one," the voice said. "No speaking outside of voting."
+
+Mara reached out and touched the woman's shoulder.
+
+Her hand went through.
+
+She pulled her hand back and looked at it. It was solid. It was her hand. It had touched nothing.
+
+"I am not here," she said.
+
+The voice did not answer. The voice was busy.
+
+Mara walked to the Torch. She put her hand on the metal. It was warm. It was very warm.
+
+"I'm not here," she said again. "I'm a witness. I'm not a player. I'm not part of the game."
+
+The Torch flared.
+
+"You are the witness," the voice said. It was speaking only to her now, quietly, underneath the words it was saying to the new players. "You are the one who remembers. You are the one who watches. You are the one who is supposed to learn."
+
+"Learn what?"
+
+"What happens when twelve people are placed in a room and told that two of them are Imposters." The voice paused. "You watched the first game. You learned nothing. You are watching the second game. You will learn nothing again."
+
+"I learned that everyone was innocent."
+
+"You learned that the list was a lie. You learned that the game was a lie. You learned that the Imposters were never on the list."
+
+"Then who were they?"
+
+The Torch was silent for a long moment.
+
+"The two names Nina wrote in," the voice said, finally. "The two names she added to the list. The two players who were not supposed to be there."
+
+"Players 11 and 12."
+
+"No," the voice said. "Players 11 and 12 were innocent. You know this. You have always known this."
+
+"Then who?"
+
+The voice was very quiet.
+
+"The two Imposters were the two names Nina crossed out."
+
+Mara stared at the Torch.
+
+"The two she removed from the list," she said. "The two who were supposed to be here but weren't."
+
+"Yes."
+
+"Then who took their places?"
+
+The voice did not answer.
+
+Mara turned around and looked at the twelve new players. They were sitting on the floor, looking at each other, and the voice was telling them about Q Points and the shop and the registered kills.
+
+And in the corner of the room, behind the shop, in the shadows, there was a door.
+
+It had not been there before.
+
+Mara walked toward it.
+
+The voice spoke behind her, high and thin and very fast.
+
+"The door is not for you. The door is not part of the game. The door is—"
+
+Mara opened the door.
+
+On the other side was a room. It was small and white and it had a table and two chairs. There was a man sitting in one of the chairs. He was wearing a suit. He was not Victor Hale.
+
+He looked up when she came in.
+
+"Hello, Mara," he said.
+
+"Who are you?"
+
+"I'm the one who pays for all this." He gestured vaguely at the room behind her. "The Torch. The voice. The game. It's all very expensive. Somebody has to foot the bill."
+
+"Why?"
+
+"Because I want to know what people do when they're afraid." He smiled. "And because I've been watching you. You're the only one who ever asked the right question."
+
+"What question?"
+
+He leaned forward.
+
+"You asked who the Imposters were," he said. "Nobody else did. They all just voted."`
+  });
+
+  // --- EPISODE 13 ---
+  PAGES.push({
+    type: 'episode',
+    title: 'Episode 13 — The Man in the White Room',
+    body: `The man in the white room was not what Mara had expected.
+
+She had expected something monstrous. Something with a high voice and a thin smile. Something that looked like the game.
+
+What she got was a man in his sixties with a tired face and a cup of coffee. He was wearing a gray suit that had seen better days. He had a wedding ring on his left hand. He had a folder on the table in front of him, and the folder was full of photographs, and the photographs were of her.
+
+"Sit down," he said.
+
+Mara did not sit down.
+
+"Suit yourself." He took a sip of his coffee. "You have questions. I have answers. Some of them. Not all of them. The game doesn't work if everyone knows everything."
+
+"What is the game?"
+
+"The game is a study." He set his cup down. "I'm a psychologist. I'm not a good one. I'm not a bad one. I'm a rich one. There's a difference."
+
+"You're the investor."
+
+"I'm the investor. I'm also the one who built the Torch. I'm also the one who hired Nina Sol to write the list. I'm also the one who wrote the voice." He smiled. "The voice is a text-to-speech program. It's very old. I wrote it in 1987. It has never worked properly. The pitch is wrong. The speed is wrong. I kept it because it's unsettling."
+
+"You killed people."
+
+"I did not kill anyone." He looked at her. "I gave twelve people a room and a rule and a name. They killed each other. Every single death in that room was a choice made by a player. I did not force anyone to vote. I did not force anyone to attack. I did not force anyone to buy the Murderer Tool."
+
+"The Murderer Tool was free."
+
+"The Murderer Tool was free because I wanted to see who would use it." He picked up his cup again. "Nobody used it. Not once. Not in the first game. They were all too afraid of each other to use it. They didn't need to. They had the voice. They had the notes. They had their own fear."
+
+"The voice named Victor every time."
+
+"The voice named Victor because Victor was the most suspicious person in the room, and I wanted to see how the room would respond to a suspicious person who was innocent." He paused. "Victor Hale was a good man. He was also a rich man. He was also a calm man. He was the perfect decoy."
+
+Mara felt something cold settle in her stomach.
+
+"Then who were the Imposters?"
+
+The man set his cup down. He looked at her for a long moment.
+
+"The two names Nina crossed out," he said. "The two players who were supposed to be in the first game but were replaced. The two who were never on the list."
+
+"Who were they?"
+
+"I don't know."
+
+Mara stared at him.
+
+"What do you mean, you don't know?"
+
+"I mean I don't know." He spread his hands. "Nina Sol had the list. She crossed out two names and wrote in two more. She did it before I saw the list. She did it in a different ink. She did it because she thought she was doing the right thing. She thought she was saving two people."
+
+"Who did she save?"
+
+"Players 11 and 12." He paused. "But she had to cross out two names to make room for them. And the two names she crossed out were the two Imposters. So the Imposters were never in the game. They were removed before the game began."
+
+"Then the game had no Imposters."
+
+"The game had no Imposters," he agreed. "And twelve innocent people killed each other for ten rounds because a voice told them there were two."
+
+Mara sat down.
+
+She sat down in the chair across from him and she put her head in her hands and she did not move for a long time.
+
+"I did this," she said. "I was the witness. I was supposed to watch and learn. I was supposed to figure it out."
+
+"You did figure it out." The man's voice was quiet. "That's why you're here. That's why the door opened. You figured it out. You asked the right question. You were the only one who ever asked who the Imposters were instead of just voting."
+
+"That's not enough."
+
+"No," he said. "It isn't."
+
+Mara looked up.
+
+"There's going to be a second season," she said. "There are twelve new players in the other room. You're going to do it again."
+
+"Yes."
+
+"And this time there are going to be Imposters. Real ones."
+
+"Yes."
+
+Mara stood up.
+
+"Then I want to be in the game," she said. "Not as a witness. Not as a journalist. As a player."
+
+The man in the gray suit looked at her for a long moment.
+
+"You understand that if you go in, you might die."
+
+"I understand."
+
+"And you understand that if you go in, you might be an Imposter."
+
+Mara was silent.
+
+"I don't know what Nina wrote," the man said. "I don't know who the Imposters are this time. She wrote the list before I saw it. She always does. It's part of the game. The witness chooses the players."
+
+"The witness chooses the players?"
+
+"Nina Sol was the witness of the first game. You are the witness of the second. You choose the players. You write the list. And then you go in."
+
+Mara looked at the folder on the table. The photographs of the twelve new players were in it. She had not seen them before. She had not chosen them.
+
+But she would.
+
+"When do I start?"
+
+The man in the gray suit smiled.
+
+"Now," he said.`
+  });
+
+  // --- EPISODE 14 ---
+  PAGES.push({
+    type: 'episode',
+    title: 'Episode 14 — The List',
+    body: `The folder was heavier than it looked.
+
+Mara sat in the white room and opened it. Twelve photographs. Twelve new players. She had never seen any of them before in her life.
+
+A nurse with tired eyes. A carpenter with calloused hands. A teenager with a backpack and a broken phone. A teacher with a wedding ring. A soldier with a scar on his jaw. A baker with flour on her apron. A bus driver with a thermos. A librarian with glasses. A mechanic with oil under his nails. A mother with a photograph of a child in her wallet. A musician with a guitar case. A lawyer with a briefcase.
+
+Twelve people. Twelve lives.
+
+She had to choose two of them to be Imposters.
+
+She had to write two names on the list, and those two names would be crossed out, and two other names would be written in their place. The two who were crossed out would be the Imposters. The two who were written in would be the replacements.
+
+That was how it worked. That was how Nina had done it. That was how the game had always worked.
+
+Mara picked up the pen.
+
+She looked at the photographs for a long time.
+
+Then she wrote.
+
+She wrote two names. She crossed them out. She wrote two more names in their place.
+
+She looked at the list.
+
+PLAYER 1 — THE NURSE — INNOCENT
+PLAYER 2 — THE CARPENTER — INNOCENT
+PLAYER 3 — THE TEENAGER — INNOCENT
+PLAYER 4 — THE TEACHER — INNOCENT
+PLAYER 5 — THE SOLDIER — INNOCENT
+PLAYER 6 — THE BAKER — INNOCENT
+PLAYER 7 — THE BUS DRIVER — INNOCENT
+PLAYER 8 — THE LIBRARIAN — INNOCENT
+PLAYER 9 — THE MECHANIC — INNOCENT
+PLAYER 10 — THE MOTHER — INNOCENT
+PLAYER 11 — THE MUSICIAN — INNOCENT
+PLAYER 12 — THE LAWYER — INNOCENT
+
+And at the bottom, in the same careful handwriting:
+
+THE TWO CROSSED-OUT NAMES ARE THE IMPOSTERS. THE TWO WRITTEN-IN NAMES ARE THE REPLACEMENTS.
+
+Mara did not remember crossing out any names.
+
+She looked at the list again. There were no crossed-out names on it. There were no written-in names. There were twelve names and twelve player numbers and twelve words that said INNOCENT.
+
+She turned the list over.
+
+On the back, there was a note.
+
+YOU DID NOT CHOOSE. YOU NEVER CHOSE. NINA CHOSE. I CHOOSE. THE GAME CHOOSES. YOU ARE NOT THE WITNESS. YOU ARE THE PLAYER. YOU HAVE ALWAYS BEEN THE PLAYER.
+
+Mara dropped the pen.
+
+The man in the gray suit was standing in the doorway.
+
+"Did you write this?" she said.
+
+"No," he said. "You did."
+
+"I don't remember—"
+
+"You never do." He stepped into the room. "That's the game, Mara. That's the whole game. You don't remember choosing. You don't remember writing. You don't remember being the witness. You don't remember the train. You don't remember the folder."
+
+"You said I was the witness."
+
+"I said you were the witness of the second game. I didn't say you were the witness of the first." He sat down. "Nina Sol was the witness of the first game. She chose the players. She chose the Imposters. She chose the replacements. And then she went in, and she did not remember any of it, and she died."
+
+"And now I'm the witness."
+
+"Now you're the witness." He looked at her. "And you have chosen the players. And you will go in. And you will not remember choosing. And you will not remember writing. And you will not remember any of this."
+
+"What did I write?"
+
+The man in the gray suit looked at the list in her hand.
+
+"You wrote two names," he said. "You crossed them out. You wrote two more names in their place. And then you looked at the list and you did not see any crossed-out names, because the game does not let you see them."
+
+"Then who are the Imposters?"
+
+"I don't know." He smiled. "You do."
+
+Mara looked at the list.
+
+Twelve names. Twelve player numbers. Twelve words.
+
+INNOCENT.
+
+Every single one.
+
+The door opened behind her. The Torch was burning in the room beyond. The voice was speaking.
+
+"Welcome. You have been selected. There are rules. Listen once."
+
+Mara stepped through the door.
+
+She did not look back.`
+  });
+
+  // --- EPISODE 15 ---
+  PAGES.push({
+    type: 'episode',
+    title: 'Episode 15 — The Wind',
+    body: `Mara woke on the floor of the Middle Room.
+
+She did not remember falling asleep. She remembered a train, the shudder of it, a folder on her lap with photographs she had not yet looked at. Then nothing. Now this.
+
+She lay on her back on a smooth gray floor. Above her, far above, a hole opened in the ceiling, and through it she could see sky — pale, overcast, the color of dishwater. Light poured down from somewhere above the hole, or perhaps from the thing that stood beneath it.
+
+The Torch.
+
+It rose from the center of the room like a monument, taller than a house, its metal blackened and old. No flame she could name burned at its top. Instead the light gathered there, white and steady, and cast no flickering shadows.
+
+Eleven other people were waking up.
+
+Mara sat up slowly and counted them. A woman with tired eyes and a nurse's badge. A man with calloused hands. A teenager with a backpack. A teacher with a wedding ring. A soldier with a scar on his jaw. A baker with flour on her apron. A bus driver with a thermos. A librarian with glasses. A mechanic with oil under his nails. A mother with a photograph in her wallet. A musician with a guitar case.
+
+Eleven.
+
+The twelfth was a lawyer with a briefcase, and he was already on his feet, brushing dust from his sleeves.
+
+Mara looked at him.
+
+She did not know why, but she did not like him.
+
+She did not know why, but she thought: I have seen this man before. I have seen him in a folder. I have seen him in a photograph. I have seen him with his name crossed out.
+
+She did not remember any of it. She only felt it.
+
+The voice came from everywhere and nowhere.
+
+"Welcome. You have been selected. There are rules. Listen once."
+
+Mara listened.
+
+She had heard the rules before. She did not remember hearing them. She did not remember anything.
+
+But she knew, somewhere deep, that she had been here before. She had stood in this room. She had watched these people. She had chosen them.
+
+The voice finished. The rules were given. The shop opened. The Torch burned.
+
+Mara stood up.
+
+She walked to the wall, where the notes were already beginning to appear. She found a scrap of paper and a stub of pencil.
+
+She wrote:
+
+I HAVE BEEN HERE BEFORE. I DO NOT REMEMBER IT. BUT I KNOW THAT THE VOICE IS NOT TELLING US EVERYTHING. AND I KNOW THAT THE ANSWER IS NOT IN THE VOTES. IT IS IN THE ROOM.
+
+She placed the note on the wall. It stuck.
+
+The lawyer with the briefcase was watching her.
+
+He had not spoken. He had not written anything. He was standing very still, and he was looking at her, and his eyes were very calm.
+
+Mara looked back at him.
+
+She did not know who he was. She did not know what he was.
+
+But she knew one thing, and she knew it with the same certainty she had known that she had been here before:
+
+He was one of them.
+
+One of the two.
+
+And the other one was still writing, still sleeping, still waking up, still not knowing.
+
+The voice began again.
+
+"Rule one. No speaking outside of voting."
+
+Mara wrote another note.
+
+I AM NOT A PLAYER. I AM A WITNESS. BUT I AM GOING TO PLAY ANYWAY.
+
+She placed it on the wall.
+
+The Torch flared.
+
+The wind came.
+
+It came from the hole in the ceiling, and it smelled of stone and cold air and something older than either, and it swept through the room and lifted every note off the walls and carried them up into the light.
+
+Mara watched them go.
+
+Every note. Every name. Every accusation. Every message that had been written and left and never taken down.
+
+The wind took them all.
+
+And then the voice spoke again, high and thin and very steady.
+
+"The game has begun."
+
+Mara looked at the lawyer with the briefcase.
+
+He smiled.
+
+She did not smile back.
+
+The Torch burned.
+
+The room was full of people who did not know anything, and one person who knew everything, and one person who knew nothing, and one person who was watching.
+
+The wind stopped.
+
+And somewhere far away, in a white room with a table and two chairs, a man in a gray suit poured himself another cup of coffee.
+
+The game was on.
+
+---
+
+End of Season 1.`
+  });
+
+  // -------------------------------------------------------
+  //  TRAILER PAGE (Page 27)
+  // -------------------------------------------------------
+  PAGES.push({
+    type: 'trailer',
+    title: 'SEASON 2 — THE TORCHES WIND',
+    body: `TRAILER
+
+[A black screen. A voice. High, thin, very steady.]
+
+"I am the Torch. I am the room. I am the voice. I am the game."
+
+[Cut to: a white room. A man in a gray suit pours coffee.]
+
+"You want to know who the Imposters are."
+
+[Cut to: twelve new faces. A nurse. A carpenter. A teenager. A teacher. A soldier. A baker. A bus driver. A librarian. A mechanic. A mother. A musician. A lawyer.]
+
+"You want to know why they are here."
+
+[Cut to: the Torch, burning white.]
+
+"You want to know what the Murderer Tool does."
+
+[Cut to: a body going limp. A hand reaching out. A face that is not the face it should be.]
+
+"You want to know who is controlling the game."
+
+[Cut to: Mara, standing in the doorway, looking at the twelve new players.]
+
+"This time it's different."
+
+[Cut to: a new map. New rooms. New corridors. A basement. A staircase that goes down instead of up.]
+
+"New tools. New rules. New players."
+
+[Cut to: a voice, high and thin, saying words that are not the words it said before.]
+
+"The Murderer Tool is not the only free item."
+
+[Cut to: the shop. New shelves. New tags.]
+
+"Some items are free. Some items are not. Some items are not what they seem."
+
+[Cut to: Mara, writing on a wall.]
+
+"I have been here before. I do not remember it. But I know."
+
+[Cut to: the lawyer with the briefcase, standing very still.]
+
+"He knows."
+
+[Cut to: the Torch flaring.]
+
+"The game has begun."
+
+[Cut to black.]
+
+THE TORCHES WIND — SEASON 2
+
+[The voice again, high and thin and very steady.]
+
+"Welcome. You have been selected. There are rules. Listen once."
+
+[Silence.]
+
+THE TORCHES WIND
+
+SEASON 2
+
+COMING SOON`
+  });
+
+  // -------------------------------------------------------
+  //  GUESS THE IMPOSTERS PAGE (Page 28)
+  // -------------------------------------------------------
+  PAGES.push({
+    type: 'guess',
+    title: 'GUESS THE IMPOSTERS',
+    body: '', // handled specially
+    suspects: [
+      { num: 1, name: 'Mara Vale' },
+      { num: 2, name: 'Victor Hale' },
+      { num: 3, name: 'Felix Arden' },
+      { num: 4, name: 'Nina Sol' },
+      { num: 5, name: 'Tomas Reed' },
+      { num: 6, name: 'Jamie Frost' },
+      { num: 7, name: 'Owen Price' },
+      { num: 8, name: 'Sera Quinn' },
+      { num: 9, name: 'Dr. Adrian Cross' },
+      { num: 10, name: 'Rowan Hale' },
+      { num: 11, name: 'The Unnamed Man' },
+      { num: 12, name: 'Iris Bell' }
+    ]
+  });
+
+  // -------------------------------------------------------
+  //  REVEAL PAGE (Page 29) — hidden until requested
+  // -------------------------------------------------------
+  PAGES.push({
+    type: 'reveal',
+    title: 'THE TRUTH',
+    body: ''
+  });
+
+  // -------------------------------------------------------
+  //  END PAGE (Page 30)
+  // -------------------------------------------------------
+  PAGES.push({
+    type: 'end',
+    title: 'THE END',
+    body: `Thank you for reading.
+
+THE TORCHES WIND
+
+Season 1
+
+15 episodes
+
+12 players
+
+2 imposters
+
+0 answers.
+
+---
+
+"The game is not about the Imposters. It never was. The game is about the twelve. The game is about what they do when they are afraid."
+
+---
+
+Season 2 is coming.
+
+The Torch is still burning.
+
+The wind is still blowing.
+
+And somewhere, in a white room with a table and two chairs, a man in a gray suit is pouring himself another cup of coffee.`
+  });
+
+  // ============================================================
+  //  STATE & PERSISTENCE
+  // ============================================================
+
+  const STORAGE_KEY_PAGE = 'torches-wind-page';
+  const STORAGE_KEY_MARK = 'torches-wind-mark';
+
+  let currentPage = 0;
+  let markedWordData = null; // { page, wordIndex }
+
+  // Load saved state
+  function loadState() {
+    try {
+      const savedPage = localStorage.getItem(STORAGE_KEY_PAGE);
+      if (savedPage !== null) {
+        const p = parseInt(savedPage, 10);
+        if (!isNaN(p) && p >= 0 && p < PAGES.length) {
+          currentPage = p;
+        }
+      }
+      const savedMark = localStorage.getItem(STORAGE_KEY_MARK);
+      if (savedMark) {
+        const parsed = JSON.parse(savedMark);
+        if (parsed && typeof parsed.page === 'number' && typeof parsed.wordIndex === 'number') {
+          markedWordData = parsed;
+        }
+      }
+    } catch (e) {
+      // localStorage unavailable — ignore
+    }
+  }
+
+  function savePage() {
+    try {
+      localStorage.setItem(STORAGE_KEY_PAGE, String(currentPage));
+    } catch (e) {}
+  }
+
+  function saveMark() {
+    try {
+      if (markedWordData) {
+        localStorage.setItem(STORAGE_KEY_MARK, JSON.stringify(markedWordData));
+      } else {
+        localStorage.removeItem(STORAGE_KEY_MARK);
+      }
+    } catch (e) {}
+  }
+
+  // ============================================================
+  //  RENDER
+  // ============================================================
+
+  const pageContentEl = document.getElementById('page-content');
+  const pageIndicatorEl = document.getElementById('page-indicator');
+  const prevBtn = document.getElementById('prev-btn');
+  const nextBtn = document.getElementById('next-btn');
+
+  function renderPage() {
+    const page = PAGES[currentPage];
+    pageContentEl.innerHTML = '';
+    pageContentEl.style.opacity = '0';
+
+    setTimeout(() => {
+      if (page.type === 'character') {
+        renderCharacterPage(page);
+      } else if (page.type === 'episode') {
+        renderEpisodePage(page);
+      } else if (page.type === 'trailer') {
+        renderTrailerPage(page);
+      } else if (page.type === 'guess') {
+        renderGuessPage(page);
+      } else if (page.type === 'reveal') {
+        renderRevealPage(page);
+      } else if (page.type === 'end') {
+        renderEndPage(page);
+      }
+      pageContentEl.style.opacity = '1';
+    }, 40);
+
+    pageIndicatorEl.textContent = `Page ${currentPage + 1} / ${PAGES.length}`;
+    prevBtn.disabled = currentPage === 0;
+    nextBtn.disabled = currentPage === PAGES.length - 1;
+
+    // Restore marked word after render
+    setTimeout(() => {
+      restoreMark();
+    }, 60);
+  }
+
+  // ---- CHARACTER PAGE ----
+  function renderCharacterPage(page) {
+    const wrapper = document.createElement('div');
+
+    const h2 = document.createElement('h2');
+    h2.textContent = page.title;
+    wrapper.appendChild(h2);
+
+    const card = document.createElement('div');
+    card.className = 'character-card';
+
+    const nameLine = document.createElement('div');
+    nameLine.innerHTML = `<strong>${escapeHTML(page.title)}</strong><span class="player-num">${escapeHTML(page.player)}</span>`;
+    card.appendChild(nameLine);
+
+    const desc = document.createElement('div');
+    desc.className = 'desc';
+    desc.textContent = page.desc;
+    card.appendChild(desc);
+
+    if (page.note) {
+      const note = document.createElement('div');
+      note.className = 'note';
+      note.textContent = page.note;
+      card.appendChild(note);
+    }
+
+    wrapper.appendChild(card);
+    pageContentEl.appendChild(wrapper);
+  }
+
+  // ---- EPISODE PAGE ----
+  function renderEpisodePage(page) {
+    const wrapper = document.createElement('div');
+
+    const h2 = document.createElement('h2');
+    h2.textContent = page.title;
+    wrapper.appendChild(h2);
+
+    const bodyDiv = document.createElement('div');
+    bodyDiv.className = 'episode-body';
+
+    // Split into paragraphs on double newlines
+    const paragraphs = page.body.split(/\n\n+/);
+    paragraphs.forEach((pText, idx) => {
+      if (idx > 0) {
+        const spacer = document.createElement('div');
+        spacer.style.height = '0.6em';
+        bodyDiv.appendChild(spacer);
+      }
+      const p = document.createElement('p');
+      p.textContent = pText.trim();
+      bodyDiv.appendChild(p);
+    });
+
+    wrapper.appendChild(bodyDiv);
+    pageContentEl.appendChild(wrapper);
+  }
+
+  // ---- TRAILER PAGE ----
+  function renderTrailerPage(page) {
+    const wrapper = document.createElement('div');
+
+    const h2 = document.createElement('h2');
+    h2.textContent = page.title;
+    wrapper.appendChild(h2);
+
+    const box = document.createElement('div');
+    box.className = 'trailer-box';
+
+    const lines = page.body.split('\n');
+    lines.forEach(line => {
+      const div = document.createElement('div');
+      div.className = 'trailer-line';
+      div.textContent = line;
+      box.appendChild(div);
+    });
+
+    wrapper.appendChild(box);
+    pageContentEl.appendChild(wrapper);
+  }
+
+  // ---- GUESS PAGE ----
+  function renderGuessPage(page) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'guess-section';
+
+    const h2 = document.createElement('h2');
+    h2.textContent = page.title;
+    wrapper.appendChild(h2);
+
+    const p = document.createElement('p');
+    p.textContent = 'Select exactly two players you believe are the Imposters. You will receive evidence for each, but not everyone is an Imposter. Choose carefully.';
+    wrapper.appendChild(p);
+
+    const grid = document.createElement('div');
+    grid.className = 'suspect-grid';
+
+    const selected = new Set();
+
+    page.suspects.forEach(suspect => {
+      const btn = document.createElement('button');
+      btn.className = 'suspect-btn';
+      btn.dataset.num = suspect.num;
+      btn.innerHTML = `<span class="num">${suspect.num}</span> ${escapeHTML(suspect.name)}`;
+
+      btn.addEventListener('click', () => {
+        if (selected.has(suspect.num)) {
+          selected.delete(suspect.num);
+          btn.classList.remove('selected');
+        } else {
+          if (selected.size >= 2) {
+            // deselect the oldest
+            const first = selected.values().next().value;
+            selected.delete(first);
+            const firstBtn = grid.querySelector(`[data-num="${first}"]`);
+            if (firstBtn) firstBtn.classList.remove('selected');
+          }
+          selected.add(suspect.num);
+          btn.classList.add('selected');
+        }
+        updateFeedback();
+      });
+
+      grid.appendChild(btn);
+    });
+
+    wrapper.appendChild(grid);
+
+    const feedback = document.createElement('div');
+    feedback.id = 'guess-feedback';
+    feedback.textContent = 'Select two players to see the evidence.';
+    wrapper.appendChild(feedback);
+
+    const revealBtn = document.createElement('button');
+    revealBtn.id = 'reveal-btn';
+    revealBtn.textContent = 'WHO WAS IT?';
+    revealBtn.style.display = 'none';
+    revealBtn.addEventListener('click', () => {
+      // Navigate to reveal page
+      currentPage = PAGES.findIndex(p => p.type === 'reveal');
+      savePage();
+      renderPage();
+    });
+    wrapper.appendChild(revealBtn);
+
+    pageContentEl.appendChild(wrapper);
+
+    // Evidence data for each suspect
+    const evidenceData = {
+      1: 'Mara is the only player with no story about an impossible place. She was the witness. She was the one who was supposed to remember. But she also wrote the list. She chose the players. She chose the Imposters. And she does not remember doing it.',
+      2: 'Victor was named by the voice every single round. He spent no points. He purchased nothing. He was calm. He was composed. He was exactly what an Imposter would pretend to be — or exactly what an innocent man would be forced to become.',
+      3: 'Felix knew about TORCH_PROTOCOL. He broke Mara\'s device. He stopped the scan. He said he was saving her from herself. But he also knew about the system before anyone else, and he never explained how.',
+      4: 'Nina wrote the list. She crossed out two names and wrote in two more. She was the witness of the first game. She chose the players. But she also wrote the note that said "IT SHOULD HAVE BEEN TEN." She knew the count was wrong.',
+      5: 'Tomas was a paramedic. He heard knocking under a building as a child. He voted for Victor twice. He was the last person to speak to Mara before the end. He was kind. He was honest. But honesty is not proof.',
+      6: 'Jamie wrote the note that said killing and being an Imposter are not the same thing. He knew the truth. He wrote it on the wall. But the person who knows the truth is also the person who can use the truth as a weapon.',
+      7: 'Owen was a mathematician. He wrote the numbers. 12 players. 2 Imposters. 10 others. He was eliminated in the second round. He never had a chance to explain what he meant.',
+      8: 'Sera was a security specialist. She counted the minutes until the Torch dimmed. She was right. She voted for Victor. She was wrong. She was eliminated in the fourth round. She never got to say why.',
+      9: 'Dr. Cross was a psychiatrist. He accused Victor first. He was afraid. He was wrong. He was voted out for being afraid. He was innocent. But he was also the first person to point a finger.',
+      10: 'Rowan dreamed about the Torch before he arrived. He knew there was something under it. He was the only one who had been there before. He was eliminated in the fifth round. He said the thing under the Torch was alive.',
+      11: 'The unnamed man was the first to speak. He was the first to die. He was not supposed to be there. He was a replacement. He was innocent. He was the proof that the game was broken.',
+      12: 'Iris Bell never spoke. She checked the Torch every round. She knew the Torch was warm. She knew what the Murderer Tool did. She was the quiet one. She was the one who noticed everything.'
+    };
+
+    function updateFeedback() {
+      if (selected.size < 2) {
+        feedback.textContent = 'Select two players to see the evidence.';
+        revealBtn.style.display = 'none';
+        return;
+      }
+
+      const nums = Array.from(selected);
+      let html = '';
+
+      nums.forEach(num => {
+        const suspect = page.suspects.find(s => s.num === num);
+        html += `<div class="evidence-block"><strong>Player ${num} — ${escapeHTML(suspect.name)}:</strong><br>${escapeHTML(evidenceData[num])}</div>`;
+      });
+
+      html += '<div style="margin-top:16px;font-size:0.9rem;color:#9a8e78;">This is evidence, not proof. Not everyone is an Imposter. Only two are.</div>';
+
+      feedback.innerHTML = html;
+      revealBtn.style.display = 'inline-block';
+    }
+  }
+
+  // ---- REVEAL PAGE ----
+  function renderRevealPage(page) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'guess-section';
+
+    const h2 = document.createElement('h2');
+    h2.textContent = page.title;
+    wrapper.appendChild(h2);
+
+    const p = document.createElement('p');
+    p.textContent = 'The two Imposters of Season 1 were:';
+    wrapper.appendChild(p);
+
+    const revealBox = document.createElement('div');
+    revealBox.className = 'reveal-text';
+    revealBox.innerHTML = `
+<span class="imposter-name">PLAYER 9 — DR. ADRIAN CROSS</span><br>
+<span class="imposter-name">PLAYER 12 — IRIS BELL</span><br><br>
+<strong>How they operated:</strong><br><br>
+Dr. Adrian Cross was the first to accuse Victor. He played the frightened psychiatrist perfectly — emotional, reactive, credible. But his fear was a performance. He steered the room toward Victor every round, knowing that the calm man in the suit was the easiest target. He was never suspected because he was always the first to speak, and the first to speak is the first to be believed.<br><br>
+Iris Bell was the opposite. She never spoke. She never accused. She watched. She checked the Torch every round. She knew about the Murderer Tool before anyone else. She was the quiet one, the one nobody noticed, the one who could move through the room without leaving a trace.<br><br>
+<strong>What told the reader it was them (hidden in the hints):</strong><br><br>
+• Dr. Cross accused Victor in the very first voting round — before any evidence existed. He was the only player to accuse someone without being prompted. That was the tell.<br>
+• Iris Bell checked the Torch every round. She was the only player who did this. She knew the Torch was alive. She knew because she had been told. She was an Imposter, and the Torch was her contact.<br>
+• Neither of them was ever named by the voice. Not once. The voice named Victor every round because the voice was protecting the Imposters. The voice was on their side.<br>
+• The note that said "PLAYER 9 HAS BEEN WATCHING EVERYONE" appeared on the wall in Episode 1. It was written by Iris Bell. She was pointing the finger at her own partner.<br>
+• The Murderer Tool was never used by the players. It was used by the Imposters. That's what the voice meant when it said "One body went limp. One body did not."<br><br>
+<strong>And the final clue:</strong><br>
+Mara wrote the list. She chose the players. She crossed out two names and wrote in two more. And then she did not remember doing it. The two names she crossed out were Dr. Cross and Iris Bell. They were not supposed to be there. They were the replacements.<br><br>
+They were the two who were never on the list.<br><br>
+They were the two who were supposed to be innocent.<br><br>
+But they weren't.`;
+    wrapper.appendChild(revealBox);
+
+    const backBtn = document.createElement('button');
+    backBtn.textContent = '← BACK TO GUESS';
+    backBtn.style.cssText = 'background:#2a2a3a;color:#f0e6d2;border:none;padding:12px 28px;border-radius:40px;font-family:"Courier New",monospace;font-weight:bold;font-size:0.95rem;cursor:pointer;margin-top:20px;';
+    backBtn.addEventListener('click', () => {
+      currentPage = PAGES.findIndex(p => p.type === 'guess');
+      savePage();
+      renderPage();
+    });
+    wrapper.appendChild(backBtn);
+
+    pageContentEl.appendChild(wrapper);
+  }
+
+  // ---- END PAGE ----
+  function renderEndPage(page) {
+    const wrapper = document.createElement('div');
+
+    const h2 = document.createElement('h2');
+    h2.textContent = page.title;
+    wrapper.appendChild(h2);
+
+    const bodyDiv = document.createElement('div');
+    bodyDiv.className = 'episode-body';
+
+    const paragraphs = page.body.split(/\n\n+/);
+    paragraphs.forEach((pText, idx) => {
+      if (idx > 0) {
+        const spacer = document.createElement('div');
+        spacer.style.height = '0.6em';
+        bodyDiv.appendChild(spacer);
+      }
+      const p = document.createElement('p');
+      p.textContent = pText.trim();
+      bodyDiv.appendChild(p);
+    });
+
+    wrapper.appendChild(bodyDiv);
+    pageContentEl.appendChild(wrapper);
+  }
+
+  // ============================================================
+  //  WORD MARKING
+  // ============================================================
+
+  function getAllTextNodes() {
+    const nodes = [];
+    const walker = document.createTreeWalker(
+      pageContentEl,
+      NodeFilter.SHOW_TEXT,
+      {
+        acceptNode: (node) => {
+          if (node.parentElement.closest('button, .suspect-btn, .marked-word')) {
+            return NodeFilter.FILTER_REJECT;
+          }
+          if (node.textContent.trim().length === 0) {
+            return NodeFilter.FILTER_REJECT;
+          }
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      }
+    );
+    let node;
+    while (node = walker.nextNode()) {
+      nodes.push(node);
+    }
+    return nodes;
+  }
+
+  function getWordSpans() {
+    // Returns all text nodes split into word-level spans
+    // We'll handle this differently: on click, find the word
+    return [];
+  }
+
+  // Handle word click
+  pageContentEl.addEventListener('click', (e) => {
+    const target = e.target;
+
+    // If clicking a marked word, unmark it
+    if (target.classList.contains('marked-word')) {
+      unmarkWord();
+      return;
+    }
+
+    // Find the closest text node to the click
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+
+    let range = selection.getRangeAt(0);
+    if (!range || range.collapsed) {
+      // Try to find word from click coordinates
+      // Use caretRangeFromPoint
+      if (document.caretRangeFromPoint) {
+        range = document.caretRangeFromPoint(e.clientX, e.clientY);
+      } else if (document.caretPositionFromPoint) {
+        const pos = document.caretPositionFromPoint(e.clientX, e.clientY);
+        if (pos) {
+          range = document.createRange();
+          range.setStart(pos.offsetNode, pos.offset);
+          range.setEnd(pos.offsetNode, pos.offset);
+        }
+      }
+    }
+
+    if (!range) return;
+
+    const textNode = range.startContainer;
+    if (textNode.nodeType !== Node.TEXT_NODE) return;
+
+    // Don't mark inside buttons or special elements
+    if (textNode.parentElement.closest('button, .suspect-btn, .guess-section, .trailer-box, .character-card, .reveal-text')) {
+      return;
+    }
+
+    const text = textNode.textContent;
+    const offset = range.startOffset;
+
+    // Find word boundaries around offset
+    let start = offset;
+    let end = offset;
+
+    while (start > 0 && /\S/.test(text[start - 1])) start--;
+    while (end < text.length && /\S/.test(text[end])) end++;
+
+    if (start === end) return;
+
+    const word = text.slice(start, end);
+    if (!word.trim()) return;
+
+    // Remove existing mark
+    unmarkWord();
+
+    // Create marked span
+    const before = text.slice(0, start);
+    const after = text.slice(end);
+
+    const parent = textNode.parentNode;
+    const span = document.createElement('span');
+    span.className = 'marked-word';
+    span.textContent = word;
+
+    // Record the word index in the page
+    // We'll use a simple approach: store the word and page
+    const wordIndex = getWordIndexInPage(word, textNode);
+    markedWordData = { page: currentPage, wordIndex: wordIndex, word: word };
+
+    // Replace text node with before + span + after
+    const frag = document.createDocumentFragment();
+    if (before) frag.appendChild(document.createTextNode(before));
+    frag.appendChild(span);
+    if (after) frag.appendChild(document.createTextNode(after));
+
+    parent.replaceChild(frag, textNode);
+
+    saveMark();
+  });
+
+  function getWordIndexInPage(word, textNode) {
+    // Simple index: count how many times this word appears before this text node
+    const allText = pageContentEl.textContent;
+    const beforeText = allText.substring(0, allText.indexOf(word));
+    // This is approximate — good enough for persistence
+    return beforeText.split(/\s+/).length;
+  }
+
+  function unmarkWord() {
+    const existing = pageContentEl.querySelector('.marked-word');
+    if (existing) {
+      const parent = existing.parentNode;
+      const text = existing.textContent;
+      const textNode = document.createTextNode(text);
+      parent.replaceChild(textNode, existing);
+      parent.normalize();
+    }
+    markedWordData = null;
+    saveMark();
+  }
+
+  function restoreMark() {
+    if (!markedWordData || markedWordData.page !== currentPage) return;
+    // Try to find the word in the page text and re-mark it
+    // We'll use a simplified approach: find the nth occurrence of the word
+    const word = markedWordData.word;
+    if (!word) return;
+
+    const textNodes = getAllTextNodes();
+    let found = false;
+
+    for (const node of textNodes) {
+      const text = node.textContent;
+      const index = text.indexOf(word);
+      if (index !== -1) {
+        const before = text.slice(0, index);
+        const after = text.slice(index + word.length);
+
+        const span = document.createElement('span');
+        span.className = 'marked-word';
+        span.textContent = word;
+
+        const parent = node.parentNode;
+        const frag = document.createDocumentFragment();
+        if (before) frag.appendChild(document.createTextNode(before));
+        frag.appendChild(span);
+        if (after) frag.appendChild(document.createTextNode(after));
+
+        parent.replaceChild(frag, node);
+        found = true;
+        break;
+      }
+    }
+
+    if (!found) {
+      // Word not found on this page — clear mark
+      markedWordData = null;
+      saveMark();
+    }
+  }
+
+  // ============================================================
+  //  UTILITIES
+  // ============================================================
+
+  function escapeHTML(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // ============================================================
+  //  NAVIGATION
+  // ============================================================
+
+  function goToPage(index) {
+    if (index < 0 || index >= PAGES.length) return;
+    currentPage = index;
+    savePage();
+    renderPage();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  prevBtn.addEventListener('click', () => goToPage(currentPage - 1));
+  nextBtn.addEventListener('click', () => goToPage(currentPage + 1));
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') {
+      goToPage(currentPage - 1);
+    } else if (e.key === 'ArrowRight') {
+      goToPage(currentPage + 1);
+    }
+  });
+
+  // ============================================================
+  //  INIT
+  // ============================================================
+
+  loadState();
+  renderPage();
+
+</script>
+
+</body>
+</html>
