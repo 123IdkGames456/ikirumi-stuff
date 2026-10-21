@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "files": [
     ".github/workflows/check-device-ai.yml",
     "app.js",
@@ -79,7 +79,9 @@
     "zero-hour/index.html",
     "zombie-survival/index.html",
     "website-maker/index.html",
-    "website-maker/site.json"
+    "website-maker/site.json",
+    "loop-infinite/index.html",
+    "loop-infinite/site.json"
   ],
   "sites": [
     "blueprint-circuit-lab",
@@ -110,6 +112,7 @@
     "zero-hour",
     "zombie-survival",
     "csharp-code",
-    "website-maker"
+    "website-maker",
+    "loop-infinite"
   ]
 }
