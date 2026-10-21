@@ -485,6 +485,9 @@
       <strong>Google Sheets sync</strong>
       <span style="font-size:.85rem;line-height:1.5">Paste the Apps Script web-app URL after deploying the companion Code.gs file. Until connected, reading progress is saved on this device.</span>
       <input id="sheet-url" type="url" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="url">
+      <label for="reader-id-field">Reader ID (copy this to another device to share progress)</label>
+      <input id="reader-id-field" type="text" autocomplete="off" spellcheck="false">
+      <button id="use-reader-id-btn" type="button">Use this Reader ID & load cloud save</button>
       <button id="connect-sheet-btn" type="button">Save connection & sync</button>
       <span style="font-size:.8rem;line-height:1.5">Your sheet stores a reader ID, current page, bookmarks, word mark, and page notes. Do not share the web-app URL publicly if you want to limit access.</span>
     </div>
@@ -3052,7 +3055,7 @@ But they weren't.`;
     syncTimer = setTimeout(() => {
       const payload = {readerId, state: snapshotReaderState()};
       fetch(endpoint, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(payload)})
-        .then(() => readerStatus('Sync sent to Google Sheets · ' + new Date().toLocaleTimeString()))
+        .then(() => readerStatus('Sync request sent · check the Reader Saves tab if the save does not appear'))
         .catch(() => readerStatus('Google Sheets sync failed. Check the web-app URL and deployment access.'));
     }, 500);
   }
@@ -3118,9 +3121,20 @@ But they weren't.`;
     syncReaderState(); loadSheetState();
     readerStatus('Google Sheets URL saved. Connecting…');
   });
+
+  document.getElementById('use-reader-id-btn').addEventListener('click', () => {
+    const nextId = document.getElementById('reader-id-field').value.trim();
+    if (!/^[A-Za-z0-9_-]{4,100}$/.test(nextId)) { readerStatus('Reader ID must be 4–100 letters, numbers, underscores, or hyphens.'); return; }
+    readerId = nextId;
+    localStorage.setItem(READER_ID_KEY, readerId);
+    loadSheetState();
+    readerStatus('Reader ID saved. Loading its Google Sheets reading progress…');
+  });
+
   function restoreSheetUrlField() {
     const url = localStorage.getItem(SHEET_URL_KEY) || '';
     document.getElementById('sheet-url').value = url;
+    document.getElementById('reader-id-field').value = readerId;
     if (url) document.getElementById('sheet-config-btn').textContent = '☁ Google Sheets connected · Settings';
   }
   readReaderState();
