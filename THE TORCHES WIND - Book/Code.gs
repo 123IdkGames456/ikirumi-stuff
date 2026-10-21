@@ -12,6 +12,10 @@ function getSaveSheet_() {
   return sheet;
 }
 
+function setup() {
+  getSaveSheet_();
+}
+
 function doPost(e) {
   try {
     const payload = JSON.parse((e && e.postData && e.postData.contents) || '{}');
