@@ -2,6 +2,7 @@
   "version": 1,
   "files": [
     ".github/workflows/check-device-ai.yml",
+    "app.js",
     "blueprint-circuit-lab/css/base.css",
     "blueprint-circuit-lab/css/layout.css",
     "blueprint-circuit-lab/css/nodes.css",
@@ -23,6 +24,8 @@
     "Contacts/contacts.txt",
     "Contacts/Images/.gitkeep",
     "cookie-clicker/index.html",
+    "csharp-code/index.html",
+    "csharp-code/site.json",
     "csharp-helpness/index.html",
     "csharp-helpness/site.json",
     "device-ai-text/app.js",
@@ -61,6 +64,7 @@
     "random-media/index.html",
     "random-media/site.json",
     "site-lock.json",
+    "styles.css",
     "subway-surfers-3d/index.html",
     "subway-surfers-reborn/index.html",
     "subway-surfers-reborn/requirements.txt",
@@ -73,9 +77,7 @@
     "unity-csharp-book/index.html",
     "unity-csharp-book/site.json",
     "zero-hour/index.html",
-    "zombie-survival/index.html",
-    "csharp-code/index.html",
-    "csharp-code/site.json"
+    "zombie-survival/index.html"
   ],
   "sites": [
     "blueprint-circuit-lab",
