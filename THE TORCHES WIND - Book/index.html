@@ -3016,6 +3016,10 @@ But they weren't.`;
   const READER_STATE_KEY = 'torchWindReaderStateV2';
   const READER_ID_KEY = 'torchWindReaderIdV1';
   const SHEET_URL_KEY = 'torchWindSheetEndpointV1';
+  const DEFAULT_SHEET_URL = 'https://script.google.com/macros/s/AKfycbzH8d-59ulHto_TEDqmxoSKITz1WdthFu0rHzWO6IU7fp3c-QadBPO_X_Yx6fuMmcOH/exec';
+  if (!localStorage.getItem(SHEET_URL_KEY)) {
+    localStorage.setItem(SHEET_URL_KEY, DEFAULT_SHEET_URL);
+  }
   let readerState = { bookmarks: [], notes: {}, fontSize: 1.35, night: false };
   let readerId = localStorage.getItem(READER_ID_KEY);
   if (!readerId) {
@@ -3135,13 +3139,11 @@ But they weren't.`;
   });
   document.getElementById('sheet-config-btn').addEventListener('click', () => document.getElementById('sheet-settings').classList.toggle('open'));
   document.getElementById('connect-sheet-btn').addEventListener('click', () => {
-    const url = document.getElementById('sheet-url').value.trim();
-    if (!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/.test(url)) {
-      readerStatus('Paste a valid deployed Google Apps Script web-app URL ending in /exec.'); return;
-    }
+    const url = DEFAULT_SHEET_URL;
     localStorage.setItem(SHEET_URL_KEY, url);
+    document.getElementById('sheet-url').value = url;
     syncReaderState(); loadSheetState();
-    readerStatus('Google Sheets URL saved. Connecting…');
+    readerStatus('Google Sheets sync configured. Connecting…');
   });
 
   document.getElementById('use-reader-id-btn').addEventListener('click', () => {
@@ -3154,10 +3156,11 @@ But they weren't.`;
   });
 
   function restoreSheetUrlField() {
-    const url = localStorage.getItem(SHEET_URL_KEY) || '';
+    const url = localStorage.getItem(SHEET_URL_KEY) || DEFAULT_SHEET_URL;
     document.getElementById('sheet-url').value = url;
     document.getElementById('reader-id-field').value = readerId;
-    if (url) document.getElementById('sheet-config-btn').textContent = '☁ Google Sheets connected · Settings';
+    document.getElementById('sheet-config-btn').textContent = '☁ Google Sheets sync · Settings';
+    document.getElementById('sheet-config-btn').title = 'Google Sheets sync is configured automatically';
   }
   readReaderState();
   restoreSheetUrlField();
