@@ -5,6 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>THE TORCHES WIND · Book</title>
   <style>
+
+    /* READING EXPERIENCE UPGRADE */
+    #reader-tools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 18px;font-family:'Courier New',monospace}
+    #reader-tools button,#reader-tools select{border:1px solid #c8bca4;border-radius:10px;padding:10px 12px;background:#ece4d4;color:#24232b;font:inherit;cursor:pointer}
+    #reader-tools button:hover{background:#dfd2bb}
+    #reading-progress{height:5px;background:#ddd3c2;border-radius:20px;overflow:hidden;margin:-12px 0 20px}
+    #reading-progress-fill{height:100%;width:0;background:#9b4c32;transition:width .25s}
+    #reader-note-wrap{grid-column:1/-1;display:grid;gap:7px}
+    #reader-note{width:100%;min-height:76px;resize:vertical;border:1px solid #c8bca4;border-radius:12px;padding:12px;background:#fffdf7;color:#222;font:1rem/1.5 Georgia,serif}
+    #reader-status{grid-column:1/-1;font-size:.75rem;color:#655a4a;min-height:1.2em}
+    #sheet-settings{grid-column:1/-1;display:none;background:#ece4d4;padding:14px;border-radius:12px;gap:8px}
+    #sheet-settings.open{display:grid}
+    #sheet-url{width:100%;padding:10px;border:1px solid #c8bca4;border-radius:8px;font: .85rem 'Courier New',monospace}
+    body.reader-night{background:#090a0d}
+    body.reader-night #book-container{background:#202127;box-shadow:0 20px 60px #000,0 0 0 1px #45434a inset}
+    body.reader-night #page-content{color:#e8e1d5}
+    body.reader-night #page-content h2,body.reader-night #page-content h3{color:#f2e9dc}
+    body.reader-night #nav-bar{color:#cfc6b7;border-color:#49454a}
+    body.reader-night #reader-note-wrap label,body.reader-night #reader-status{color:#d4c6b0}
+    body.reader-night #reader-note{background:#2b2c32;color:#f1e8da;border-color:#55515a}
+    body.reader-night #reader-tools button,body.reader-night #reader-tools select,body.reader-night #sheet-settings{background:#303139;color:#f0e6d2;border-color:#55515a}
+    @media(max-width:600px){#reader-tools{grid-template-columns:repeat(2,minmax(0,1fr))}#reader-tools button{padding:11px 8px}#reader-note-wrap{grid-column:1/-1}}
+
     /* ---- RESET & GLOBAL ---- */
     * {
       margin: 0;
@@ -445,6 +468,29 @@
 
   <!-- MARK HINT -->
   <div id="mark-hint">✦ Click any word to mark your spot · only one mark at a time</div>
+
+
+  <div id="reader-tools" aria-label="Reader tools">
+    <button id="bookmark-btn" type="button">☆ Bookmark page</button>
+    <button id="font-down" type="button" aria-label="Decrease text size">A− Text</button>
+    <button id="font-up" type="button" aria-label="Increase text size">A+ Text</button>
+    <button id="theme-btn" type="button">☾ Night mode</button>
+    <div id="reader-note-wrap">
+      <label for="reader-note">Your private reading note for this page</label>
+      <textarea id="reader-note" placeholder="Write a theory, reminder, or note about this page…"></textarea>
+      <button id="save-note-btn" type="button">Save page note</button>
+    </div>
+    <button id="sheet-config-btn" type="button" style="grid-column:1/-1">☁ Connect Google Sheets sync</button>
+    <div id="sheet-settings">
+      <strong>Google Sheets sync</strong>
+      <span style="font-size:.85rem;line-height:1.5">Paste the Apps Script web-app URL after deploying the companion Code.gs file. Until connected, reading progress is saved on this device.</span>
+      <input id="sheet-url" type="url" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="url">
+      <button id="connect-sheet-btn" type="button">Save connection & sync</button>
+      <span style="font-size:.8rem;line-height:1.5">Your sheet stores a reader ID, current page, bookmarks, word mark, and page notes. Do not share the web-app URL publicly if you want to limit access.</span>
+    </div>
+    <div id="reader-status" role="status" aria-live="polite">Progress saves automatically on this device.</div>
+  </div>
+  <div id="reading-progress" aria-label="Book reading progress"><div id="reading-progress-fill"></div></div>
 
   <!-- PAGE CONTENT -->
   <div id="page-content"></div>
@@ -2453,6 +2499,7 @@ And somewhere, in a white room with a table and two chairs, a man in a gray suit
     }, 40);
 
     pageIndicatorEl.textContent = `Page ${currentPage + 1} / ${PAGES.length}`;
+    if (typeof updateReaderTools === 'function') updateReaderTools();
     prevBtn.disabled = currentPage === 0;
     nextBtn.disabled = currentPage === PAGES.length - 1;
 
@@ -2939,8 +2986,154 @@ But they weren't.`;
   //  INIT
   // ============================================================
 
+
+  // Enhanced reader state and optional Google Sheets sync
+  const READER_STATE_KEY = 'torchWindReaderStateV2';
+  const READER_ID_KEY = 'torchWindReaderIdV1';
+  const SHEET_URL_KEY = 'torchWindSheetEndpointV1';
+  let readerState = { bookmarks: [], notes: {}, fontSize: 1.35, night: false };
+  let readerId = localStorage.getItem(READER_ID_KEY);
+  if (!readerId) {
+    readerId = 'reader-' + (window.crypto && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+    localStorage.setItem(READER_ID_KEY, readerId);
+  }
+  function readerStatus(message) {
+    const el = document.getElementById('reader-status');
+    if (el) el.textContent = message;
+  }
+  function readReaderState() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(READER_STATE_KEY) || '{}');
+      readerState = {...readerState, ...saved, notes: saved.notes || {}, bookmarks: saved.bookmarks || []};
+    } catch (_) {}
+    applyReaderSettings();
+  }
+  function applyReaderSettings() {
+    const content = document.getElementById('page-content');
+    if (content) content.style.fontSize = Math.max(0.9, Math.min(2.1, Number(readerState.fontSize) || 1.35)) + 'rem';
+    document.body.classList.toggle('reader-night', !!readerState.night);
+    const theme = document.getElementById('theme-btn');
+    if (theme) theme.textContent = readerState.night ? '☀ Day mode' : '☾ Night mode';
+    updateReaderTools();
+  }
+  function currentPageKey() { return String(currentPage); }
+  function updateReaderTools() {
+    const b = document.getElementById('bookmark-btn');
+    if (b) {
+      const on = readerState.bookmarks.includes(currentPage);
+      b.textContent = on ? '★ Bookmarked' : '☆ Bookmark page';
+    }
+    const note = document.getElementById('reader-note');
+    if (note && note.value !== (readerState.notes[currentPageKey()] || '')) note.value = readerState.notes[currentPageKey()] || '';
+    const fill = document.getElementById('reading-progress-fill');
+    if (fill) fill.style.width = (((currentPage + 1) / PAGES.length) * 100) + '%';
+  }
+  function persistReaderState(sync = true) {
+    try { localStorage.setItem(READER_STATE_KEY, JSON.stringify(readerState)); } catch (_) {}
+    if (sync) syncReaderState();
+  }
+  function snapshotReaderState() {
+    return {
+      page: currentPage,
+      pageTitle: PAGES[currentPage] ? PAGES[currentPage].title : '',
+      markedWord: markedWordData || null,
+      bookmarks: readerState.bookmarks,
+      notes: readerState.notes,
+      fontSize: readerState.fontSize,
+      night: readerState.night,
+      updatedAt: new Date().toISOString()
+    };
+  }
+  let syncTimer = null;
+  function syncReaderState() {
+    const endpoint = localStorage.getItem(SHEET_URL_KEY);
+    if (!endpoint) return;
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(() => {
+      const payload = {readerId, state: snapshotReaderState()};
+      fetch(endpoint, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(payload)})
+        .then(() => readerStatus('Sync sent to Google Sheets · ' + new Date().toLocaleTimeString()))
+        .catch(() => readerStatus('Google Sheets sync failed. Check the web-app URL and deployment access.'));
+    }, 500);
+  }
+  function loadSheetState() {
+    const endpoint = localStorage.getItem(SHEET_URL_KEY);
+    if (!endpoint) return;
+    const callbackName = '__torchWindSheetLoadCallback';
+    window[callbackName] = function(data) {
+      try {
+        if (!data || !data.state) { readerStatus('Connected to Google Sheets. No previous cloud save found yet.'); return; }
+        const cloud = data.state;
+        if (cloud.notes) readerState.notes = {...readerState.notes, ...cloud.notes};
+        if (Array.isArray(cloud.bookmarks)) readerState.bookmarks = [...new Set([...readerState.bookmarks, ...cloud.bookmarks])];
+        if (cloud.fontSize) readerState.fontSize = cloud.fontSize;
+        if (typeof cloud.night === 'boolean') readerState.night = cloud.night;
+        if (Number.isInteger(cloud.page) && cloud.page >= 0 && cloud.page < PAGES.length) currentPage = cloud.page;
+        if (cloud.markedWord) markedWordData = cloud.markedWord;
+        savePage(); saveMark(); persistReaderState(false); renderPage(); updateReaderTools();
+        readerStatus('Reading progress loaded from Google Sheets.');
+      } catch (_) { readerStatus('Could not apply cloud save. Local progress remains available.'); }
+      delete window[callbackName];
+    };
+    const script = document.createElement('script');
+    script.src = endpoint + (endpoint.includes('?') ? '&' : '?') + 'readerId=' + encodeURIComponent(readerId) + '&callback=' + callbackName + '&t=' + Date.now();
+    script.onerror = () => readerStatus('Could not load Google Sheets save. Check the deployment URL and access settings.');
+    document.head.appendChild(script);
+  }
+  document.getElementById('bookmark-btn').addEventListener('click', () => {
+    const i = readerState.bookmarks.indexOf(currentPage);
+    if (i >= 0) readerState.bookmarks.splice(i, 1); else readerState.bookmarks.push(currentPage);
+    readerState.bookmarks.sort((a,b)=>a-b); persistReaderState(); updateReaderTools();
+    readerStatus(i >= 0 ? 'Bookmark removed.' : 'Page bookmarked and saved.');
+  });
+  document.getElementById('font-up').addEventListener('click', () => {
+    readerState.fontSize = Math.min(2.1, (Number(readerState.fontSize) || 1.35) + 0.1);
+    applyReaderSettings(); persistReaderState(); readerStatus('Text size saved.');
+  });
+  document.getElementById('font-down').addEventListener('click', () => {
+    readerState.fontSize = Math.max(0.9, (Number(readerState.fontSize) || 1.35) - 0.1);
+    applyReaderSettings(); persistReaderState(); readerStatus('Text size saved.');
+  });
+  document.getElementById('theme-btn').addEventListener('click', () => {
+    readerState.night = !readerState.night; applyReaderSettings(); persistReaderState();
+    readerStatus('Reading theme saved.');
+  });
+  document.getElementById('save-note-btn').addEventListener('click', () => {
+    const value = document.getElementById('reader-note').value;
+    if (value.trim()) readerState.notes[currentPageKey()] = value; else delete readerState.notes[currentPageKey()];
+    persistReaderState(); readerStatus('Page note saved.');
+  });
+  document.getElementById('reader-note').addEventListener('change', () => {
+    const value = document.getElementById('reader-note').value;
+    if (value.trim()) readerState.notes[currentPageKey()] = value; else delete readerState.notes[currentPageKey()];
+    persistReaderState(); readerStatus('Page note saved.');
+  });
+  document.getElementById('sheet-config-btn').addEventListener('click', () => document.getElementById('sheet-settings').classList.toggle('open'));
+  document.getElementById('connect-sheet-btn').addEventListener('click', () => {
+    const url = document.getElementById('sheet-url').value.trim();
+    if (!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/.test(url)) {
+      readerStatus('Paste a valid deployed Google Apps Script web-app URL ending in /exec.'); return;
+    }
+    localStorage.setItem(SHEET_URL_KEY, url);
+    syncReaderState(); loadSheetState();
+    readerStatus('Google Sheets URL saved. Connecting…');
+  });
+  function restoreSheetUrlField() {
+    const url = localStorage.getItem(SHEET_URL_KEY) || '';
+    document.getElementById('sheet-url').value = url;
+    if (url) document.getElementById('sheet-config-btn').textContent = '☁ Google Sheets connected · Settings';
+  }
+  readReaderState();
+  restoreSheetUrlField();
+  const originalSavePage = savePage;
+  savePage = function() { originalSavePage(); persistReaderState(); updateReaderTools(); };
+  const originalSaveMark = saveMark;
+  saveMark = function() { originalSaveMark(); persistReaderState(); };
+
   loadState();
   renderPage();
+  updateReaderTools();
+  loadSheetState();
 
 </script>
 
