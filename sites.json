@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "files": [
     ".github/workflows/check-device-ai.yml",
     "app.js",
@@ -14,7 +14,9 @@
     "styles.css",
     "Text to 3D/index.html",
     "evergreen/index.html",
-    "evergreen/site.json"
+    "evergreen/site.json",
+    "THE TORCHES WIND - Book/index.html",
+    "THE TORCHES WIND - Book/site.json"
   ],
   "sites": [
     "cookie-clicker",
@@ -22,6 +24,7 @@
     "links",
     "notes",
     "Text to 3D",
-    "evergreen"
+    "evergreen",
+    "THE TORCHES WIND - Book"
   ]
 }
