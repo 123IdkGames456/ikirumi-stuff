@@ -40,7 +40,7 @@
       background: var(--page-bg);
       border-radius: 18px;
       box-shadow: 0 12px 48px rgba(0,0,0,0.9), 0 0 0 1px #2a2a3a inset;
-      padding: 16px 20px 16px 20px;
+      padding: 14px 18px 14px 18px;
       display: flex;
       flex-direction: column;
       height: calc(100vh - 24px);
@@ -59,7 +59,7 @@
       gap: 6px;
       padding-bottom: 8px;
       border-bottom: 2px solid #d4c9b0;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       flex-shrink: 0;
       font-family: 'Courier New', monospace;
       font-size: 0.7rem;
@@ -99,7 +99,7 @@
     .nav-buttons button:disabled { opacity: 0.3; cursor: not-allowed; background: #2a2a36; }
 
     /* ============================================================
-       SETTINGS PANEL
+       SETTINGS PANEL (Page 1 only)
        ============================================================ */
     #settings-panel {
       background: var(--card-bg);
@@ -115,7 +115,7 @@
 
     #settings-panel .settings-title {
       font-weight: bold;
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       margin-bottom: 8px;
       color: #0e0e10;
       letter-spacing: 0.5px;
@@ -253,43 +253,67 @@
     }
 
     /* ============================================================
-       CHARACTER CARDS
+       COVER PAGE
        ============================================================ */
-    .character-card {
-      background: var(--card-bg);
-      border-left: 5px solid var(--gold);
-      padding: 10px 14px;
-      margin: 8px 0;
-      border-radius: 0 10px 10px 0;
-      font-size: 0.85em;
-      line-height: 1.5;
+    .cover-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px 10px;
+      min-height: 100%;
     }
 
-    .character-card strong {
+    .cover-content h1 {
+      font-size: 2.6em;
+      font-weight: 700;
+      letter-spacing: 0.06em;
       color: #0e0e10;
-      font-size: 1.05em;
+      line-height: 1.15;
+      margin-bottom: 0.2em;
+      text-indent: 0;
+      border: none;
+      padding: 0;
     }
 
-    .character-card .player-num {
-      font-family: 'Courier New', monospace;
-      background: var(--nav-bg);
-      color: var(--nav-text);
-      padding: 1px 10px;
-      border-radius: 20px;
-      font-size: 0.7em;
-      margin-left: 8px;
-      font-weight: bold;
-    }
-
-    .character-card .desc { margin-top: 4px; color: #2e2e3a; }
-
-    .character-card .note {
-      margin-top: 6px;
+    .cover-content .subtitle {
+      font-size: 1.1em;
       font-style: italic;
       color: #6a5e4e;
-      font-size: 0.92em;
-      border-top: 1px dashed #c8bca4;
-      padding-top: 6px;
+      margin-bottom: 1.6em;
+      letter-spacing: 0.04em;
+    }
+
+    .cover-content .flame {
+      font-size: 2.2em;
+      margin: 0.2em 0 0.4em 0;
+      color: var(--gold);
+    }
+
+    .cover-content .tagline {
+      font-size: 0.95em;
+      color: #3d3d4a;
+      max-width: 460px;
+      line-height: 1.7;
+      margin-bottom: 1.4em;
+      text-indent: 0;
+    }
+
+    .cover-content .divider {
+      margin: 0.8em 0;
+      color: #9a8e78;
+      letter-spacing: 8px;
+      font-size: 0.9em;
+    }
+
+    .cover-content .season-label {
+      font-family: 'Courier New', monospace;
+      font-size: 0.75em;
+      letter-spacing: 3px;
+      color: #8b7a5c;
+      margin-top: 0.6em;
+      text-transform: uppercase;
     }
 
     /* ============================================================
@@ -450,19 +474,17 @@
        RESPONSIVE
        ============================================================ */
     @media (max-width: 600px) {
-      #book-container {
-        padding: 10px 12px 10px 12px;
-        border-radius: 12px;
-      }
+      #book-container { padding: 10px 12px 10px 12px; border-radius: 12px; }
       #page-content { font-size: var(--text-size); }
       #page-content h2 { font-size: 1.2em; }
-      .character-card { padding: 8px 10px; }
       .suspect-grid { grid-template-columns: 1fr 1fr; }
       #nav-bar { font-size: 0.6rem; }
       .nav-buttons button { padding: 4px 10px; font-size: 0.6rem; }
       .setting-row label { min-width: 70px; font-size: 0.62rem; }
       .setting-row .value-display { min-width: 32px; font-size: 0.62rem; }
       #settings-panel { padding: 8px 10px; font-size: 0.65rem; }
+      .cover-content h1 { font-size: 1.9em; }
+      .cover-content .subtitle { font-size: 0.95em; }
     }
 
     /* ============================================================
@@ -487,7 +509,7 @@
     </div>
   </div>
 
-  <!-- SETTINGS (always visible on page 1, collapsible elsewhere) -->
+  <!-- SETTINGS (Page 1 only) -->
   <div id="settings-panel">
     <div class="settings-title">✦ READING SETTINGS</div>
     <div class="setting-row">
@@ -526,26 +548,55 @@
 <script>
   // ============================================================
   //  THE TORCHES WIND — SEASON 1 BOOK DATA
-  //  31 pages total (0–30)
-  //  Page 0: Cover + Settings
-  //  Page 1–12: Character Profiles (12 pages)
-  //  Page 13–27: Episodes 1–15 (15 pages)
-  //  Page 28: Trailer Season 2
-  //  Page 29: Guess the Imposters
-  //  Page 30: Reveal (hidden until requested)
-  //  Page 31: End / Credits
+  //  30 pages total (0–29)
+  //  Page 0: Settings
+  //  Page 1: Cover / Front of Book
+  //  Page 2–16: Episodes 1–15
+  //  Page 17: Trailer Season 2
+  //  Page 18: Guess the Imposters
+  //  Page 19: Reveal (hidden)
+  //  Page 20: End / Credits
   // ============================================================
 
   const PAGES = [];
 
   // -------------------------------------------------------
-  //  PAGE 0 — COVER
+  //  PAGE 0 — SETTINGS ONLY
+  // -------------------------------------------------------
+  PAGES.push({
+    type: 'settings',
+    title: 'READING SETTINGS',
+    body: `Adjust the text to your liking.
+
+Text Size — how large the words appear.
+
+Line Spacing — the distance between lines.
+
+Word Spacing — the gap between words.
+
+Letter Spacing — the gap between letters.
+
+---
+
+Your settings will be saved automatically.
+
+Your reading position will be saved automatically.
+
+Your marked word will be saved automatically.
+
+---
+
+Press ▶ to begin.`
+  });
+
+  // -------------------------------------------------------
+  //  PAGE 1 — COVER / FRONT OF BOOK
   // -------------------------------------------------------
   PAGES.push({
     type: 'cover',
     title: 'THE TORCHES WIND',
     subtitle: 'SEASON 1',
-    body: `Twelve players.
+    body: `Twelve strangers.
 
 One Torch.
 
@@ -567,13 +618,7 @@ That makes you disappear.
 
 From nothing.
 
----
-
-Every round, one player is eliminated.
-
-Every round, the Murderer Tool is available.
-
-Every round, the voice speaks.
+Into nothing.
 
 ---
 
@@ -585,113 +630,13 @@ The game has begun.`
   });
 
   // -------------------------------------------------------
-  //  CHARACTER PROFILES (Pages 1–12)
-  // -------------------------------------------------------
-
-  PAGES.push({
-    type: 'character',
-    title: 'MARA VALE',
-    player: 'PLAYER 1',
-    desc: 'An investigative journalist who had been researching strange reports about an impossible tower and a mysterious Torch. She may recognize details that others overlook, but the reason she was investigating them should emerge slowly.',
-    note: 'She carries a folder of photographs she never got to open. The first page is missing.'
-  });
-
-  PAGES.push({
-    type: 'character',
-    title: 'VICTOR HALE',
-    player: 'PLAYER 2',
-    desc: 'A wealthy investor who wears an expensive suit and has experience buying failing companies. He is unusually calm under pressure.',
-    note: 'His true role must remain a mystery. Even if the system identifies him as a killer, that does not automatically establish his role.'
-  });
-
-  PAGES.push({
-    type: 'character',
-    title: 'FELIX ARDEN',
-    player: 'PLAYER 3',
-    desc: 'A computer and security specialist who previously encountered something called TORCH_PROTOCOL. He understands systems better than most of the others, but may not understand who created this one.',
-    note: 'He purchased a Reinforced Wall in Episode 1. He has not explained why.'
-  });
-
-  PAGES.push({
-    type: 'character',
-    title: 'NINA SOL',
-    player: 'PLAYER 4',
-    desc: 'An archivist who found documents referring to a group of participants. Her discovery may connect the game to events that happened before the players arrived.',
-    note: 'She wrote the first note questioning the number of players: "IT SHOULD HAVE BEEN TEN. SOMETHING IS WRONG."'
-  });
-
-  PAGES.push({
-    type: 'character',
-    title: 'TOMAS REED',
-    player: 'PLAYER 5',
-    desc: 'A paramedic who once heard unexplained knocking beneath a building. His medical experience may help the group, but it cannot guarantee his survival.',
-    note: 'He voted for Player 2 without speaking. He has not said why.'
-  });
-
-  PAGES.push({
-    type: 'character',
-    title: 'JAMIE FROST',
-    player: 'PLAYER 6',
-    desc: 'A quiet person whose notebook contains a drawing of the Torch and a group of figures. The drawing may be a clue, but its meaning is unknown.',
-    note: 'Wrote the most important note in Episode 2: "PLAYER 2 IS THE ONE WHO DID IT. THAT DOES NOT MEAN PLAYER 2 IS AN IMPOSTER."'
-  });
-
-  PAGES.push({
-    type: 'character',
-    title: 'OWEN PRICE',
-    player: 'PLAYER 7',
-    desc: 'A mathematician interested in uncertainty. He may try to calculate patterns in voting, deaths, purchases, and the system\'s behavior.',
-    note: 'Eliminated in Episode 2 by registered kill. He wrote: "12 PLAYERS. 2 IMPOSTERS. 10 OTHERS. THAT\'S THE SPLIT."'
-  });
-
-  PAGES.push({
-    type: 'character',
-    title: 'SERA QUINN',
-    player: 'PLAYER 8',
-    desc: 'A former security specialist who once saw cameras displaying impossible rooms. She understands surveillance, but may not know whether the game\'s cameras follow the same rules.',
-    note: 'She counted the minutes until the Torch dimmed. She was right.'
-  });
-
-  PAGES.push({
-    type: 'character',
-    title: 'DR. ADRIAN CROSS',
-    player: 'PLAYER 9',
-    desc: 'A psychiatrist who researched reports of people sharing memories of impossible places. He may be good at reading people, but interpreting behavior is not the same as knowing the truth.',
-    note: 'He accused Player 2 first. He was also accused back. The revote decided between them.'
-  });
-
-  PAGES.push({
-    type: 'character',
-    title: 'ROWAN HALE',
-    player: 'PLAYER 10',
-    desc: 'A building maintenance worker who experiences recurring dreams about an unfamiliar place. His surname resembles Victor Hale\'s, but that connection should not be assumed to mean they are related.',
-    note: 'He purchased something from the shop. He voted for Player 2. He has not explained either.'
-  });
-
-  PAGES.push({
-    type: 'character',
-    title: 'UNNAMED',
-    player: 'PLAYER 11',
-    desc: 'A broad-shouldered, shaved-head man. In Episode 1, he breaks a rule and is immediately removed. His name and deeper history have not yet been established.',
-    note: 'CANON: Player 11 is INNOCENT. This is background truth, not stated in-story.'
-  });
-
-  PAGES.push({
-    type: 'character',
-    title: 'IRIS BELL',
-    player: 'PLAYER 12',
-    desc: 'A quiet woman. Her history, loyalties, and role remain largely unknown, giving her room to become more important as the season progresses.',
-    note: 'CANON: Player 12 is INNOCENT. This is background truth, not stated in-story.'
-  });
-
-  // -------------------------------------------------------
   //  EPISODES 1–15
   // -------------------------------------------------------
 
   // --- EPISODE 1 ---
   PAGES.push({
     type: 'episode',
-    title: 'Episode 1 — The Rules',
+    title: 'Episode 1 — The Wake',
     body: `Mara Vale woke to the smell of stone and cold air.
 
 She did not remember falling asleep. She remembered a train, the shudder of it, a folder on her lap with photographs she had not yet looked at. Then nothing. Now this.
@@ -712,17 +657,22 @@ Then the voice began.
 
 It came from everywhere and nowhere, and its pitch was wrong — high, thin, like a violin played slightly off-key. It did not hurry. It simply spoke, and the speaking was worse than shouting.
 
-"Welcome. You have been selected. There are rules. Listen once."
+"Welcome. You have been selected. There are rules. Listen once."`
+  });
 
-The suited man's jaw tightened. The woman with the notebook wrote something down immediately, her pen scratching.
+  // --- EPISODE 2 ---
+  PAGES.push({
+    type: 'episode',
+    title: 'Episode 2 — The Rules',
+    body: `The voice was high and thin and very steady.
 
 "Rule one. Talking is allowed. You may speak freely at all times. Rule two. Attacking is allowed. You may harm one another. Rule three. Do not damage the Torch. If you damage the Torch, you will disappear. Not die. Disappear. From nothing. Into nothing."
 
-The voice paused. When it resumed, it was very slightly faster.
+The players looked at each other. Nobody spoke. The voice continued.
 
 "Rule four. Each of you begins with one hundred Q Points. The shop is open. You may purchase food, water, tools, defenses, weapons. Purchases are final. Rule five. There are two Imposters among you. They will act against you. You may act against each other. Registered kills will be announced at voting. Rule six. At the end of each round, you will vote. One player will be eliminated."
 
-The voice climbed, a half-note higher.
+The voice paused. When it resumed, it was very slightly faster.
 
 "Survive. Identify. Vote. The round begins now."
 
@@ -732,25 +682,19 @@ Then the shaved-head man laughed. "Talking is allowed? So I can just say—"
 
 He got no further. The floor beneath him simply opened — not a trapdoor, not a seam, just an absence where he had been standing — and he dropped through it without a sound, and the floor closed again, smooth and gray and unmarked.
 
-Nobody screamed. Nobody moved. The place where he had stood was indistinguishable from the rest of the floor.
+Nobody screamed. Nobody moved.
 
 The voice returned, calm and high and almost gentle.
 
 "You did not damage the Torch. You were removed for another reason. But you have seen the consequence."
 
-Then it was gone.
-
-For a long moment the eleven remaining players stared at one another.
-
-The man in the suit — Victor Hale, though she would learn that later — looked at the empty floor, then at the Torch, then at the rest of them. His expression was not fear. It was calculation.
-
-That frightened her more than the screaming would have.`
+Then it was gone.`
   });
 
-  // --- EPISODE 2 ---
+  // --- EPISODE 3 ---
   PAGES.push({
     type: 'episode',
-    title: 'Episode 2 — The Shop',
+    title: 'Episode 3 — The Shop',
     body: `The shop was a recess in the far wall.
 
 It had not been there before. Mara was certain of that. She had walked the perimeter of the room twice while waiting for the voice to return, and there had been no recess, no shelves, no softly lit alcove full of equipment.
@@ -798,10 +742,10 @@ He did not buy anything.
 He simply stood there, very still, and then he walked away.`
   });
 
-  // --- EPISODE 3 ---
+  // --- EPISODE 4 ---
   PAGES.push({
     type: 'episode',
-    title: 'Episode 3 — The First Kill',
+    title: 'Episode 4 — The First Kill',
     body: `The round ended without warning.
 
 There was no bell, no countdown. The Torch simply brightened — a pulse of white light that swept the room and left everyone blinking — and the voice returned, high and quick, as though it had been waiting just behind their ears.
@@ -852,9 +796,14 @@ Jamie Frost — Player 6, the quiet one with the notebook — had not spoken at 
 
 THE VOICE SAID TWO IMPOSTERS. THE KILL WAS REGISTERED BY ONE. WHOEVER IS NAMED IS THE ONE WHO DID IT. PLAYER 2 IS THE ONE WHO DID IT. THAT DOES NOT MEAN PLAYER 2 IS AN IMPOSTER. IT MEANS PLAYER 2 KILLED. THOSE ARE NOT THE SAME THING.
 
-The room went quiet.
+The room went quiet.`
+  });
 
-Mara felt it land. That was the trap, wasn't it. The system told them who killed and let them decide what killing meant. Adrian had already decided. The notebook said not to.
+  // --- EPISODE 5 ---
+  PAGES.push({
+    type: 'episode',
+    title: 'Episode 5 — The Revote',
+    body: `Mara felt it land. That was the trap, wasn't it. The system told them who killed and let them decide what killing meant. Adrian had already decided. The notebook said not to.
 
 "Read that again," Victor said quietly. He had turned to look at Jamie. "Read it again. Because if this room votes on the assumption that a killer is an Imposter, then the Imposters don't need to do anything at all. They can just let us do it for them."
 
@@ -915,10 +864,10 @@ Victor Hale and Adrian Cross stood facing each other in the dimming light.
 Somewhere above them, through the hole in the ceiling, the sky had not changed at all.`
   });
 
-  // --- EPISODE 4 ---
+  // --- EPISODE 6 ---
   PAGES.push({
     type: 'episode',
-    title: 'Episode 4 — The Revote',
+    title: 'Episode 6 — The Body That Went Limp',
     body: `The revote did not last long.
 
 Adrian spoke first. He spoke quickly, and his voice cracked once in the middle, and he kept glancing at the Torch as though he expected it to interrupt him.
@@ -965,106 +914,21 @@ Mara wrote on her own paper: WHAT DOES IT DO?
 
 Jamie shook his head. He wrote: I DON'T KNOW. BUT FREE THINGS IN THIS PLACE ARE NOT GIFTS.
 
-She bought the Identity Device. Eighty points. The device was small and cold and fit in her palm, and it had a single button and a small screen that showed nothing at all.
+She had already bought the Identity Device. Eighty points. The device was broken. Her one use was gone.
 
-Ten seconds. A fifty-fifty chance. She had no idea what she was going to do with it, and she had already spent almost everything she had.
-
----
-
-The round passed slowly. Nobody spoke. Notes appeared on the walls, permanent and anonymous.
-
-PLAYER 2 IS TOO CALM.
-
-PLAYER 3 HAS BEEN WATCHING THE SHOP.
-
-PLAYER 9 HAS BEEN WATCHING EVERYONE. (This one had been written before Adrian was eliminated. It stayed. That was the point.)
-
-Mara watched the notes accumulate and thought about how none of them could be erased, and how none of them had a name attached.
-
-On the second day — if it was a day; the sky never changed — she found Iris Bell sitting alone on a bench near the Torch, and she sat down beside her, and she took out her identity device and showed it to her, and Iris looked at it and then at Mara and then, very deliberately, she nodded toward Victor across the room.
-
-Mara understood.
-
-She stood up. She walked toward Victor with the device in her hand.
-
-Ten seconds was a long time when you were walking toward a man who might be a killer. Ten seconds was longer when he turned and saw what she was holding and did not move.
-
-She pressed the button.
-
-The screen flickered. Numbers. A progress bar. Victor watched her without expression.
-
-Five seconds. Six. Seven.
-
-Felix Arden stepped out of the crowd and knocked the device out of her hand.
-
-It clattered across the floor. The screen went dark. Victor had not moved at all.
-
-Felix stood there with his hands up, and on his face was an expression Mara could not read, and he said — aloud, because talking was allowed — "I'm sorry. I'm sorry. I'm sorry."
-
-The device was broken. Her one use was gone.
-
-And the voice, high and amused, came from everywhere at once.
-
-"The identity attempt has failed. The round continues."
-
-Mara picked up the broken device and looked at Felix.
-
-He would not meet her eyes.`
-  });
-
-  // --- EPISODE 5 ---
-  PAGES.push({
-    type: 'episode',
-    title: 'Episode 5 — The Body That Went Limp',
-    body: `The round ended quietly. No kill had been registered. The voice announced the voting period with something that might almost have been disappointment.
-
-Nobody had died. It was the first time.
-
-Then the voice said something new.
-
-"The Murderer Tool has been used. One body went limp. One body did not."
-
-Nobody understood what it meant. Nobody wanted to ask.
-
-Mara counted the players. Ten. Adrian was gone. Owen was gone. The shaved-head man was gone. Ten remained.
-
-She found Felix standing by the Torch, alone.
-
-"What does it mean?" she said.
-
-"The tool." He did not look at her. "The Murderer Tool. It lets you take control of someone else. Your body goes limp. Theirs doesn't."
-
-"How do you know that?"
-
-"Because I've seen it before." He turned to look at her. "Not here. Before. In a place like this. In a room with a torch."
-
-"You've been here before?"
-
-"I don't know. I don't remember. But I know what the tool does. And I know that the person who uses it can commit a kill while wearing someone else's body."
-
-Mara stared at him.
-
-"That means—"
-
-"It means the voice can name an innocent person and be telling the truth." He looked at the Torch. "It means the registered kill is real. It means the accused is real. It just doesn't mean they're an Imposter."
+Ten seconds. A fifty-fifty chance. And she had wasted it.
 
 The voice returned.
 
-"Voting has begun. A registered kill has been logged. The victim: Player 10."
+"The Murderer Tool has been used. One body went limp. One body did not."
 
-Rowan Hale. The maintenance worker. The one who had voted for Victor.
-
-"The accused: Player 2."
-
-Victor did not move.
-
-"Of course," he said.`
+Nobody understood what it meant. Nobody wanted to ask.`
   });
 
-  // --- EPISODE 6 ---
+  // --- EPISODE 7 ---
   PAGES.push({
     type: 'episode',
-    title: 'Episode 6 — The Scapegoat',
+    title: 'Episode 7 — The Scapegoat',
     body: `The vote was quick.
 
 "Player 2," said Tomas.
@@ -1130,10 +994,10 @@ She looked at Felix.
 He was looking at the shop too.`
   });
 
-  // --- EPISODE 7 ---
+  // --- EPISODE 8 ---
   PAGES.push({
     type: 'episode',
-    title: 'Episode 7 — The Notes That Stay',
+    title: 'Episode 8 — The Notes That Stay',
     body: `The notes were becoming a problem.
 
 Not because they were wrong — most of them were guesses, and guesses were all anyone had — but because they stayed. They stayed on the walls, on the benches, on the floor near the shop, and they could not be taken down, and they could not be signed.
@@ -1209,10 +1073,10 @@ The floor opened.
 He fell.`
   });
 
-  // --- EPISODE 8 ---
+  // --- EPISODE 9 ---
   PAGES.push({
     type: 'episode',
-    title: 'Episode 8 — The Room Changes',
+    title: 'Episode 9 — The Room Changes',
     body: `The room changed while they were sleeping.
 
 Mara woke to find that the benches had moved. Not much — a few feet to the left, and one had turned to face the wall — but they had moved, and nobody had seen them move.
@@ -1302,10 +1166,10 @@ Mara looked at the empty space where Iris had been.
 "That," she said, "was not a vote."`
   });
 
-  // --- EPISODE 9 ---
+  // --- EPISODE 10 ---
   PAGES.push({
     type: 'episode',
-    title: 'Episode 9 — Two People Left',
+    title: 'Episode 10 — Two People Left',
     body: `Two people were left.
 
 Mara and the Torch. The room was vast and gray and quiet, and the Torch burned white at the center of it, and the floor was smooth and gray and unmarked.
@@ -1377,10 +1241,10 @@ The voice was very quiet now.
 The light went out.`
   });
 
-  // --- EPISODE 10 ---
+  // --- EPISODE 11 ---
   PAGES.push({
     type: 'episode',
-    title: 'Episode 10 — The Train',
+    title: 'Episode 11 — The Train',
     body: `Mara woke on a train.
 
 She was sitting in a window seat. There was a folder on her lap. The folder was full of photographs, and the photographs were of people, and the people were all of the people she had just watched die.
@@ -1432,10 +1296,10 @@ Mara looked up. The train was moving. Outside the window, the sky was gray and o
 And somewhere far away, a Torch was burning.`
   });
 
-  // --- EPISODE 11 ---
+  // --- EPISODE 12 ---
   PAGES.push({
     type: 'episode',
-    title: 'Episode 11 — The Second Folder',
+    title: 'Episode 12 — The Second Folder',
     body: `The train did not stop.
 
 Mara sat with the folder on her lap for a long time. The photographs were heavy. She turned them over one by one, and each one had a note on the back, and each note was in Nina Sol's handwriting.
@@ -1519,10 +1383,10 @@ Mara walked toward the building.
 She did not look back.`
   });
 
-  // --- EPISODE 12 ---
+  // --- EPISODE 13 ---
   PAGES.push({
     type: 'episode',
-    title: 'Episode 12 — The Added Names',
+    title: 'Episode 13 — The Added Names',
     body: `The building was the same building.
 
 Mara walked through the doors and found herself in the Middle Room. The Torch stood at the center, burning white. The benches were in their places. The notes were on the walls. The shop was in the recess.
@@ -1616,10 +1480,10 @@ The voice spoke behind her, high and thin and very fast.
 Mara opened the door.`
   });
 
-  // --- EPISODE 13 ---
+  // --- EPISODE 14 ---
   PAGES.push({
     type: 'episode',
-    title: 'Episode 13 — The Man in the White Room',
+    title: 'Episode 14 — The Man in the White Room',
     body: `The man in the white room was not what Mara had expected.
 
 She had expected something monstrous. Something with a high voice and a thin smile. Something that looked like the game.
@@ -1689,108 +1553,6 @@ She sat down in the chair across from him and she put her head in her hands and 
 "That's not enough."
 
 "No," he said. "It isn't."`
-  });
-
-  // --- EPISODE 14 ---
-  PAGES.push({
-    type: 'episode',
-    title: 'Episode 14 — The List',
-    body: `The folder was heavier than it looked.
-
-Mara sat in the white room and opened it. Twelve photographs. Twelve new players. She had never seen any of them before in her life.
-
-A nurse with tired eyes. A carpenter with calloused hands. A teenager with a backpack and a broken phone. A teacher with a wedding ring. A soldier with a scar on his jaw. A baker with flour on her apron. A bus driver with a thermos. A librarian with glasses. A mechanic with oil under his nails. A mother with a photograph of a child in her wallet. A musician with a guitar case. A lawyer with a briefcase.
-
-Twelve people. Twelve lives.
-
-She had to choose two of them to be Imposters.
-
-She had to write two names on the list, and those two names would be crossed out, and two other names would be written in their place. The two who were crossed out would be the Imposters. The two who were written in would be the replacements.
-
-That was how it worked. That was how Nina had done it. That was how the game had always worked.
-
-Mara picked up the pen.
-
-She looked at the photographs for a long time.
-
-Then she wrote.
-
-She wrote two names. She crossed them out. She wrote two more names in their place.
-
-She looked at the list.
-
-PLAYER 1 — THE NURSE — INNOCENT
-PLAYER 2 — THE CARPENTER — INNOCENT
-PLAYER 3 — THE TEENAGER — INNOCENT
-PLAYER 4 — THE TEACHER — INNOCENT
-PLAYER 5 — THE SOLDIER — INNOCENT
-PLAYER 6 — THE BAKER — INNOCENT
-PLAYER 7 — THE BUS DRIVER — INNOCENT
-PLAYER 8 — THE LIBRARIAN — INNOCENT
-PLAYER 9 — THE MECHANIC — INNOCENT
-PLAYER 10 — THE MOTHER — INNOCENT
-PLAYER 11 — THE MUSICIAN — INNOCENT
-PLAYER 12 — THE LAWYER — INNOCENT
-
-And at the bottom, in the same careful handwriting:
-
-THE TWO CROSSED-OUT NAMES ARE THE IMPOSTERS. THE TWO WRITTEN-IN NAMES ARE THE REPLACEMENTS.
-
-Mara did not remember crossing out any names.
-
-She looked at the list again. There were no crossed-out names on it. There were no written-in names. There were twelve names and twelve player numbers and twelve words that said INNOCENT.
-
-She turned the list over.
-
-On the back, there was a note.
-
-YOU DID NOT CHOOSE. YOU NEVER CHOSE. NINA CHOSE. I CHOOSE. THE GAME CHOOSES. YOU ARE NOT THE WITNESS. YOU ARE THE PLAYER. YOU HAVE ALWAYS BEEN THE PLAYER.
-
-Mara dropped the pen.
-
-The man in the gray suit was standing in the doorway.
-
-"Did you write this?" she said.
-
-"No," he said. "You did."
-
-"I don't remember—"
-
-"You never do." He stepped into the room. "That's the game, Mara. That's the whole game. You don't remember choosing. You don't remember writing. You don't remember being the witness. You don't remember the train. You don't remember the folder."
-
-"You said I was the witness."
-
-"I said you were the witness of the second game. I didn't say you were the witness of the first." He sat down. "Nina Sol was the witness of the first game. She chose the players. She chose the Imposters. She chose the replacements. And then she went in, and she did not remember any of it, and she died."
-
-"And now I'm the witness."
-
-"Now you're the witness." He looked at her. "And you have chosen the players. And you will go in. And you will not remember choosing. And you will not remember writing. And you will not remember any of this."
-
-"What did I write?"
-
-The man in the gray suit looked at the list in her hand.
-
-"You wrote two names," he said. "You crossed them out. You wrote two more names in their place. And then you looked at the list and you did not see any crossed-out names, because the game does not let you see them."
-
-"Then who are the Imposters?"
-
-"I don't know." He smiled. "You do."
-
-Mara looked at the list.
-
-Twelve names. Twelve player numbers. Twelve words.
-
-INNOCENT.
-
-Every single one.
-
-The door opened behind her. The Torch was burning in the room beyond. The voice was speaking.
-
-"Welcome. You have been selected. There are rules. Listen once."
-
-Mara stepped through the door.
-
-She did not look back.`
   });
 
   // --- EPISODE 15 ---
@@ -1909,7 +1671,7 @@ End of Season 1.`
   });
 
   // -------------------------------------------------------
-  //  TRAILER SEASON 2 (Page 28)
+  //  TRAILER SEASON 2 (Page 17)
   // -------------------------------------------------------
   PAGES.push({
     type: 'trailer',
@@ -1982,7 +1744,7 @@ COMING SOON`
   });
 
   // -------------------------------------------------------
-  //  GUESS THE IMPOSTERS (Page 29)
+  //  GUESS THE IMPOSTERS (Page 18)
   // -------------------------------------------------------
   PAGES.push({
     type: 'guess',
@@ -2005,7 +1767,7 @@ COMING SOON`
   });
 
   // -------------------------------------------------------
-  //  REVEAL (Page 30) — hidden until requested
+  //  REVEAL (Page 19) — hidden until requested
   // -------------------------------------------------------
   PAGES.push({
     type: 'reveal',
@@ -2014,7 +1776,7 @@ COMING SOON`
   });
 
   // -------------------------------------------------------
-  //  END PAGE (Page 31)
+  //  END PAGE (Page 20)
   // -------------------------------------------------------
   PAGES.push({
     type: 'end',
@@ -2059,7 +1821,6 @@ And somewhere, in a white room with a table and two chairs, a man in a gray suit
   let currentPage = 0;
   let markedWordData = null;
 
-  // Load saved state
   function loadState() {
     try {
       const savedPage = localStorage.getItem(STORAGE_KEY_PAGE);
@@ -2197,10 +1958,10 @@ And somewhere, in a white room with a table and two chairs, a man in a gray suit
     pageContentEl.style.opacity = '0';
 
     setTimeout(() => {
-      if (page.type === 'cover') {
+      if (page.type === 'settings') {
+        renderSettingsPage(page);
+      } else if (page.type === 'cover') {
         renderCoverPage(page);
-      } else if (page.type === 'character') {
-        renderCharacterPage(page);
       } else if (page.type === 'episode') {
         renderEpisodePage(page);
       } else if (page.type === 'trailer') {
@@ -2222,19 +1983,12 @@ And somewhere, in a white room with a table and two chairs, a man in a gray suit
     setTimeout(() => { restoreMark(); }, 60);
   }
 
-  // ---- COVER PAGE ----
-  function renderCoverPage(page) {
+  // ---- SETTINGS PAGE ----
+  function renderSettingsPage(page) {
     const wrapper = document.createElement('div');
     const h2 = document.createElement('h2');
     h2.textContent = page.title;
     wrapper.appendChild(h2);
-    const h3 = document.createElement('h3');
-    h3.textContent = page.subtitle;
-    h3.style.textAlign = 'center';
-    h3.style.fontStyle = 'italic';
-    h3.style.color = '#6a5e4e';
-    h3.style.marginBottom = '1em';
-    wrapper.appendChild(h3);
     const bodyDiv = document.createElement('div');
     const paragraphs = page.body.split(/\n\n+/);
     paragraphs.forEach((pText, idx) => {
@@ -2251,28 +2005,39 @@ And somewhere, in a white room with a table and two chairs, a man in a gray suit
     pageContentEl.appendChild(wrapper);
   }
 
-  // ---- CHARACTER PAGE ----
-  function renderCharacterPage(page) {
+  // ---- COVER PAGE ----
+  function renderCoverPage(page) {
     const wrapper = document.createElement('div');
-    const h2 = document.createElement('h2');
-    h2.textContent = page.title;
-    wrapper.appendChild(h2);
-    const card = document.createElement('div');
-    card.className = 'character-card';
-    const nameLine = document.createElement('div');
-    nameLine.innerHTML = `<strong>${escapeHTML(page.title)}</strong><span class="player-num">${escapeHTML(page.player)}</span>`;
-    card.appendChild(nameLine);
-    const desc = document.createElement('div');
-    desc.className = 'desc';
-    desc.textContent = page.desc;
-    card.appendChild(desc);
-    if (page.note) {
-      const note = document.createElement('div');
-      note.className = 'note';
-      note.textContent = page.note;
-      card.appendChild(note);
-    }
-    wrapper.appendChild(card);
+    wrapper.className = 'cover-content';
+    const h1 = document.createElement('h1');
+    h1.textContent = page.title;
+    wrapper.appendChild(h1);
+    const sub = document.createElement('div');
+    sub.className = 'subtitle';
+    sub.textContent = page.subtitle;
+    wrapper.appendChild(sub);
+    const flame = document.createElement('div');
+    flame.className = 'flame';
+    flame.textContent = '✦';
+    wrapper.appendChild(flame);
+    const bodyDiv = document.createElement('div');
+    const paragraphs = page.body.split(/\n\n+/);
+    paragraphs.forEach((pText, idx) => {
+      if (idx > 0) {
+        const spacer = document.createElement('div');
+        spacer.style.height = '0.4em';
+        bodyDiv.appendChild(spacer);
+      }
+      const p = document.createElement('p');
+      p.textContent = pText.trim();
+      p.style.textIndent = '0';
+      bodyDiv.appendChild(p);
+    });
+    wrapper.appendChild(bodyDiv);
+    const seasonLabel = document.createElement('div');
+    seasonLabel.className = 'season-label';
+    seasonLabel.textContent = 'SEASON 1 · THE TORCHES WIND';
+    wrapper.appendChild(seasonLabel);
     pageContentEl.appendChild(wrapper);
   }
 
@@ -2521,7 +2286,7 @@ But they weren't.`;
     if (!range) return;
     const textNode = range.startContainer;
     if (textNode.nodeType !== Node.TEXT_NODE) return;
-    if (textNode.parentElement.closest('button, .suspect-btn, .guess-section, .trailer-box, .character-card, .reveal-text')) {
+    if (textNode.parentElement.closest('button, .suspect-btn, .guess-section, .trailer-box, .reveal-text')) {
       return;
     }
     const text = textNode.textContent;
