@@ -1,0 +1,21 @@
+{
+  "name": "Evergreen — Infinite Life",
+  "description": "An endless 2D pixel-art life game. Explore a procedurally generated world, build, farm, craft, earn money, meet neighbours and drive; death only costs a few coins, and three local save slots autosave your progress.",
+  "tags": [
+    "game",
+    "infinite world",
+    "pixel art",
+    "life simulator",
+    "open world",
+    "building",
+    "jobs",
+    "farming",
+    "vehicles",
+    "crafting",
+    "NPCs",
+    "autosave",
+    "3 save slots"
+  ],
+  "category": "Games",
+  "icon": "🌿"
+}
