@@ -751,19 +751,37 @@
   const allStoryChapters = PAGES.filter(p => p.type === 'episode');
   if (allStoryChapters.length !== 10) throw new Error('Expected ten source sections before combining.');
   const combinedChapters = [
-    { type: 'episode', title: 'Chapter 1 — The Room That Counted Backwards', body: allStoryChapters.slice(0, 4).map(p => p.body).join('\n\n') },
-    { type: 'episode', title: 'Chapter 2 — The Thirteenth Place', body: allStoryChapters.slice(4, 7).map(p => p.body).join('\n\n') },
-    { type: 'episode', title: 'Chapter 3 — The Count That Remains', body: allStoryChapters.slice(7, 10).map(p => p.body).join('\n\n') }
+    { title: 'Chapter 1 — The Room That Counted Backwards', body: allStoryChapters.slice(0, 4).map(p => p.body).join('\n\n') },
+    { title: 'Chapter 2 — The Thirteenth Place', body: allStoryChapters.slice(4, 7).map(p => p.body).join('\n\n') },
+    { title: 'Chapter 3 — The Count That Remains', body: allStoryChapters.slice(7, 10).map(p => p.body).join('\n\n') }
   ];
+  const readingPages = [];
+  combinedChapters.forEach((chapter, chapterIndex) => {
+    const paragraphs = chapter.body.split(/\n\n+/).map(part => part.trim()).filter(Boolean);
+    const pagesForChapter = 5;
+    for (let part = 0; part < pagesForChapter; part++) {
+      const from = Math.floor(part * paragraphs.length / pagesForChapter);
+      const to = Math.floor((part + 1) * paragraphs.length / pagesForChapter);
+      readingPages.push({
+        type: 'episode',
+        title: chapter.title + ' · Part ' + (part + 1) + ' of ' + pagesForChapter,
+        chapterTitle: chapter.title,
+        chapterNumber: chapterIndex + 1,
+        chapterPart: part + 1,
+        chapterParts: pagesForChapter,
+        body: paragraphs.slice(from, to).join('\n\n')
+      });
+    }
+  });
   const otherPages = PAGES.filter(p => p.type !== 'episode');
-  PAGES.splice(0, PAGES.length, ...otherPages.slice(0, 2), ...combinedChapters, ...otherPages.slice(2));
+  PAGES.splice(0, PAGES.length, ...otherPages.slice(0, 2), ...readingPages, ...otherPages.slice(2));
 
   // ============================================================
   //  STATE & PERSISTENCE
   // ============================================================
 
-  const STORAGE_KEY_PAGE = 'torches-wind-hollow-count-page-v3';
-  const STORAGE_KEY_MARK = 'torches-wind-hollow-count-mark-v3';
+  const STORAGE_KEY_PAGE = 'torches-wind-hollow-count-page-v4';
+  const STORAGE_KEY_MARK = 'torches-wind-hollow-count-mark-v4';
   const STORAGE_KEY_SETTINGS = 'torches-wind-settings';
 
   let currentPage = 0;
