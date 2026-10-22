@@ -751,9 +751,9 @@
   const allStoryChapters = PAGES.filter(p => p.type === 'episode');
   if (allStoryChapters.length !== 10) throw new Error('Expected ten source sections before combining.');
   const combinedChapters = [
-    { type: 'episode', title: 'Chapter 1 — The Room That Counted Backwards', body: allStoryChapters.slice(0, 4).map(p => p.body).join('\\n\\n') },
-    { type: 'episode', title: 'Chapter 2 — The Thirteenth Place', body: allStoryChapters.slice(4, 7).map(p => p.body).join('\\n\\n') },
-    { type: 'episode', title: 'Chapter 3 — The Count That Remains', body: allStoryChapters.slice(7, 10).map(p => p.body).join('\\n\\n') }
+    { type: 'episode', title: 'Chapter 1 — The Room That Counted Backwards', body: allStoryChapters.slice(0, 4).map(p => p.body).join('\n\n') },
+    { type: 'episode', title: 'Chapter 2 — The Thirteenth Place', body: allStoryChapters.slice(4, 7).map(p => p.body).join('\n\n') },
+    { type: 'episode', title: 'Chapter 3 — The Count That Remains', body: allStoryChapters.slice(7, 10).map(p => p.body).join('\n\n') }
   ];
   const otherPages = PAGES.filter(p => p.type !== 'episode');
   PAGES.splice(0, PAGES.length, ...otherPages.slice(0, 2), ...combinedChapters, ...otherPages.slice(2));
@@ -1001,7 +1001,7 @@
     wrapper.appendChild(bodyDiv);
     const seasonLabel = document.createElement('div');
     seasonLabel.className = 'season-label';
-    seasonLabel.textContent = 'THE HOLLOW COUNT · TEN CHAPTERS';
+    seasonLabel.textContent = 'THE HOLLOW COUNT · THREE CHAPTERS';
     wrapper.appendChild(seasonLabel);
     pageContentEl.appendChild(wrapper);
   }
