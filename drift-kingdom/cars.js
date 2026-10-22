@@ -1,10 +1,10 @@
 export const CARS=[
-{id:"s14",name:"Kitsune S14",price:0,power:280,mass:1240,grip:1.0,drive:"RWD",top:220,color:"#d52f43",type:"STREET"},
-{id:"euro",name:"M3 Touring",price:1800,power:410,mass:1620,grip:1.08,drive:"RWD",top:250,color:"#3478bf",type:"SPORT"},
-{id:"supra",name:"A90 Apex",price:4200,power:520,mass:1510,grip:1.04,drive:"RWD",top:285,color:"#e5b13c",type:"SPORT"},
-{id:"rx7",name:"RX-7 Spirit",price:6500,power:365,mass:1280,grip:.94,drive:"RWD",top:245,color:"#f0f0e8",type:"DRIFT"},
-{id:"gt86",name:"GT86 Club",price:9000,power:330,mass:1260,grip:.9,drive:"RWD",top:235,color:"#9c68d5",type:"DRIFT"},
-{id:"r35",name:"R35 Track",price:16000,power:620,mass:1740,grip:1.18,drive:"AWD",top:310,color:"#6d8495",type:"HYPER"},
-{id:"viper",name:"Viper GTS",price:22000,power:645,mass:1530,grip:.98,drive:"RWD",top:320,color:"#c7d1d9",type:"HYPER"},
-{id:"rally",name:"Gravel RS",price:28000,power:390,mass:1390,grip:1.12,drive:"AWD",top:260,color:"#65a878",type:"RALLY"}
+{id:"s14",name:"Kitsune S14",price:0,power:280,mass:1240,grip:1.0,drive:"RWD",top:220,color:"#d52f43",type:"DRIFT",specialty:"Easy to slide · balanced drift control",image:"https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=900&q=85"},
+{id:"euro",name:"M3 Touring",price:1800,power:410,mass:1620,grip:1.22,drive:"RWD",top:250,color:"#3478bf",type:"RACE",specialty:"High grip · stable cornering",image:"https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=900&q=85"},
+{id:"supra",name:"A90 Apex",price:4200,power:520,mass:1510,grip:1.14,drive:"RWD",top:285,color:"#e5b13c",type:"DRAG",specialty:"Huge launch power · fast straights",image:"https://images.unsplash.com/photo-1580414057403-c5f451f30e1c?auto=format&fit=crop&w=900&q=85"},
+{id:"rx7",name:"RX-7 Spirit",price:6500,power:365,mass:1280,grip:.78,drive:"RWD",top:245,color:"#f0f0e8",type:"DRIFT",specialty:"Loose rear · long controlled slides",image:"https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=900&q=85"},
+{id:"gt86",name:"GT86 Club",price:9000,power:330,mass:1260,grip:.84,drive:"RWD",top:235,color:"#9c68d5",type:"DRIFT",specialty:"Lightweight · precise transitions",image:"https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=900&q=85"},
+{id:"r35",name:"R35 Track",price:16000,power:620,mass:1740,grip:1.32,drive:"AWD",top:310,color:"#6d8495",type:"RACE",specialty:"All-wheel grip · high-speed corners",image:"https://images.unsplash.com/photo-1614200187524-dc4b892acf16?auto=format&fit=crop&w=900&q=85"},
+{id:"viper",name:"Viper GTS",price:22000,power:645,mass:1530,grip:1.02,drive:"RWD",top:320,color:"#c7d1d9",type:"DRAG",specialty:"Massive horsepower · top speed",image:"https://images.unsplash.com/photo-1544829099-b9a0c07fad1a?auto=format&fit=crop&w=900&q=85"},
+{id:"rally",name:"Gravel RS",price:28000,power:390,mass:1390,grip:1.08,drive:"AWD",top:260,color:"#65a878",type:"RALLY",specialty:"Rough roads · all-terrain handling",image:"https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=900&q=85"}
 ];
