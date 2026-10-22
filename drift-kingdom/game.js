@@ -11,7 +11,59 @@ function save(){localStorage.setItem('driftKingdomSave',JSON.stringify({credits,
 function toast(s){toastEl.textContent=s;toastEl.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toastEl.classList.remove('show'),2200)}
 function updateCash(){$('#cash').textContent='¢ '+Math.floor(credits).toLocaleString();$('#ownedCount').textContent=owned.length+' CAR'+(owned.length===1?'':'S')+' OWNED';}
 function setupRenderer(){renderer=new THREE.WebGLRenderer(fallbackMode?{antialias:false,powerPreference:'low-power',failIfMajorPerformanceCaveat:false}:{antialias:true,powerPreference:'high-performance',failIfMajorPerformanceCaveat:false});renderer.setPixelRatio(Math.min(devicePixelRatio,fallbackMode?1:1.7));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=!fallbackMode;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.08;game.appendChild(renderer.domElement);}
-function carMesh(car,playerIndex){const root=new THREE.Group();const bodyMat=new THREE.MeshStandardMaterial({color:playerIndex===0?paint:'#3b91dd',metalness:.62,roughness:.28});const body=new THREE.Mesh(new THREE.BoxGeometry(2.05,.58,4.15),bodyMat);body.position.y=.72;body.castShadow=true;root.add(body);const hood=new THREE.Mesh(new THREE.BoxGeometry(1.88,.19,1.2),bodyMat);hood.position.set(0,.98,-1.25);root.add(hood);const cabinMat=new THREE.MeshStandardMaterial({color:0x1a2731,metalness:.25,roughness:.2});const cabin=new THREE.Mesh(new THREE.BoxGeometry(1.45,.55,1.75),cabinMat);cabin.position.set(0,1.2,.05);cabin.castShadow=true;root.add(cabin);const frontGlass=new THREE.Mesh(new THREE.BoxGeometry(1.35,.04,.65),new THREE.MeshStandardMaterial({color:0x90b9c9,metalness:.3,roughness:.2}));frontGlass.position.set(0,1.43,-.38);frontGlass.rotation.x=-.25;root.add(frontGlass);const wheelGeo=new THREE.CylinderGeometry(.39,.39,.27,18),wheelMat=new THREE.MeshStandardMaterial({color:0x151719,roughness:.9}),rimMat=new THREE.MeshStandardMaterial({color:0x9ca5ad,metalness:.8,roughness:.25});const wheels=[];for(const x of [-1.03,1.03])for(const z of [-1.35,1.35]){const pivot=new THREE.Group();pivot.position.set(x,.4,z);root.add(pivot);const w=new THREE.Mesh(wheelGeo,wheelMat);w.rotation.z=Math.PI/2;w.castShadow=true;pivot.add(w);const rim=new THREE.Mesh(new THREE.CylinderGeometry(.2,.2,.29,12),rimMat);rim.rotation.z=Math.PI/2;pivot.add(rim);wheels.push({pivot,w,front:z<0});}const tail=new THREE.Mesh(new THREE.BoxGeometry(1.5,.13,.22),new THREE.MeshStandardMaterial({color:0x20242a}));tail.position.set(0,1.05,1.85);root.add(tail);const lamps=new THREE.Mesh(new THREE.BoxGeometry(1.5,.12,.08),new THREE.MeshStandardMaterial({color:0xff2424,emissive:0x8b0000}));lamps.position.set(0,.83,2.09);root.add(lamps);if(playerIndex===0&&decalData){const img=new Image();img.onload=()=>{const tx=new THREE.CanvasTexture(img);const decal=new THREE.Mesh(new THREE.PlaneGeometry(1.4,.5),new THREE.MeshBasicMaterial({map:tx,transparent:true,side:THREE.DoubleSide,depthWrite:false}));decal.position.set(0,1.015,.35);decal.rotation.x=-Math.PI/2;root.add(decal);};img.src=decalData;}scene.add(root);return {root,bodyMat,wheels,car,playerIndex,vel:new THREE.Vector3(),yaw:0,steer:0,score:0,scoreTick:0,pos:new THREE.Vector3(-850,1,600),prevScore:0};}
+function carMesh(car,playerIndex){
+const root=new THREE.Group();
+const bodyMat=new THREE.MeshStandardMaterial({color:playerIndex===0?paint:'#3b91dd',metalness:.72,roughness:.24});
+const darkMat=new THREE.MeshStandardMaterial({color:0x11161b,metalness:.35,roughness:.35});
+const glassMat=new THREE.MeshPhysicalMaterial({color:0x263b49,metalness:.3,roughness:.12,transparent:true,opacity:.86,clearcoat:1});
+const chromeMat=new THREE.MeshStandardMaterial({color:0xaeb8c0,metalness:.9,roughness:.2});
+const lampMat=new THREE.MeshStandardMaterial({color:0xfff4d2,emissive:0x887755,emissiveIntensity:.65});
+const tailMat=new THREE.MeshStandardMaterial({color:0xff2424,emissive:0x790000,emissiveIntensity:1.3});
+const addBox=(w,h,d,mat,x,y,z,rx=0,ry=0,rz=0)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);m.rotation.set(rx,ry,rz);m.castShadow=true;m.receiveShadow=true;root.add(m);return m;};
+addBox(1.92,.48,4.15,bodyMat,0,.72,0);
+addBox(1.78,.17,1.12,bodyMat,0,.99,-1.28,-.025);
+addBox(1.45,.53,1.72,glassMat,0,1.17,.02);
+addBox(1.53,.09,.16,bodyMat,0,1.45,-.69,-.28);
+addBox(1.53,.09,.16,bodyMat,0,1.45,.72,.22);
+addBox(.09,.39,1.35,bodyMat,-.73,1.2,.02,0,0,-.08);
+addBox(.09,.39,1.35,bodyMat,.73,1.2,.02,0,0,.08);
+addBox(1.98,.2,.2,bodyMat,0,.53,-2.02);
+addBox(2.02,.22,.22,bodyMat,0,.52,2.02);
+addBox(1.45,.12,.18,darkMat,0,.73,-2.14);
+addBox(1.25,.12,.18,darkMat,0,.73,2.14);
+addBox(.4,.16,.09,lampMat,-.65,.86,-2.14);
+addBox(.4,.16,.09,lampMat,.65,.86,-2.14);
+addBox(.42,.13,.08,tailMat,-.62,.87,2.13);
+addBox(.42,.13,.08,tailMat,.62,.87,2.13);
+addBox(.48,.13,.08,darkMat,0,.81,-2.15);
+addBox(.11,.18,.32,chromeMat,-.98,.91,-.45);
+addBox(.11,.18,.32,chromeMat,.98,.91,-.45);
+addBox(.12,.12,.42,bodyMat,-.98,.83,.82);
+addBox(.12,.12,.42,bodyMat,.98,.83,.82);
+addBox(.09,.09,.36,darkMat,-.83,.47,0);
+addBox(.09,.09,.36,darkMat,.83,.47,0);
+const roof=addBox(1.13,.1,.88,bodyMat,0,1.47,.02);
+roof.material=bodyMat;
+addBox(.95,.07,.12,darkMat,0,1.53,-.5,-.28);
+addBox(.95,.07,.12,darkMat,0,1.53,.52,.25);
+if(car.type==='DRAG'||car.type==='RACE'){addBox(1.5,.08,.23,darkMat,0,1.02,1.9);addBox(.08,.27,.12,darkMat,-.55,1.15,1.9);addBox(.08,.27,.12,darkMat,.55,1.15,1.9);}
+if(car.type==='DRIFT'){addBox(1.5,.08,.22,darkMat,0,1.03,1.86);}
+const wheelGeo=new THREE.CylinderGeometry(.39,.39,.29,24),wheelMat=new THREE.MeshStandardMaterial({color:0x101214,roughness:.92}),rimMat=new THREE.MeshStandardMaterial({color:0xc0c7ce,metalness:.92,roughness:.22}),discMat=new THREE.MeshStandardMaterial({color:0x626970,metalness:.85,roughness:.3}),caliperMat=new THREE.MeshStandardMaterial({color:car.type==='RACE'?0xff3e35:0xd6a43a,metalness:.3,roughness:.4});
+const wheels=[];
+for(const x of [-1.02,1.02])for(const z of [-1.34,1.34]){
+const pivot=new THREE.Group();pivot.position.set(x,.4,z);root.add(pivot);
+const w=new THREE.Mesh(wheelGeo,wheelMat);w.rotation.z=Math.PI/2;w.castShadow=true;pivot.add(w);
+const disc=new THREE.Mesh(new THREE.CylinderGeometry(.26,.26,.3,20),discMat);disc.rotation.z=Math.PI/2;pivot.add(disc);
+const rim=new THREE.Mesh(new THREE.CylinderGeometry(.21,.21,.31,12),rimMat);rim.rotation.z=Math.PI/2;pivot.add(rim);
+const hub=new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,.32,12),chromeMat);hub.rotation.z=Math.PI/2;pivot.add(hub);
+const caliper=new THREE.Mesh(new THREE.BoxGeometry(.1,.19,.12),caliperMat);caliper.position.set(x>0?-.08:.08,.1,0);pivot.add(caliper);
+wheels.push({pivot,w,front:z<0});
+}
+for(const x of [-.53,.53]){const exhaust=new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,.16,10),chromeMat);exhaust.rotation.x=Math.PI/2;exhaust.position.set(x,.48,2.15);root.add(exhaust);}
+if(playerIndex===0&&decalData){const img=new Image();img.onload=()=>{const tx=new THREE.CanvasTexture(img);const decal=new THREE.Mesh(new THREE.PlaneGeometry(1.4,.5),new THREE.MeshBasicMaterial({map:tx,transparent:true,side:THREE.DoubleSide,depthWrite:false}));decal.position.set(0,1.02,.35);decal.rotation.x=-Math.PI/2;root.add(decal);};img.src=decalData;}
+scene.add(root);
+return {root,bodyMat,wheels,car,playerIndex,vel:new THREE.Vector3(),yaw:0,steer:0,score:0,scoreTick:0,pos:new THREE.Vector3(-850,1,600),prevScore:0};
+}
 function setupWorld(mode){worldMode=mode;if(renderer?.domElement){game.remove(renderer.domElement);renderer.dispose();}scene=new THREE.Scene();sceneObjects.length=0;setupRenderer();scene.add(new THREE.HemisphereLight(0xd9efff,0x5a634a,2.0));const sun=new THREE.DirectionalLight(0xfff0d6,3.0);sun.position.set(-300,500,100);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-400;sun.shadow.camera.right=400;sun.shadow.camera.top=400;sun.shadow.camera.bottom=-400;scene.add(sun);worldData=buildWorld(scene,mode);players.length=0;players.push(carMesh(CARS[selectedCar],0));players[0].pos.copy(worldData.start);players[0].root.position.copy(players[0].pos);players[0].yaw=0;if(split){const second=CARS.find(c=>owned.includes(c.id))||CARS[0];players.push(carMesh(second,1));players[1].pos.copy(worldData.start).add(new THREE.Vector3(5,0,4));players[1].root.position.copy(players[1].pos);players[1].yaw=0;}cameras=players.map(()=>new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,3500));$('#mapName').textContent=mode==='highlands'?'HIGHLAND COUNTY':mode==='coast'?'COASTLINE DRIVE':'INDUSTRIAL DISTRICT';drawMiniMap();}
 function controls(p){const p2=p.playerIndex===1,forward=keys.has(p2?'ArrowUp':'KeyW'),back=keys.has(p2?'ArrowDown':'KeyS'),left=keys.has(p2?'ArrowLeft':'KeyA'),right=keys.has(p2?'ArrowRight':'KeyR'),hand=keys.has(p2?'ControlRight':'Space');let steer=(right?1:0)-(left?1:0);if(invert)steer=-steer;const throttle=(forward?1:0)-(back?1:0),speed=p.vel.length();p.steer=THREE.MathUtils.damp(p.steer,steer,7,1/60);const forwardVec=new THREE.Vector3(-Math.sin(p.yaw),0,-Math.cos(p.yaw));const forwardSpeed=p.vel.dot(forwardVec);const engine=(p.car.power/280)*75; p.vel.addScaledVector(forwardVec,throttle*engine*(1-Math.min(Math.abs(forwardSpeed)/p.car.top,0.9))/p.car.mass*90);p.vel.multiplyScalar(Math.pow(hand?.985:.994,1));if(!throttle)p.vel.multiplyScalar(.998);const reverse=Math.sign(forwardSpeed||1);p.yaw+=p.steer*(.7+Math.min(speed/30,1.3))*(hand?1.15:1)*Math.min(speed/8,1)*reverse/60;const side=new THREE.Vector3(Math.cos(p.yaw),0,-Math.sin(p.yaw));const lateral=p.vel.dot(side);p.vel.addScaledVector(side,-lateral*(hand?.025:.12)*p.car.grip);const max=p.car.top/3.6;if(p.vel.length()>max)p.vel.setLength(max);p.pos.add(p.vel.clone().multiplyScalar(1/60));const ground=terrainAt(p.pos.x,p.pos.z,worldMode);p.pos.y=ground+1.05;p.root.position.copy(p.pos);p.root.rotation.y=p.yaw;p.root.rotation.z=THREE.MathUtils.damp(p.root.rotation.z,Math.max(-.14,Math.min(.14,-lateral*.004)),5,1/60);for(const w of p.wheels){if(w.front)w.pivot.rotation.y=p.steer*.48;w.w.rotation.x+=speed*.015;}const angle=Math.abs(p.steer),drifting=speed>9&&angle>.12&&Math.abs(lateral)>1.4;if(drifting){p.score+=Math.min(20,Math.abs(lateral)*.03+speed*.005);p.scoreTick++;if(p.scoreTick>180){credits+=Math.floor(p.score/8);p.score=0;p.scoreTick=0;save();toast('CLEAN DRIFT BONUS EARNED');}}else{p.score=Math.max(0,p.score-.2);p.scoreTick=0;}return {speed,drifting};}
 function cameraFollow(p,c,view){const dir=new THREE.Vector3(-Math.sin(p.yaw),0,-Math.cos(p.yaw));if(cockpit){c.position.copy(p.pos).add(new THREE.Vector3(0,1.5,0)).addScaledVector(dir,-.25);c.lookAt(p.pos.clone().addScaledVector(dir,20).add(new THREE.Vector3(0,1,0)));}else{const target=p.pos.clone().addScaledVector(dir,-10).add(new THREE.Vector3(0,5,0));c.position.lerp(target,.12);c.lookAt(p.pos.clone().addScaledVector(dir,5).add(new THREE.Vector3(0,1,0)));}c.aspect=view.w/view.h;c.updateProjectionMatrix();}
