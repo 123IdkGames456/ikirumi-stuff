@@ -54,6 +54,9 @@ $("newGame").onclick=()=>{mode="new";switchPanel("slotPanel");$("slotIntro").tex
 $("continueGame").onclick=()=>{mode="continue";switchPanel("slotPanel");$("slotIntro").textContent="Choose a life to continue.";slots()};
 $("slotBack").onclick=()=>switchPanel("startPanel");
 $("slotDelete").onclick=()=>{const answer=prompt("Enter the slot number to clear (1, 2, or 3):",""+(selectedSlot+1));const i=Number(answer)-1;if(![0,1,2].includes(i))return;const s=readSave(i);if(!s){toast("That slot is already empty.");return}if(confirm("Clear save slot "+(i+1)+"? This cannot be undone.")){localStorage.removeItem(saveKey(i));selectedSlot=i;slots();toast("Save slot cleared.")}};
+
+canvas.addEventListener("pointerdown",e=>{if(!running)return;const rect=canvas.getBoundingClientRect(),sx=e.clientX-rect.left,sy=e.clientY-rect.top;let target=null,bd=Infinity;for(const o of objects){const ox=(o.x-game.x)*TILE+W/2,oy=(o.y-game.y)*TILE+H/2;const d=Math.hypot(sx-(ox+TILE/2),sy-(oy+TILE/2));if(d<TILE*1.15&&d<bd){target=o;bd=d}}if(target){const d=Math.hypot(target.x+.5-game.x,target.y+.5-game.y);if(d<2.7){interactObject(target);return}clickTarget={x:target.x+.5,y:target.y+.5,object:target};toast("Walking over…")}else{clickTarget={x:Math.floor(game.x+(sx-W/2)/TILE)+.5,y:Math.floor(game.y+(sy-H/2)/TILE)+.5,object:null}}});
+
 function startWorld(){menuOpen=false;clickTarget=null;switchPanel("");$("hud").hidden=false;worldTime=game.minute||480;day=game.day||1;running=true;keys={};touchMove={};last=performance.now();updateHud();writeSave(selectedSlot,true);requestAnimationFrame(loop)}
 function stopWorld(){running=false;menuOpen=true;writeSave(selectedSlot,true);$("hud").hidden=true;$("detailPanel").hidden=true;switchPanel("startPanel")}
 function chunkType(cx,cy){const r=randAt(cx,cy,1);return r<.09?"lake":r<.19?"grove":r<.27?"meadow":r<.31?"ridge":"field"}
