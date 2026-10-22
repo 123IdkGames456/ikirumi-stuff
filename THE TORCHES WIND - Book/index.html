@@ -59,16 +59,15 @@
        ============================================================ */
     #nav-bar {
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
-      flex-wrap: wrap;
-      gap: 6px;
-      padding-bottom: 8px;
-      border-bottom: 2px solid #d4c9b0;
-      margin-bottom: 8px;
+      gap: 8px;
+      padding: 2px 64px 10px;
+      border-bottom: 1px solid #d4c9b0;
+      margin-bottom: 12px;
       flex-shrink: 0;
       font-family: 'Courier New', monospace;
-      font-size: 0.7rem;
+      font-size: .7rem;
       color: #3d3d4a;
     }
 
@@ -76,46 +75,58 @@
       font-weight: bold;
       background: var(--nav-bg);
       color: var(--nav-text);
-      padding: 4px 14px;
+      padding: 7px 15px;
       border-radius: 30px;
-      letter-spacing: 0.5px;
-      font-size: 0.7rem;
+      letter-spacing: .7px;
+      font-size: .72rem;
       white-space: nowrap;
+      box-shadow: 0 3px 12px rgba(0,0,0,.1);
     }
 
-    .nav-buttons { display: flex; gap: 6px; }
+    .nav-buttons { display: contents; }
 
     .nav-buttons button {
-      background: var(--nav-bg);
+      position: fixed;
+      z-index: 20;
+      top: 50%;
+      transform: translateY(-50%);
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 76px;
+      padding: 0;
+      border: 1px solid rgba(240,230,210,.18);
+      border-radius: 14px;
+      background: rgba(30,30,42,.88);
       color: var(--nav-text);
-      border: none;
-      padding: 6px 16px;
-      border-radius: 30px;
+      box-shadow: 0 8px 26px rgba(0,0,0,.2);
+      backdrop-filter: blur(10px);
       font-family: 'Courier New', monospace;
       font-weight: bold;
-      font-size: 0.7rem;
+      font-size: 1rem;
       cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-      letter-spacing: 0.3px;
-      white-space: nowrap;
+      transition: background .2s, opacity .2s, transform .2s;
     }
 
-    .nav-buttons button:hover { background: #3a3a4e; }
-    .nav-buttons button:active { transform: scale(0.95); }
-    .nav-buttons button:disabled { opacity: 0.3; cursor: not-allowed; background: #2a2a36; }
+    #prev-btn { left: 12px; }
+    #next-btn { right: 12px; }
+    .nav-buttons button:hover { background: #48485c; transform: translateY(-50%) scale(1.04); }
+    .nav-buttons button:active { transform: translateY(-50%) scale(.96); }
+    .nav-buttons button:disabled { opacity: .2; cursor: not-allowed; box-shadow: none; }
 
     /* ============================================================
        SETTINGS PANEL (Page 1 only)
        ============================================================ */
     #settings-panel {
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 14px 16px;
-      margin-bottom: 10px;
+      background: linear-gradient(135deg, #f1e8d6, #e8ddc8);
+      border-radius: 16px;
+      padding: 16px 18px;
+      margin-bottom: 12px;
       flex-shrink: 0;
       border: 1px solid #c8bca4;
+      box-shadow: 0 8px 24px rgba(69,48,20,.08);
       font-family: 'Courier New', monospace;
-      font-size: 0.75rem;
+      font-size: .78rem;
       color: #2e2e3a;
     }
 
@@ -480,17 +491,27 @@
        RESPONSIVE
        ============================================================ */
     @media (max-width: 600px) {
-      #book-container { padding: 10px 12px 10px 12px; }
-      #page-content { font-size: var(--text-size); }
+      #book-container { padding: 10px 14px; }
+      #page-content { font-size: var(--text-size); padding: 0 2px; }
       #page-content h2 { font-size: 1.2em; }
       .suspect-grid { grid-template-columns: 1fr 1fr; }
-      #nav-bar { font-size: 0.6rem; }
-      .nav-buttons button { padding: 4px 10px; font-size: 0.6rem; }
-      .setting-row label { min-width: 70px; font-size: 0.62rem; }
-      .setting-row .value-display { min-width: 32px; font-size: 0.62rem; }
-      #settings-panel { padding: 8px 10px; font-size: 0.65rem; }
+      #nav-bar { font-size: .6rem; padding: 2px 46px 10px; }
+      .nav-buttons button { width: 34px; height: 58px; border-radius: 11px; font-size: .8rem; }
+      #prev-btn { left: 4px; }
+      #next-btn { right: 4px; }
+      .setting-row { gap: 7px; }
+      .setting-row label { min-width: 74px; font-size: .66rem; }
+      .setting-row input[type="range"] { min-width: 70px; }
+      .setting-row .value-display { min-width: 42px; font-size: .64rem; }
+      #settings-panel { padding: 12px; font-size: .68rem; }
+      #settings-panel .settings-title { font-size: .82rem; }
+      .cover-content { padding: 14px 4px; }
       .cover-content h1 { font-size: 1.9em; }
-      .cover-content .subtitle { font-size: 0.95em; }
+      .cover-content .subtitle { font-size: .95em; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
     }
 
     /* ============================================================
@@ -1965,14 +1986,10 @@ And somewhere, in a white room with a table and two chairs, a man in a gray suit
     pageContentEl.innerHTML = '';
     pageContentEl.style.opacity = '0';
 
-    // Show/hide settings panel and mark hint
-    if (page.type === 'settings') {
-      settingsPanelEl.style.display = 'block';
-      markHintEl.style.display = 'none';
-    } else {
-      settingsPanelEl.style.display = 'none';
-      markHintEl.style.display = 'block';
-    }
+    // Reading controls are available only on the first page.
+    const isFirstPage = currentPage === 0;
+    settingsPanelEl.style.display = isFirstPage ? 'block' : 'none';
+    markHintEl.style.display = isFirstPage ? 'none' : 'block';
 
     setTimeout(() => {
       if (page.type === 'settings') {
