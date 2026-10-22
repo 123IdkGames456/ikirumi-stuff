@@ -1203,35 +1203,18 @@
   function createTTSPanel() {
     const panel = document.createElement('div');
     panel.className = 'tts-panel';
-    panel.innerHTML = '<label>From <input id="tts-from" type="number" min="1" value="46" inputmode="numeric"></label><label>To <input id="tts-to" type="number" min="1" value="847" inputmode="numeric"></label><button type="button" id="tts-play">▶ Read</button><button type="button" id="tts-pause" disabled>Ⅱ Pause</button><button type="button" id="tts-stop" disabled>■ Stop</button><div class="tts-status" id="tts-status" aria-live="polite">Ready · word 46 to word 847 (or the final word on this page)</div>';
+    panel.innerHTML = '<button type="button" id="tts-play">▶ Read from marked word</button><button type="button" id="tts-pause" disabled>Ⅱ Pause</button><button type="button" id="tts-stop" disabled>■ Stop</button><div class="tts-status" id="tts-status" aria-live="polite">Ready · reading starts at the marked word and continues until you stop.</div>';
     return panel;
   }
 
   function setupTTSForPage(bodyDiv, panel) {
     ttsWordElements = Array.from(bodyDiv.querySelectorAll('.tts-word'));
-    const fromInput = panel.querySelector('#tts-from');
-    const toInput = panel.querySelector('#tts-to');
     const playButton = panel.querySelector('#tts-play');
     const pauseButton = panel.querySelector('#tts-pause');
     const stopButton = panel.querySelector('#tts-stop');
     const status = panel.querySelector('#tts-status');
     const total = ttsWordElements.length;
-    toInput.max = String(total);
-    fromInput.max = String(total);
-    toInput.value = String(Math.min(847, total));
-    fromInput.value = String(Math.min(46, Math.max(1, total)));
-    status.textContent = 'This chapter has ' + total + ' words. Reads one sentence at a time.';
-    toInput.addEventListener('change', () => {
-      const from = clampWord(fromInput.value, total);
-      const to = clampWord(toInput.value, total);
-      fromInput.value = String(from);
-      toInput.value = String(Math.max(from, to));
-    });
-    fromInput.addEventListener('change', () => {
-      const from = clampWord(fromInput.value, total);
-      fromInput.value = String(from);
-      if (Number(toInput.value) < from) toInput.value = String(from);
-    });
+    status.textContent = 'This chapter has ' + total + ' words. Reads one sentence at a time from your mark.';
     playButton.addEventListener('click', () => {
       if (!('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) {
         status.textContent = 'Text-to-speech is not supported by this browser.';
@@ -1244,7 +1227,18 @@
         status.textContent = 'Reading…';
         return;
       }
-      startTTS(clampWord(fromInput.value, total), clampWord(toInput.value, total), status, playButton, pauseButton, stopButton);
+      const visibleMark = pageContentEl.querySelector('.marked-word');
+      let startIndex = visibleMark && visibleMark.closest('.tts-word')
+        ? Number(visibleMark.closest('.tts-word').dataset.ttsWord)
+        : 0;
+      if (!startIndex && markedWordData && markedWordData.page === currentPage && markedWordData.word) {
+        const savedWord = markedWordData.word.toLocaleLowerCase();
+        const found = ttsWordElements.findIndex(el => el.textContent.toLocaleLowerCase() === savedWord);
+        if (found >= 0) startIndex = found + 1;
+      }
+      if (!startIndex && ttsCurrentElement) startIndex = Number(ttsCurrentElement.dataset.ttsWord);
+      if (!startIndex) startIndex = 1;
+      startTTS(startIndex, total, status, playButton, pauseButton, stopButton);
     });
     pauseButton.addEventListener('click', () => {
       if (!ttsActive) return;
@@ -1257,14 +1251,15 @@
         window.speechSynthesis.pause();
         ttsPaused = true;
         pauseButton.textContent = '▶ Resume';
-        status.textContent = 'Paused';
+        status.textContent = 'Paused at the marked word.';
       }
     });
     stopButton.addEventListener('click', () => {
-      stopTTS(true);
-      status.textContent = 'Stopped.';
+      stopTTS(false);
+      status.textContent = 'Stopped · word ' + (markedWordData && markedWordData.page === currentPage ? markedWordData.wordIndex : 'mark') + ' saved. Press Read to continue from the mark.';
       playButton.disabled = false;
       pauseButton.disabled = true;
+      pauseButton.textContent = 'Ⅱ Pause';
       stopButton.disabled = true;
     });
   }
@@ -1299,7 +1294,7 @@
     playButton.disabled = true;
     pauseButton.disabled = false;
     stopButton.disabled = false;
-    status.textContent = 'Reading from word ' + from + ' to word ' + to + '…';
+    status.textContent = 'Reading from marked word ' + from + '…';
     speakNextSentence(status, playButton, pauseButton, stopButton);
   }
 
@@ -1312,7 +1307,7 @@
       if (playButton) playButton.disabled = false;
       if (pauseButton) { pauseButton.disabled = true; pauseButton.textContent = 'Ⅱ Pause'; }
       if (stopButton) stopButton.disabled = true;
-      if (status) status.textContent = 'Finished · word ' + ttsRangeEnd + ' remains marked.';
+      if (status) status.textContent = 'Reached the end of this chapter · final word remains marked.';
       return;
     }
     const words = ttsSentenceQueue[ttsQueueIndex++];
