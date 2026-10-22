@@ -269,6 +269,26 @@
       align-self: flex-start;
     }
 
+
+    .tts-panel {
+      display:flex; flex-wrap:wrap; align-items:center; gap:8px;
+      padding:10px; margin:0 0 14px; border:1px solid #b9aa8e;
+      border-radius:12px; background:#e9dfcb; color:#25221d;
+      font-family:'Courier New',monospace; font-size:.78rem;
+    }
+    .tts-panel label { display:flex; align-items:center; gap:5px; }
+    .tts-panel input[type="number"] { width:74px; min-width:0; padding:7px 5px; border:1px solid #9f927a; border-radius:7px; background:#fffaf0; color:#222; }
+    .tts-panel button { padding:8px 11px; border:0; border-radius:8px; background:#292720; color:#f6ecd7; font-weight:bold; cursor:pointer; }
+    .tts-panel button:disabled { opacity:.45; cursor:default; }
+    .tts-status { flex-basis:100%; color:#5a4e3e; font-size:.72rem; }
+    .tts-word-current { background:#f2a93b !important; color:#17130d !important; border-radius:3px; box-shadow:0 0 0 2px #b87514; }
+    .tts-word-range-end { box-shadow:0 0 0 2px #b87514; }
+    @media (max-width:600px) {
+      .tts-panel { gap:6px; padding:8px; font-size:.72rem; }
+      .tts-panel input[type="number"] { width:62px; }
+      .tts-panel button { padding:8px; }
+    }
+
     /* ============================================================
        COVER PAGE
        ============================================================ */
@@ -883,6 +903,7 @@
 
   function renderPage() {
     const page = PAGES[currentPage];
+    stopTTS(false);
     pageContentEl.innerHTML = '';
     pageContentEl.style.opacity = '0';
 
@@ -977,13 +998,17 @@
 
   // ---- EPISODE PAGE ----
   function renderEpisodePage(page) {
+    stopTTS(false);
     const wrapper = document.createElement('div');
     const h2 = document.createElement('h2');
     h2.textContent = page.title;
     wrapper.appendChild(h2);
+    const ttsPanel = createTTSPanel();
+    wrapper.appendChild(ttsPanel);
     const bodyDiv = document.createElement('div');
     bodyDiv.className = 'episode-body';
     const paragraphs = page.body.split(/\n\n+/);
+    let wordIndex = 0;
     paragraphs.forEach((pText, idx) => {
       if (idx > 0) {
         const spacer = document.createElement('div');
@@ -991,11 +1016,23 @@
         bodyDiv.appendChild(spacer);
       }
       const p = document.createElement('p');
-      p.textContent = pText.trim();
+      const parts = pText.trim().match(/\S+|\s+/g) || [];
+      parts.forEach(part => {
+        if (/^\s+$/.test(part)) {
+          p.appendChild(document.createTextNode(part));
+        } else {
+          const span = document.createElement('span');
+          span.className = 'tts-word';
+          span.dataset.ttsWord = String(++wordIndex);
+          span.textContent = part;
+          p.appendChild(span);
+        }
+      });
       bodyDiv.appendChild(p);
     });
     wrapper.appendChild(bodyDiv);
     pageContentEl.appendChild(wrapper);
+    setupTTSForPage(bodyDiv, ttsPanel);
   }
 
   // ---- TRAILER PAGE ----
@@ -1149,6 +1186,196 @@
     });
     wrapper.appendChild(bodyDiv);
     pageContentEl.appendChild(wrapper);
+  }
+
+  // ============================================================
+  //  SENTENCE-BY-SENTENCE TEXT TO SPEECH
+  // ============================================================
+  let ttsUtterance = null;
+  let ttsActive = false;
+  let ttsPaused = false;
+  let ttsSentenceQueue = [];
+  let ttsQueueIndex = 0;
+  let ttsWordElements = [];
+  let ttsRangeEnd = 0;
+  let ttsCurrentElement = null;
+
+  function createTTSPanel() {
+    const panel = document.createElement('div');
+    panel.className = 'tts-panel';
+    panel.innerHTML = '<label>From <input id="tts-from" type="number" min="1" value="46" inputmode="numeric"></label><label>To <input id="tts-to" type="number" min="1" value="847" inputmode="numeric"></label><button type="button" id="tts-play">▶ Read</button><button type="button" id="tts-pause" disabled>Ⅱ Pause</button><button type="button" id="tts-stop" disabled>■ Stop</button><div class="tts-status" id="tts-status" aria-live="polite">Ready · word 46 to word 847 (or the final word on this page)</div>';
+    return panel;
+  }
+
+  function setupTTSForPage(bodyDiv, panel) {
+    ttsWordElements = Array.from(bodyDiv.querySelectorAll('.tts-word'));
+    const fromInput = panel.querySelector('#tts-from');
+    const toInput = panel.querySelector('#tts-to');
+    const playButton = panel.querySelector('#tts-play');
+    const pauseButton = panel.querySelector('#tts-pause');
+    const stopButton = panel.querySelector('#tts-stop');
+    const status = panel.querySelector('#tts-status');
+    const total = ttsWordElements.length;
+    toInput.max = String(total);
+    fromInput.max = String(total);
+    toInput.value = String(Math.min(847, total));
+    fromInput.value = String(Math.min(46, Math.max(1, total)));
+    status.textContent = 'This chapter has ' + total + ' words. Reads one sentence at a time.';
+    toInput.addEventListener('change', () => {
+      const from = clampWord(fromInput.value, total);
+      const to = clampWord(toInput.value, total);
+      fromInput.value = String(from);
+      toInput.value = String(Math.max(from, to));
+    });
+    fromInput.addEventListener('change', () => {
+      const from = clampWord(fromInput.value, total);
+      fromInput.value = String(from);
+      if (Number(toInput.value) < from) toInput.value = String(from);
+    });
+    playButton.addEventListener('click', () => {
+      if (!('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) {
+        status.textContent = 'Text-to-speech is not supported by this browser.';
+        return;
+      }
+      if (ttsPaused) {
+        window.speechSynthesis.resume();
+        ttsPaused = false;
+        pauseButton.textContent = 'Ⅱ Pause';
+        status.textContent = 'Reading…';
+        return;
+      }
+      startTTS(clampWord(fromInput.value, total), clampWord(toInput.value, total), status, playButton, pauseButton, stopButton);
+    });
+    pauseButton.addEventListener('click', () => {
+      if (!ttsActive) return;
+      if (ttsPaused) {
+        window.speechSynthesis.resume();
+        ttsPaused = false;
+        pauseButton.textContent = 'Ⅱ Pause';
+        status.textContent = 'Reading…';
+      } else {
+        window.speechSynthesis.pause();
+        ttsPaused = true;
+        pauseButton.textContent = '▶ Resume';
+        status.textContent = 'Paused';
+      }
+    });
+    stopButton.addEventListener('click', () => {
+      stopTTS(true);
+      status.textContent = 'Stopped.';
+      playButton.disabled = false;
+      pauseButton.disabled = true;
+      stopButton.disabled = true;
+    });
+  }
+
+  function clampWord(value, max) {
+    const n = Number.parseInt(value, 10);
+    return Math.min(max, Math.max(1, Number.isFinite(n) ? n : 1));
+  }
+
+  function startTTS(from, to, status, playButton, pauseButton, stopButton) {
+    stopTTS(false);
+    if (!ttsWordElements.length) return;
+    const total = ttsWordElements.length;
+    from = clampWord(from, total);
+    to = clampWord(to, total);
+    if (to < from) to = from;
+    ttsRangeEnd = to;
+    ttsSentenceQueue = [];
+    let sentence = [];
+    for (let i = from - 1; i < to; i++) {
+      sentence.push({ element: ttsWordElements[i], index: i + 1 });
+      const word = ttsWordElements[i].textContent;
+      if (/[.!?][”’"')\]]*$/.test(word) || i === to - 1) {
+        ttsSentenceQueue.push(sentence);
+        sentence = [];
+      }
+    }
+    if (sentence.length) ttsSentenceQueue.push(sentence);
+    ttsQueueIndex = 0;
+    ttsActive = true;
+    ttsPaused = false;
+    playButton.disabled = true;
+    pauseButton.disabled = false;
+    stopButton.disabled = false;
+    status.textContent = 'Reading from word ' + from + ' to word ' + to + '…';
+    speakNextSentence(status, playButton, pauseButton, stopButton);
+  }
+
+  function speakNextSentence(status, playButton, pauseButton, stopButton) {
+    if (!ttsActive || ttsQueueIndex >= ttsSentenceQueue.length) {
+      const endElement = ttsWordElements[ttsRangeEnd - 1];
+      if (endElement) setTTSHighlight(endElement);
+      ttsActive = false;
+      ttsPaused = false;
+      if (playButton) playButton.disabled = false;
+      if (pauseButton) { pauseButton.disabled = true; pauseButton.textContent = 'Ⅱ Pause'; }
+      if (stopButton) stopButton.disabled = true;
+      if (status) status.textContent = 'Finished · word ' + ttsRangeEnd + ' remains marked.';
+      return;
+    }
+    const words = ttsSentenceQueue[ttsQueueIndex++];
+    const text = words.map(item => item.element.textContent).join(' ');
+    const utterance = new SpeechSynthesisUtterance(text);
+    ttsUtterance = utterance;
+    utterance.rate = 0.92;
+    utterance.pitch = 1;
+    utterance.onboundary = event => {
+      if (!ttsActive || event.name && event.name !== 'word') return;
+      const before = text.slice(0, event.charIndex);
+      const localIndex = (before.match(/\S+/g) || []).length;
+      const item = words[Math.min(localIndex, words.length - 1)];
+      if (item) {
+        setTTSHighlight(item.element);
+        if (status) status.textContent = 'Reading word ' + item.index + ' of ' + ttsRangeEnd + '…';
+      }
+    };
+    utterance.onend = () => {
+      if (ttsActive) speakNextSentence(status, playButton, pauseButton, stopButton);
+    };
+    utterance.onerror = event => {
+      if (event.error === 'canceled' || event.error === 'interrupted') return;
+      ttsActive = false;
+      if (status) status.textContent = 'Speech stopped by the browser. Press Read to continue.';
+      if (playButton) playButton.disabled = false;
+      if (pauseButton) pauseButton.disabled = true;
+      if (stopButton) stopButton.disabled = true;
+    };
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function setTTSHighlight(element) {
+    if (ttsCurrentElement) ttsCurrentElement.classList.remove('tts-word-current');
+    ttsCurrentElement = element;
+    if (ttsCurrentElement) {
+      ttsCurrentElement.classList.add('tts-word-current');
+      ttsCurrentElement.scrollIntoView({block:'nearest', behavior:'smooth'});
+      const index = Number(ttsCurrentElement.dataset.ttsWord);
+      markedWordData = { page: currentPage, wordIndex: index, word: ttsCurrentElement.textContent };
+      saveMark();
+    }
+  }
+
+  function stopTTS(clearHighlight) {
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    ttsActive = false;
+    ttsPaused = false;
+    ttsUtterance = null;
+    ttsSentenceQueue = [];
+    ttsQueueIndex = 0;
+    if (ttsCurrentElement) {
+      ttsCurrentElement.classList.remove('tts-word-current');
+      ttsCurrentElement = null;
+    }
+    if (clearHighlight) {
+      const marked = pageContentEl.querySelector('.marked-word');
+      if (marked) {
+        const parent = marked.parentNode;
+        parent.replaceChild(document.createTextNode(marked.textContent), marked);
+        parent.normalize();
+      }
+    }
   }
 
   // ============================================================
