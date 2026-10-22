@@ -30,6 +30,7 @@
 <section class="panel" id="panel-progress"><div class="sectionTitle"><div><span class="eyebrow">YOUR DRIVER PROFILE</span><h2>BUILT ON THE ROAD</h2></div><p>Credits are earned by holding clean drifts and exploring.</p></div><div class="progressGrid"><div><small>AVAILABLE CREDITS</small><b id="progressMoney">¢ 2,500</b></div><div><small>CARS OWNED</small><b id="progressCars">1 / 8</b></div><div><small>TOTAL DISTANCE</small><b id="distance">0.0 km</b></div><div><small>DRIFT POINTS</small><b id="totalDrift">0</b></div></div><button class="danger" id="resetSave">RESET ALL LOCAL PROGRESS</button></section>
 <footer><span>STREET LEGENDS <i>—</i> BROWSER BUILD</span><span>THREE.JS · EXTERNAL GLB MODEL · LOCAL SAVE</span></footer>
 </main>
+<script>setTimeout(()=>{const l=document.getElementById("loading");if(l&&!l.classList.contains("done")){document.getElementById("loadText").textContent="The game engine did not start. Check your connection to the Three.js CDN, then reload.";document.getElementById("loadBar").style.width="100%";const b=document.createElement("button");b.textContent="RELOAD GAME";b.onclick=()=>location.reload();b.style.cssText="margin-top:18px;padding:12px 22px;background:#e73b48;color:white;border:0;font-weight:800;cursor:pointer";l.appendChild(b);}} ,12000);</script>
 <script type="module" src="game.js"></script>
 </body>
 </html>
