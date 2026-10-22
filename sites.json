@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "files": [
     ".github/workflows/check-device-ai.yml",
     "app.js",
@@ -12,13 +12,16 @@
     "notes/index.html",
     "site-lock.json",
     "styles.css",
-    "Text to 3D/index.html"
+    "Text to 3D/index.html",
+    "evergreen/index.html",
+    "evergreen/site.json"
   ],
   "sites": [
     "cookie-clicker",
     "Links",
     "links",
     "notes",
-    "Text to 3D"
+    "Text to 3D",
+    "evergreen"
   ]
 }
