@@ -522,54 +522,63 @@
     #page-content::-webkit-scrollbar-thumb { background: #b8ac98; border-radius: 10px; }
     #page-content::-webkit-scrollbar-thumb:hover { background: #9a8e78; }
   
-    /* Mobile-first reading layout */
+    /* Navigation stays in the reading flow, before and after the text */
     #book-container {
       width: 100%;
       max-width: 860px;
-      height: 100dvh;
-      max-height: 100dvh;
-      padding: 10px clamp(12px, 4vw, 28px) 60px;
+      min-height: 100dvh;
+      height: auto;
+      max-height: none;
+      padding: 10px clamp(12px, 4vw, 28px) 18px;
       position: relative;
+      overflow: visible;
     }
     #nav-bar {
       justify-content: center;
       padding: 2px 4px 9px;
       margin-bottom: 8px;
     }
-    .nav-buttons { display: contents; }
+    .nav-buttons {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      margin: 10px 0;
+    }
     .nav-buttons button {
-      position: fixed;
-      z-index: 30;
-      left: 50%;
-      transform: translateX(-50%);
+      position: static;
+      left: auto;
+      top: auto;
+      bottom: auto;
+      transform: none;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 9px;
-      width: min(180px, calc(100vw - 40px));
-      min-height: 42px;
-      padding: 9px 16px;
+      width: min(220px, 100%);
+      min-height: 44px;
+      padding: 10px 16px;
       border: 1px solid rgba(240,230,210,.2);
       border-radius: 24px;
       background: rgba(30,30,42,.97);
       color: var(--nav-text);
-      box-shadow: 0 5px 18px rgba(0,0,0,.22);
+      box-shadow: 0 5px 18px rgba(0,0,0,.16);
       font: bold .78rem 'Courier New', monospace;
       cursor: pointer;
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
     }
-    #prev-btn { top: 56px; }
     #prev-btn::after { content: 'PREVIOUS PAGE'; }
-    #next-btn { bottom: max(10px, env(safe-area-inset-bottom)); }
     #next-btn::after { content: 'NEXT PAGE'; }
-    .nav-buttons button:hover { background: #48485c; transform: translateX(-50%); }
+    .nav-buttons button:hover { background: #48485c; transform: none; }
     .nav-buttons button:active { opacity: .8; }
     .nav-buttons button:disabled { opacity: .18; cursor: not-allowed; box-shadow: none; }
     #page-content {
-      padding: 4px 4px 30px 2px;
+      display: block;
+      width: 100%;
+      overflow: visible;
       overflow-wrap: anywhere;
-      overscroll-behavior: contain;
+      padding: 4px 4px 12px 2px;
+      min-height: 0;
       -webkit-overflow-scrolling: touch;
     }
     #settings-panel {
