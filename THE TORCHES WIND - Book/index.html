@@ -2,493 +2,476 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>THE TORCHES WIND · Book</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>THE TORCHES WIND · SEASON 1</title>
   <style>
+    /* ============================================================
+       RESET & GLOBAL
+       ============================================================ */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    /* READING EXPERIENCE UPGRADE */
-    #reader-tools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 18px;font-family:'Courier New',monospace}
-    #reader-tools button,#reader-tools select{border:1px solid #c8bca4;border-radius:10px;padding:10px 12px;background:#ece4d4;color:#24232b;font:inherit;cursor:pointer}
-    #reader-tools button:hover{background:#dfd2bb}
-    #reading-progress{height:5px;background:#ddd3c2;border-radius:20px;overflow:hidden;margin:-12px 0 20px}
-    #reading-progress-fill{height:100%;width:0;background:#9b4c32;transition:width .25s}
-    #reader-note-wrap{grid-column:1/-1;display:grid;gap:7px}
-    #reader-note{width:100%;min-height:76px;resize:vertical;border:1px solid #c8bca4;border-radius:12px;padding:12px;background:#fffdf7;color:#222;font:1rem/1.5 Georgia,serif}
-    #reader-status{grid-column:1/-1;font-size:.75rem;color:#655a4a;min-height:1.2em}
-    #sheet-settings{grid-column:1/-1;display:none;background:#ece4d4;padding:14px;border-radius:12px;gap:8px}
-    #sheet-settings.open{display:grid}
-    #sheet-url{width:100%;padding:10px;border:1px solid #c8bca4;border-radius:8px;font: .85rem 'Courier New',monospace}
-    body.reader-night{background:#090a0d}
-    body.reader-night #book-container{background:#202127;box-shadow:0 20px 60px #000,0 0 0 1px #45434a inset}
-    body.reader-night #page-content{color:#e8e1d5}
-    body.reader-night #page-content h2,body.reader-night #page-content h3{color:#f2e9dc}
-    body.reader-night #nav-bar{color:#cfc6b7;border-color:#49454a}
-    body.reader-night #reader-note-wrap label,body.reader-night #reader-status{color:#d4c6b0}
-    body.reader-night #reader-note{background:#2b2c32;color:#f1e8da;border-color:#55515a}
-    body.reader-night #reader-tools button,body.reader-night #reader-tools select,body.reader-night #sheet-settings{background:#303139;color:#f0e6d2;border-color:#55515a}
-    @media(max-width:600px){#reader-tools{grid-template-columns:repeat(2,minmax(0,1fr))}#reader-tools button{padding:11px 8px}#reader-note-wrap{grid-column:1/-1}}
-
-
-    /* PHONE + SIDE PAGE CONTROLS */
-    #side-page-prev,#side-page-next{
-      position:fixed;top:50%;transform:translateY(-50%);z-index:50;
-      width:48px;height:76px;border:1px solid #b9a989;border-radius:14px;
-      background:rgba(30,30,42,.94);color:#f0e6d2;font-size:26px;font-weight:bold;
-      display:flex;align-items:center;justify-content:center;cursor:pointer;
-      box-shadow:0 5px 22px rgba(0,0,0,.28);touch-action:manipulation;
-      -webkit-tap-highlight-color:transparent;
-    }
-    #side-page-prev{left:8px}
-    #side-page-next{right:8px}
-    #side-page-prev:disabled,#side-page-next:disabled{opacity:.28;cursor:not-allowed}
-    #side-page-prev:active,#side-page-next:active{transform:translateY(-50%) scale(.95)}
-    #page-content .marked-word{user-select:none;-webkit-user-select:none}
-    #mark-hint{line-height:1.5}
-    @media(max-width:760px){
-      body{padding:10px 8px 24px}
-      #book-container{padding:18px 16px 28px;max-width:100%;border-radius:14px}
-      #nav-bar{gap:8px;margin-bottom:18px;padding-bottom:12px}
-      #page-indicator{padding:7px 10px}
-      .nav-buttons{display:none}
-      #page-content{min-height:60vh;font-size:1.1rem;line-height:1.8}
-      #reader-tools{gap:7px}
-      #reader-tools button,#reader-tools select{font-size:.82rem;padding:11px 7px;min-height:42px}
-      #reader-note{font-size:16px}
-      #side-page-prev,#side-page-next{width:38px;height:58px;font-size:21px;border-radius:12px;top:auto;bottom:16px;transform:none}
-      #side-page-prev{left:10px}
-      #side-page-next{right:10px}
-      #side-page-prev:active,#side-page-next:active{transform:scale(.95)}
-      body{padding-bottom:88px}
-      #mark-hint{font-size:.72rem}
-    }
-    @media(min-width:761px){
-      #side-page-prev,#side-page-next{opacity:.82}
-      #side-page-prev:hover,#side-page-next:hover{opacity:1;background:#3a3a4e}
-    }
-
-    /* ---- RESET & GLOBAL ---- */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    :root {
+      --text-size: 1.15rem;
+      --line-height: 1.8;
+      --word-spacing: 0.04em;
+      --letter-spacing: 0.01em;
+      --page-bg: #f8f4e9;
+      --page-text: #1a1a1a;
+      --accent: #8b2a1a;
+      --gold: #b8952a;
+      --card-bg: #ece4d4;
+      --nav-bg: #1e1e2a;
+      --nav-text: #f0e6d2;
     }
 
     body {
-      background: #0e0e10;
+      background: #0a0a0c;
       font-family: 'Georgia', 'Times New Roman', serif;
       display: flex;
       justify-content: center;
-      padding: 20px;
+      padding: 12px;
       min-height: 100vh;
+      overflow: hidden;
     }
 
     #book-container {
       max-width: 820px;
       width: 100%;
-      background: #f8f4e9;
-      border-radius: 24px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px #3a3a4a inset;
-      padding: 30px 35px 40px 35px;
-      position: relative;
+      background: var(--page-bg);
+      border-radius: 18px;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.9), 0 0 0 1px #2a2a3a inset;
+      padding: 16px 20px 16px 20px;
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 24px);
+      max-height: calc(100vh - 24px);
       transition: background 0.2s;
     }
 
-    /* ---- NAVIGATION BAR ---- */
+    /* ============================================================
+       NAVIGATION
+       ============================================================ */
     #nav-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 12px;
-      padding-bottom: 16px;
-      border-bottom: 3px solid #d4c9b0;
-      margin-bottom: 28px;
+      gap: 6px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #d4c9b0;
+      margin-bottom: 10px;
+      flex-shrink: 0;
       font-family: 'Courier New', monospace;
-      font-size: 0.9rem;
+      font-size: 0.7rem;
       color: #3d3d4a;
     }
 
     #page-indicator {
       font-weight: bold;
-      background: #1e1e2a;
-      color: #f0e6d2;
-      padding: 6px 18px;
-      border-radius: 40px;
-      letter-spacing: 1px;
-      font-size: 0.85rem;
+      background: var(--nav-bg);
+      color: var(--nav-text);
+      padding: 4px 14px;
+      border-radius: 30px;
+      letter-spacing: 0.5px;
+      font-size: 0.7rem;
+      white-space: nowrap;
     }
 
-    .nav-buttons {
-      display: flex;
-      gap: 10px;
-    }
+    .nav-buttons { display: flex; gap: 6px; }
 
     .nav-buttons button {
-      background: #1e1e2a;
-      color: #f0e6d2;
+      background: var(--nav-bg);
+      color: var(--nav-text);
       border: none;
-      padding: 8px 22px;
-      border-radius: 40px;
+      padding: 6px 16px;
+      border-radius: 30px;
       font-family: 'Courier New', monospace;
       font-weight: bold;
-      font-size: 0.85rem;
+      font-size: 0.7rem;
       cursor: pointer;
       transition: background 0.2s, transform 0.1s;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+    }
+
+    .nav-buttons button:hover { background: #3a3a4e; }
+    .nav-buttons button:active { transform: scale(0.95); }
+    .nav-buttons button:disabled { opacity: 0.3; cursor: not-allowed; background: #2a2a36; }
+
+    /* ============================================================
+       SETTINGS PANEL
+       ============================================================ */
+    #settings-panel {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      flex-shrink: 0;
+      border: 1px solid #c8bca4;
+      font-family: 'Courier New', monospace;
+      font-size: 0.72rem;
+      color: #2e2e3a;
+    }
+
+    #settings-panel .settings-title {
+      font-weight: bold;
+      font-size: 0.8rem;
+      margin-bottom: 8px;
+      color: #0e0e10;
       letter-spacing: 0.5px;
     }
 
-    .nav-buttons button:hover {
-      background: #3a3a4e;
+    .setting-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
     }
 
-    .nav-buttons button:active {
-      transform: scale(0.96);
+    .setting-row label {
+      min-width: 90px;
+      font-weight: bold;
+      font-size: 0.68rem;
+      color: #3d3d4a;
     }
 
-    .nav-buttons button:disabled {
-      opacity: 0.35;
-      cursor: not-allowed;
-      background: #2a2a36;
+    .setting-row input[type="range"] {
+      flex: 1;
+      min-width: 80px;
+      accent-color: var(--accent);
+      height: 5px;
+      cursor: pointer;
     }
 
-    /* ---- PAGE CONTENT ---- */
+    .setting-row .value-display {
+      min-width: 42px;
+      text-align: right;
+      font-weight: bold;
+      color: var(--accent);
+      font-size: 0.68rem;
+    }
+
+    .setting-row .reset-btn {
+      background: #d4c9b0;
+      border: none;
+      border-radius: 20px;
+      padding: 3px 12px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.65rem;
+      font-weight: bold;
+      cursor: pointer;
+      color: #2e2e3a;
+      transition: background 0.2s;
+    }
+
+    .setting-row .reset-btn:hover { background: #c8bca4; }
+
+    /* ============================================================
+       PAGE CONTENT
+       ============================================================ */
     #page-content {
-      min-height: 520px;
-      font-size: 1.35rem;
-      line-height: 1.9;
-      color: #1e1e1e;
-      letter-spacing: 0.02em;
-      word-spacing: 0.05em;
-      transition: opacity 0.15s;
-      white-space: pre-wrap;
-      word-break: break-word;
+      flex: 1 1 auto;
+      overflow-y: auto;
+      overflow-x: hidden;
+      font-size: var(--text-size);
+      line-height: var(--line-height);
+      word-spacing: var(--word-spacing);
+      letter-spacing: var(--letter-spacing);
+      color: var(--page-text);
+      transition: opacity 0.1s;
+      padding-right: 6px;
+      scroll-behavior: smooth;
+      min-height: 0;
+      -webkit-overflow-scrolling: touch;
     }
 
     #page-content p {
-      margin-bottom: 1.4em;
-      text-indent: 2em;
+      margin-bottom: 0.8em;
+      text-indent: 1.4em;
     }
 
-    #page-content p:first-of-type {
-      text-indent: 0;
-    }
+    #page-content p:first-of-type { text-indent: 0; }
 
     #page-content h2 {
-      font-size: 2.1rem;
+      font-size: 1.5em;
       font-weight: 700;
-      letter-spacing: 0.04em;
-      margin: 0 0 0.7em 0;
+      letter-spacing: 0.02em;
+      margin: 0 0 0.4em 0;
       color: #0e0e10;
       text-indent: 0;
-      border-left: 8px solid #8b7a5c;
-      padding-left: 20px;
-      line-height: 1.3;
+      border-left: 5px solid var(--gold);
+      padding-left: 12px;
+      line-height: 1.25;
     }
 
     #page-content h3 {
-      font-size: 1.5rem;
+      font-size: 1.15em;
       font-weight: 600;
-      margin: 1.6em 0 0.6em 0;
+      margin: 1em 0 0.3em 0;
       color: #2a2a3a;
       text-indent: 0;
     }
 
     #page-content .divider {
       text-align: center;
-      margin: 2.2em 0;
+      margin: 1.4em 0;
       color: #9a8e78;
-      letter-spacing: 8px;
-      font-size: 1.2rem;
+      letter-spacing: 6px;
+      font-size: 1em;
     }
 
-    /* ---- MARKED WORD HIGHLIGHT ---- */
+    /* Marked word */
     .marked-word {
       background: #e8d48b;
       color: #0e0e10;
-      padding: 0 4px;
-      border-radius: 4px;
+      padding: 0 3px;
+      border-radius: 3px;
       cursor: pointer;
-      box-shadow: 0 0 0 2px #d4b85c;
-      transition: background 0.2s;
+      box-shadow: 0 0 0 1.5px #d4b85c;
       font-weight: 600;
     }
 
-    .marked-word:hover {
-      background: #f0e0a0;
-    }
+    .marked-word:hover { background: #f0e0a0; }
 
-    /* ---- MARK BUTTON ---- */
+    /* ============================================================
+       MARK HINT
+       ============================================================ */
     #mark-hint {
       font-family: 'Courier New', monospace;
-      font-size: 0.8rem;
+      font-size: 0.6rem;
       color: #5a4e3e;
       background: #ece4d4;
-      padding: 6px 14px;
-      border-radius: 30px;
+      padding: 3px 12px;
+      border-radius: 20px;
       display: inline-block;
-      margin-top: 8px;
-      margin-bottom: 8px;
-      letter-spacing: 0.3px;
+      margin-top: 6px;
+      letter-spacing: 0.2px;
       border: 1px solid #c8bca4;
+      flex-shrink: 0;
+      align-self: flex-start;
     }
 
-    /* ---- SPECIAL PAGES ---- */
+    /* ============================================================
+       CHARACTER CARDS
+       ============================================================ */
     .character-card {
-      background: #ece4d4;
-      border-left: 6px solid #8b7a5c;
-      padding: 18px 24px;
-      margin: 18px 0;
-      border-radius: 0 16px 16px 0;
-      font-size: 1.15rem;
-      line-height: 1.7;
+      background: var(--card-bg);
+      border-left: 5px solid var(--gold);
+      padding: 10px 14px;
+      margin: 8px 0;
+      border-radius: 0 10px 10px 0;
+      font-size: 0.85em;
+      line-height: 1.5;
     }
 
     .character-card strong {
       color: #0e0e10;
-      font-size: 1.25rem;
-      letter-spacing: 0.02em;
+      font-size: 1.05em;
     }
 
     .character-card .player-num {
       font-family: 'Courier New', monospace;
-      background: #1e1e2a;
-      color: #f0e6d2;
-      padding: 2px 12px;
-      border-radius: 30px;
-      font-size: 0.85rem;
-      margin-left: 10px;
+      background: var(--nav-bg);
+      color: var(--nav-text);
+      padding: 1px 10px;
+      border-radius: 20px;
+      font-size: 0.7em;
+      margin-left: 8px;
       font-weight: bold;
     }
 
-    .character-card .desc {
-      margin-top: 6px;
-      color: #2e2e3a;
-    }
+    .character-card .desc { margin-top: 4px; color: #2e2e3a; }
 
     .character-card .note {
-      margin-top: 8px;
+      margin-top: 6px;
       font-style: italic;
       color: #6a5e4e;
-      font-size: 1rem;
+      font-size: 0.92em;
       border-top: 1px dashed #c8bca4;
-      padding-top: 8px;
+      padding-top: 6px;
     }
 
-    /* ---- TRAILER ---- */
+    /* ============================================================
+       TRAILER
+       ============================================================ */
     .trailer-box {
       background: #14141e;
       color: #e8e0d0;
-      padding: 30px 32px;
-      border-radius: 20px;
-      margin: 20px 0;
+      padding: 14px 16px;
+      border-radius: 12px;
+      margin: 6px 0;
       font-family: 'Courier New', monospace;
-      font-size: 1.05rem;
-      line-height: 1.8;
+      font-size: 0.82em;
+      line-height: 1.6;
       border: 2px solid #3a3a4e;
-      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.7);
+      box-shadow: inset 0 0 30px rgba(0,0,0,0.7);
     }
 
     .trailer-box h3 {
-      color: #f0e6d2;
-      font-size: 1.8rem;
-      margin-bottom: 0.4em;
-      border-left: 6px solid #c45a3a;
-      padding-left: 20px;
+      color: var(--nav-text);
+      font-size: 1.2em;
+      margin-bottom: 0.3em;
+      border-left: 4px solid var(--accent);
+      padding-left: 12px;
       font-family: 'Georgia', serif;
     }
 
-    .trailer-box .trailer-line {
-      margin: 12px 0;
-    }
+    .trailer-box .trailer-line { margin: 5px 0; }
+    .trailer-box em { color: var(--gold); font-style: normal; }
 
-    .trailer-box .redacted {
-      background: #2a2a3a;
-      color: #2a2a3a;
-      padding: 0 6px;
-      border-radius: 4px;
-      user-select: none;
-    }
-
-    .trailer-box em {
-      color: #d4b85c;
-      font-style: normal;
-    }
-
-    /* ---- GUESSING GAME ---- */
+    /* ============================================================
+       GUESSING GAME
+       ============================================================ */
     .guess-section {
-      background: #1e1e2a;
-      color: #f0e6d2;
-      padding: 28px 30px;
-      border-radius: 20px;
-      margin: 20px 0;
+      background: var(--nav-bg);
+      color: var(--nav-text);
+      padding: 14px 16px;
+      border-radius: 12px;
+      margin: 6px 0;
       font-family: 'Courier New', monospace;
+      font-size: 0.82em;
     }
 
     .guess-section h2 {
-      color: #f0e6d2;
-      border-left-color: #c45a3a;
-      font-size: 1.8rem;
+      color: var(--nav-text);
+      border-left-color: var(--accent);
+      font-size: 1.2em;
     }
 
     .guess-section p {
-      font-size: 1rem;
-      line-height: 1.7;
-      margin-bottom: 18px;
+      font-size: 0.82em;
+      line-height: 1.5;
+      margin-bottom: 10px;
       color: #c8c0b0;
+      text-indent: 0;
     }
 
     .suspect-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 10px;
-      margin: 16px 0 24px 0;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 6px;
+      margin: 8px 0 12px 0;
     }
 
     .suspect-btn {
       background: #2a2a3a;
       border: 2px solid #3a3a4e;
-      color: #f0e6d2;
-      padding: 10px 12px;
-      border-radius: 12px;
+      color: var(--nav-text);
+      padding: 6px 8px;
+      border-radius: 8px;
       font-family: 'Courier New', monospace;
-      font-size: 0.9rem;
+      font-size: 0.75em;
       cursor: pointer;
       transition: background 0.15s, border-color 0.15s;
       text-align: left;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 6px;
     }
 
-    .suspect-btn:hover {
-      background: #3a3a4e;
-      border-color: #6a6a7e;
-    }
+    .suspect-btn:hover { background: #3a3a4e; border-color: #6a6a7e; }
 
     .suspect-btn.selected {
       background: #4a3a2a;
-      border-color: #d4b85c;
-      box-shadow: 0 0 0 2px #d4b85c;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 2px var(--gold);
     }
 
     .suspect-btn .num {
       background: #0e0e10;
-      padding: 2px 10px;
-      border-radius: 20px;
+      padding: 1px 7px;
+      border-radius: 12px;
       font-weight: bold;
-      font-size: 0.75rem;
-      color: #d4b85c;
+      font-size: 0.7em;
+      color: var(--gold);
     }
 
     #guess-feedback {
-      margin-top: 20px;
+      margin-top: 10px;
       background: #0e0e10;
-      border-radius: 14px;
-      padding: 20px 24px;
-      font-size: 1rem;
-      line-height: 1.7;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.78em;
+      line-height: 1.5;
       color: #d4c8b0;
-      border-left: 4px solid #c45a3a;
+      border-left: 3px solid var(--accent);
       white-space: pre-wrap;
     }
 
     #guess-feedback .evidence-block {
-      margin: 14px 0;
-      padding: 12px 16px;
+      margin: 6px 0;
+      padding: 6px 10px;
       background: #1a1a26;
-      border-radius: 10px;
-      border-left: 3px solid #d4b85c;
+      border-radius: 6px;
+      border-left: 2px solid var(--gold);
+      font-size: 0.95em;
     }
 
-    #guess-feedback .evidence-block strong {
-      color: #f0e6d2;
-    }
+    #guess-feedback .evidence-block strong { color: var(--nav-text); }
 
     #reveal-btn {
       background: #8b2a1a;
-      color: #f0e6d2;
+      color: var(--nav-text);
       border: none;
-      padding: 14px 32px;
-      border-radius: 40px;
+      padding: 8px 20px;
+      border-radius: 30px;
       font-family: 'Courier New', monospace;
       font-weight: bold;
-      font-size: 1rem;
+      font-size: 0.8em;
       cursor: pointer;
-      margin-top: 16px;
+      margin-top: 10px;
       transition: background 0.2s;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.3px;
     }
 
-    #reveal-btn:hover {
-      background: #a83a2a;
-    }
-
-    #reveal-btn:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
+    #reveal-btn:hover { background: #a83a2a; }
+    #reveal-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
     .reveal-text {
-      margin-top: 20px;
-      padding: 20px 24px;
+      margin-top: 10px;
+      padding: 12px 16px;
       background: #0e0e10;
-      border-radius: 14px;
-      border-left: 4px solid #d4b85c;
+      border-radius: 8px;
+      border-left: 3px solid var(--gold);
       color: #e8e0d0;
-      font-size: 1rem;
-      line-height: 1.8;
+      font-size: 0.8em;
+      line-height: 1.6;
       white-space: pre-wrap;
     }
 
     .reveal-text .imposter-name {
       color: #e8a060;
       font-weight: bold;
-      font-size: 1.2rem;
+      font-size: 1.1em;
     }
 
-    /* ---- RESPONSIVE ---- */
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
     @media (max-width: 600px) {
       #book-container {
-        padding: 20px 18px 30px 18px;
-        border-radius: 16px;
+        padding: 10px 12px 10px 12px;
+        border-radius: 12px;
       }
-      #page-content {
-        font-size: 1.15rem;
-        line-height: 1.8;
-      }
-      #page-content h2 {
-        font-size: 1.6rem;
-      }
-      .character-card {
-        font-size: 1rem;
-        padding: 14px 16px;
-      }
-      .suspect-grid {
-        grid-template-columns: 1fr 1fr;
-      }
-      #nav-bar {
-        font-size: 0.75rem;
-      }
-      .nav-buttons button {
-        padding: 6px 14px;
-        font-size: 0.75rem;
-      }
+      #page-content { font-size: var(--text-size); }
+      #page-content h2 { font-size: 1.2em; }
+      .character-card { padding: 8px 10px; }
+      .suspect-grid { grid-template-columns: 1fr 1fr; }
+      #nav-bar { font-size: 0.6rem; }
+      .nav-buttons button { padding: 4px 10px; font-size: 0.6rem; }
+      .setting-row label { min-width: 70px; font-size: 0.62rem; }
+      .setting-row .value-display { min-width: 32px; font-size: 0.62rem; }
+      #settings-panel { padding: 8px 10px; font-size: 0.65rem; }
     }
 
-    /* ---- SCROLLBAR ---- */
-    ::-webkit-scrollbar {
-      width: 8px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #1a1a26;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #3a3a4e;
-      border-radius: 10px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #5a5a6e;
-    }
+    /* ============================================================
+       SCROLLBAR
+       ============================================================ */
+    #page-content::-webkit-scrollbar { width: 5px; }
+    #page-content::-webkit-scrollbar-track { background: #e8e0d0; border-radius: 10px; }
+    #page-content::-webkit-scrollbar-thumb { background: #b8ac98; border-radius: 10px; }
+    #page-content::-webkit-scrollbar-thumb:hover { background: #9a8e78; }
   </style>
 </head>
 <body>
@@ -499,66 +482,110 @@
   <div id="nav-bar">
     <span id="page-indicator">Page 1 / 31</span>
     <div class="nav-buttons">
-      <button id="prev-btn" aria-label="Previous page">◀ PREV</button>
-      <button id="next-btn" aria-label="Next page">NEXT ▶</button>
+      <button id="prev-btn" aria-label="Previous page">◀</button>
+      <button id="next-btn" aria-label="Next page">▶</button>
+    </div>
+  </div>
+
+  <!-- SETTINGS (always visible on page 1, collapsible elsewhere) -->
+  <div id="settings-panel">
+    <div class="settings-title">✦ READING SETTINGS</div>
+    <div class="setting-row">
+      <label for="text-size-slider">Text Size</label>
+      <input type="range" id="text-size-slider" min="0.9" max="2.0" step="0.05" value="1.15">
+      <span class="value-display" id="text-size-value">1.15rem</span>
+    </div>
+    <div class="setting-row">
+      <label for="line-height-slider">Line Spacing</label>
+      <input type="range" id="line-height-slider" min="1.2" max="2.8" step="0.05" value="1.8">
+      <span class="value-display" id="line-height-value">1.8</span>
+    </div>
+    <div class="setting-row">
+      <label for="word-spacing-slider">Word Spacing</label>
+      <input type="range" id="word-spacing-slider" min="0" max="0.3" step="0.01" value="0.04">
+      <span class="value-display" id="word-spacing-value">0.04em</span>
+    </div>
+    <div class="setting-row">
+      <label for="letter-spacing-slider">Letter Spacing</label>
+      <input type="range" id="letter-spacing-slider" min="0" max="0.12" step="0.005" value="0.01">
+      <span class="value-display" id="letter-spacing-value">0.01em</span>
+    </div>
+    <div class="setting-row" style="justify-content:flex-end;">
+      <button class="reset-btn" id="reset-settings">Reset</button>
     </div>
   </div>
 
   <!-- MARK HINT -->
-  <div id="mark-hint">✦ Click any word to mark your spot · only one mark at a time</div>
-
-
-  <div id="reader-tools" aria-label="Reader tools">
-    <button id="bookmark-btn" type="button">☆ Bookmark page</button>
-    <button id="font-down" type="button" aria-label="Decrease text size">A− Text</button>
-    <button id="font-up" type="button" aria-label="Increase text size">A+ Text</button>
-    <button id="theme-btn" type="button">☾ Night mode</button>
-    <div id="reader-note-wrap">
-      <label for="reader-note">Your private reading note for this page</label>
-      <textarea id="reader-note" placeholder="Write a theory, reminder, or note about this page…"></textarea>
-      <button id="save-note-btn" type="button">Save page note</button>
-    </div>
-    <button id="sheet-config-btn" type="button" style="grid-column:1/-1">☁ Connect Google Sheets sync</button>
-    <div id="sheet-settings">
-      <strong>Google Sheets sync</strong>
-      <span style="font-size:.85rem;line-height:1.5">Paste the Apps Script web-app URL after deploying the companion Code.gs file. Until connected, reading progress is saved on this device.</span>
-      <input id="sheet-url" type="url" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="url">
-      <label for="reader-id-field">Reader ID (copy this to another device to share progress)</label>
-      <input id="reader-id-field" type="text" autocomplete="off" spellcheck="false">
-      <button id="use-reader-id-btn" type="button">Use this Reader ID & load cloud save</button>
-      <button id="connect-sheet-btn" type="button">Save connection & sync</button>
-      <span style="font-size:.8rem;line-height:1.5">Your sheet stores a reader ID, current page, bookmarks, word mark, and page notes. Do not share the web-app URL publicly if you want to limit access.</span>
-    </div>
-    <div id="reader-status" role="status" aria-live="polite">Progress saves automatically on this device.</div>
-  </div>
-  <div id="reading-progress" aria-label="Book reading progress"><div id="reading-progress-fill"></div></div>
+  <div id="mark-hint">✦ Click any word to mark your spot · only one mark at a time · saved automatically</div>
 
   <!-- PAGE CONTENT -->
   <div id="page-content"></div>
 
 </div>
 
-<button id="side-page-prev" type="button" aria-label="Previous page" title="Previous page">‹</button>
-<button id="side-page-next" type="button" aria-label="Next page" title="Next page">›</button>
-
 <script>
   // ============================================================
-  //  THE TORCHES WIND — BOOK DATA
-  //  Total pages: 31 (12 character pages + 15 episode pages +
-  //                1 trailer page + 1 guess page + 1 extra)
+  //  THE TORCHES WIND — SEASON 1 BOOK DATA
+  //  31 pages total (0–30)
+  //  Page 0: Cover + Settings
+  //  Page 1–12: Character Profiles (12 pages)
+  //  Page 13–27: Episodes 1–15 (15 pages)
+  //  Page 28: Trailer Season 2
+  //  Page 29: Guess the Imposters
+  //  Page 30: Reveal (hidden until requested)
+  //  Page 31: End / Credits
   // ============================================================
-
-  // Page 0–11: CHARACTER PROFILES (12 pages)
-  // Page 12–26: EPISODES 1–15 (15 pages)
-  // Page 27: TRAILER SEASON 2
-  // Page 28: GUESS THE IMPOSTERS
-  // Page 29: REVEAL (hidden until requested)
-  // Page 30: END / CREDITS
 
   const PAGES = [];
 
   // -------------------------------------------------------
-  //  CHARACTER PAGES 1–12
+  //  PAGE 0 — COVER
+  // -------------------------------------------------------
+  PAGES.push({
+    type: 'cover',
+    title: 'THE TORCHES WIND',
+    subtitle: 'SEASON 1',
+    body: `Twelve players.
+
+One Torch.
+
+Two Imposters.
+
+No one knows who.
+
+---
+
+The game is simple.
+
+Talk. Move. Buy. Vote.
+
+Everything is allowed.
+
+Except damaging the Torch.
+
+That makes you disappear.
+
+From nothing.
+
+---
+
+Every round, one player is eliminated.
+
+Every round, the Murderer Tool is available.
+
+Every round, the voice speaks.
+
+---
+
+The Torch is warm.
+
+The room is watching.
+
+The game has begun.`
+  });
+
+  // -------------------------------------------------------
+  //  CHARACTER PROFILES (Pages 1–12)
   // -------------------------------------------------------
 
   PAGES.push({
@@ -574,7 +601,7 @@
     title: 'VICTOR HALE',
     player: 'PLAYER 2',
     desc: 'A wealthy investor who wears an expensive suit and has experience buying failing companies. He is unusually calm under pressure.',
-    note: 'His true role must remain a mystery. He may appear suspicious, but his wealth and composure alone must not prove he is an imposter. Even if the system identifies him as a killer, that does not automatically establish his role.'
+    note: 'His true role must remain a mystery. Even if the system identifies him as a killer, that does not automatically establish his role.'
   });
 
   PAGES.push({
@@ -590,7 +617,7 @@
     title: 'NINA SOL',
     player: 'PLAYER 4',
     desc: 'An archivist who found documents referring to a group of participants. Her discovery may connect the game to events that happened before the players arrived.',
-    note: 'She wrote the first note questioning the number of players. "IT SHOULD HAVE BEEN TEN. SOMETHING IS WRONG."'
+    note: 'She wrote the first note questioning the number of players: "IT SHOULD HAVE BEEN TEN. SOMETHING IS WRONG."'
   });
 
   PAGES.push({
@@ -630,7 +657,7 @@
     title: 'DR. ADRIAN CROSS',
     player: 'PLAYER 9',
     desc: 'A psychiatrist who researched reports of people sharing memories of impossible places. He may be good at reading people, but interpreting behavior is not the same as knowing the truth.',
-    note: 'He accused Player 2 first. He was also accused back. The revote will decide between them.'
+    note: 'He accused Player 2 first. He was also accused back. The revote decided between them.'
   });
 
   PAGES.push({
@@ -645,7 +672,7 @@
     type: 'character',
     title: 'UNNAMED',
     player: 'PLAYER 11',
-    desc: 'A broad-shouldered, shaved-head man. In Episode 1, he breaks the no-speaking rule by shouting a question and is immediately removed. His name and deeper history have not yet been established.',
+    desc: 'A broad-shouldered, shaved-head man. In Episode 1, he breaks a rule and is immediately removed. His name and deeper history have not yet been established.',
     note: 'CANON: Player 11 is INNOCENT. This is background truth, not stated in-story.'
   });
 
@@ -689,15 +716,11 @@ It came from everywhere and nowhere, and its pitch was wrong — high, thin, lik
 
 The suited man's jaw tightened. The woman with the notebook wrote something down immediately, her pen scratching.
 
-"Rule one. No speaking outside of voting. You will communicate in writing. Rule two. Do not attempt to leave the game area. Rule three. Do not damage the Torch. Rule four. Do not interfere with voting."
+"Rule one. Talking is allowed. You may speak freely at all times. Rule two. Attacking is allowed. You may harm one another. Rule three. Do not damage the Torch. If you damage the Torch, you will disappear. Not die. Disappear. From nothing. Into nothing."
 
 The voice paused. When it resumed, it was very slightly faster.
 
-"Each of you begins with one hundred Q Points. Equipment may be purchased. Some equipment will help you survive. Some will help you learn. Purchases are final. There is a shop; you will find it. There is a Torch; you have found it. There are two among you who are not as they seem."
-
-Mara's stomach turned over.
-
-"At the end of each round, you will vote. One player will be eliminated. Two players among you are Imposters. They will act against you. You may act against each other. Attacks are permitted. Registered kills will be announced at voting."
+"Rule four. Each of you begins with one hundred Q Points. The shop is open. You may purchase food, water, tools, defenses, weapons. Purchases are final. Rule five. There are two Imposters among you. They will act against you. You may act against each other. Registered kills will be announced at voting. Rule six. At the end of each round, you will vote. One player will be eliminated."
 
 The voice climbed, a half-note higher.
 
@@ -705,84 +728,85 @@ The voice climbed, a half-note higher.
 
 Silence.
 
-The shaved-head man exploded. "What the hell is this? What the hell is—"
+Then the shaved-head man laughed. "Talking is allowed? So I can just say—"
 
 He got no further. The floor beneath him simply opened — not a trapdoor, not a seam, just an absence where he had been standing — and he dropped through it without a sound, and the floor closed again, smooth and gray and unmarked.
 
 Nobody screamed. Nobody moved. The place where he had stood was indistinguishable from the rest of the floor.
 
-Mara's hands were shaking. She pressed them flat against the stone.
-
 The voice returned, calm and high and almost gentle.
 
-"Speaking is not permitted. Your companion has been removed."
+"You did not damage the Torch. You were removed for another reason. But you have seen the consequence."
 
 Then it was gone.
 
-For a long moment the eleven remaining players stared at one another. The suited man — she would learn his number later, or guess it — looked at the empty floor, then at the Torch, then at the rest of them, and his expression was not fear. It was calculation. That frightened her more than the screaming would have.
+For a long moment the eleven remaining players stared at one another.
 
-The thin man with the notebook sat down hard on a bench and opened it, and Mara saw, over his shoulder, a drawing. The Torch. A ring of small figures around it. The ink was old and faded, as though the page had been drawn years ago and carried a long way.
+The man in the suit — Victor Hale, though she would learn that later — looked at the empty floor, then at the Torch, then at the rest of them. His expression was not fear. It was calculation.
 
-The archivist woman had already found paper somewhere and was writing. She held up the sheet.
-
-HOW MANY OF US WERE THERE?
-
-A pause. Then the man in the suit wrote on his own sheet, deliberately, and held it up.
-
-TWELVE.
-
-The archivist frowned. She wrote again.
-
-THE VOICE SAID TWO. TWO IMPOSTERS. NOT HOW MANY PLAYERS.
-
-The mathematician — a wiry man with glasses who had been mouthing numbers to himself — wrote quickly.
-
-12 PLAYERS. 2 IMPOSTERS. 10 OTHERS. THAT'S THE SPLIT.
-
-But the archivist shook her head and wrote, slower, underlining it:
-
-NO. IT SHOULD HAVE BEEN TEN. SOMETHING IS WRONG.
-
-Mara read that twice. Something is wrong. She looked around at the faces — eleven of them now, eleven strangers — and thought: she's right. There's one too many of us. Or two.
-
-She found a scrap of paper on a bench and a stub of pencil, and wrote her own first message.
-
-THE BROAD-SHOULDERED MAN. DID ANYONE SEE WHERE HE WENT?
-
-The psychiatrist — she guessed from the way he watched everyone, the careful stillness — read it and wrote back.
-
-NOWHERE. HE JUST STOPPED EXISTING.
-
-The pen shook in his hand as he wrote it.
-
-Then the voice came back, and everyone flinched.
-
-"The first registered kill has been logged. At voting, the victim and the accused will be announced. Voting will begin when the round ends. Use your time."
-
-Mara felt the words settle into the room like cold water.
-
-Somewhere among these eleven people, someone had already killed. Or would. Or the system was lying. She did not know which was worse.
-
-She looked toward the shop — a recess in the far wall she had not noticed before, lit softly, shelves visible. Equipment. Q Points. She had one hundred of them and no idea what they were worth.
-
-The man in the suit was already walking toward it.
-
-The archivist was watching him. Then she looked at Mara, and her eyes said, plainly, without a word: watch him.
-
-Mara nodded, just slightly.
-
-Behind them all, the Torch burned on, white and steady and silent, and through the hole in the ceiling the sky did not change.`
+That frightened her more than the screaming would have.`
   });
 
   // --- EPISODE 2 ---
   PAGES.push({
     type: 'episode',
-    title: 'Episode 2 — The First Vote',
+    title: 'Episode 2 — The Shop',
+    body: `The shop was a recess in the far wall.
+
+It had not been there before. Mara was certain of that. She had walked the perimeter of the room twice while waiting for the voice to return, and there had been no recess, no shelves, no softly lit alcove full of equipment.
+
+Now there was.
+
+The shelves were labeled with small paper tags. She read them all.
+
+Food and Water — 10 Q. Basic supplies. Non-negotiable.
+
+Reinforced Wall — 60 Q. A wall upgrade intended to resist attacks.
+
+Kill Shield — 100 Q. Protects against one registered kill.
+
+Identity Device — 80 Q. One use. Ten seconds. Fifty-fifty chance of identifying a player's role.
+
+Torch Scanner — 75 Q. A device intended to scan or investigate the Torch.
+
+Deface Kit — 40 Q. Allows you to write on surfaces that cannot normally be written on.
+
+Attack Tool — 50 Q. A weapon. Simple. Effective.
+
+The Murderer Tool — 0 Q. Once per round. Free. No description.
+
+Mara stared at that last one for a long time.
+
+She was still standing there when Felix Arden appeared beside her. He did not speak — talking was allowed, but nobody had spoken yet — but he held up a scrap of paper on which he had written: THE TOOL IS FREE. THAT MEANS SOMEONE WILL USE IT.
+
+Mara took out her own paper and wrote: WHAT DOES IT DO?
+
+He shook his head. He had not bought it. He wrote: I DON'T KNOW. BUT FREE THINGS IN THIS PLACE ARE NOT GIFTS.
+
+She bought the Identity Device. Eighty points. The device was small and cold and fit in her palm, and it had a single button and a small screen that showed nothing at all.
+
+Ten seconds. A fifty-fifty chance.
+
+She had no idea what she was going to do with it.
+
+Victor Hale came to stand beside her. He did not look at her. He looked at the Murderer Tool.
+
+He did not buy it.
+
+He did not buy anything.
+
+He simply stood there, very still, and then he walked away.`
+  });
+
+  // --- EPISODE 3 ---
+  PAGES.push({
+    type: 'episode',
+    title: 'Episode 3 — The First Kill',
     body: `The round ended without warning.
 
 There was no bell, no countdown. The Torch simply brightened — a pulse of white light that swept the room and left everyone blinking — and the voice returned, high and quick, as though it had been waiting just behind their ears.
 
-"Voting has begun. Speaking is permitted. The registered kill will now be announced."
+"Voting has begun. The registered kill will now be announced."
 
 Mara set her pencil down. Her fingers had gone numb from writing.
 
@@ -790,97 +814,95 @@ The voice climbed.
 
 "Last round, a kill was registered. The victim: Player 7."
 
-The mathematician. The wiry man with glasses. Mara turned, and he was still there, sitting on his bench, mouthing numbers — and then he was not. The floor opened beneath him the way it had opened beneath the shaved-head man, and he fell without a cry, and the floor closed, and it was as though he had never existed.
+The mathematician. The wiry man with glasses. Owen Price. Mara turned, and he was still there, sitting on his bench, mouthing numbers — and then he was not. The floor opened beneath him the way it had opened beneath the shaved-head man, and he fell without a cry, and the floor closed, and it was as though he had never existed.
 
 Except he had. She had watched him write. 12 players. 2 imposters. 10 others.
 
 "The accused: Player 2."
 
-Everyone looked at the man in the suit.
+Everyone looked at Victor Hale.
 
 He did not flinch. He stood very still near the shop recess with his hands folded in front of him, and he looked back at them all with an expression that was almost courteous, as though he had been introduced at a dinner party and was waiting for someone to offer him a drink.
 
 "Voting will proceed. You have until the Torch dims. One player will be eliminated."
 
-The voice did not say choose well. It did not need to.
-
 The silence broke all at once.
 
-"It was you," the psychiatrist said — Player 9, if the notes were right. He had risen from his bench and his voice was tight. "You were the only one moving. You went straight to the shop. You knew—"
+"It was you," Dr. Adrian Cross said — Player 9, the psychiatrist. He had risen from his bench and his voice was tight. "You were the only one moving. You went straight to the shop. You knew—"
 
-"I went to the shop because I needed to know what was for sale." The suited man — Player 2 — spoke calmly, evenly, without raising his voice. "As did several of you. Player 3 bought something. Player 10 bought something. I did not."
+"I went to the shop because I needed to know what was for sale." Victor spoke calmly, evenly, without raising his voice. "As did several of you. Player 3 bought something. Player 10 bought something. I did not."
 
-"That's not—" The psychiatrist stopped himself. "You didn't buy anything?"
+"That's not—" Adrian stopped himself. "You didn't buy anything?"
 
-"The walls." Player 2 gestured vaguely toward the far side of the room. "Someone purchased a reinforced wall. It wasn't me. I have spent nothing."
+"The walls." Victor gestured vaguely toward the far side of the room. "Someone purchased a reinforced wall. It wasn't me. I have spent nothing."
 
-Mara watched the archivist — Player 4 — write quickly on a fresh sheet and hold it up.
+Nina Sol — Player 4, the archivist — wrote quickly on a fresh sheet and held it up.
 
 PLAYER 2, HOW DID YOU KNOW ABOUT THE WALL?
 
-Player 2 read it, and for the first time something crossed his face. Not guilt. Something closer to annoyance at himself.
+Victor read it, and for the first time something crossed his face. Not guilt. Something closer to annoyance at himself.
 
 "I saw it appear," he said. "The wall changed while I was standing there. I assumed the purchaser was nearby. I don't know who it was."
 
-"Convenient," the psychiatrist said.
+"Convenient," Adrian said.
 
 "It is what happened."
 
-The thin man with the notebook — Player 6, the quiet one — had not spoken at all. He sat with the notebook open on his knees, and now he turned it around so the room could see. Not his drawing this time. A page of neat, cramped writing.
+Jamie Frost — Player 6, the quiet one with the notebook — had not spoken at all. He sat with the notebook open on his knees, and now he turned it around so the room could see. Not his drawing this time. A page of neat, cramped writing.
 
 THE VOICE SAID TWO IMPOSTERS. THE KILL WAS REGISTERED BY ONE. WHOEVER IS NAMED IS THE ONE WHO DID IT. PLAYER 2 IS THE ONE WHO DID IT. THAT DOES NOT MEAN PLAYER 2 IS AN IMPOSTER. IT MEANS PLAYER 2 KILLED. THOSE ARE NOT THE SAME THING.
 
 The room went quiet.
 
-Mara felt it land. That was the trap, wasn't it. That was the whole design. The system told them who killed and let them decide what killing meant. The psychiatrist had already decided. The notebook said not to.
+Mara felt it land. That was the trap, wasn't it. The system told them who killed and let them decide what killing meant. Adrian had already decided. The notebook said not to.
 
-"Read that again," Player 2 said quietly. He had turned to look at Player 6. "Read it again. Because if this room votes on the assumption that a killer is an Imposter, then the Imposters don't need to do anything at all. They can just let us do it for them."
+"Read that again," Victor said quietly. He had turned to look at Jamie. "Read it again. Because if this room votes on the assumption that a killer is an Imposter, then the Imposters don't need to do anything at all. They can just let us do it for them."
 
-"You'd say that," the psychiatrist said. "You'd say anything."
+"You'd say that," Adrian said. "You'd say anything."
 
-"Yes." Player 2's voice did not change. "So would you. So would everyone. That is the point."
+"Yes." Victor's voice did not change. "So would you. So would everyone. That is the point."
 
-The archivist wrote again, and this time her hand was steady.
+Nina wrote again, and this time her hand was steady.
 
 WE SHOULD NOT VOTE FOR PLAYER 2 JUST BECAUSE THE VOICE NAMED HIM. BUT WE SHOULD ASK WHY THE VOICE NAMED HIM AND NOT SOMEONE ELSE. IS THE ACCUSATION TRUE OR IS IT A TOOL?
 
-"How would we know?" the psychiatrist demanded. "How would we ever know?"
+"How would we know?" Adrian demanded. "How would we ever know?"
 
-Nobody answered him. Mara looked around at the faces — Player 2 calm, Player 6 silent, Player 4 writing, Player 3 with his hands in his pockets, Player 9 flushed with anger, Player 10 watching the wall, Player 5 the paramedic with her arms crossed, Player 8 the security woman scanning the ceiling for cameras, Player 12 the quiet woman who had said nothing at all since waking — and thought, with a lurch, that she did not know any of them, and she was about to help decide which one of them died.
+Nobody answered him. Mara looked around at the faces — Victor calm, Jamie silent, Nina writing, Felix with his hands in his pockets, Adrian flushed with anger, Rowan watching the wall, Tomas with his arms crossed, Sera scanning the ceiling for cameras, Iris saying nothing at all — and thought, with a lurch, that she did not know any of them, and she was about to help decide which one of them died.
 
-"Ten minutes," Player 8 said suddenly. Everyone looked at her. "That's not a rule. That's a guess. The Torch is dimming. Look at it."
+"Ten minutes," Sera Quinn said suddenly. Everyone looked at her. "That's not a rule. That's a guess. The Torch is dimming. Look at it."
 
 It was. The white light had begun to recede, drawing down toward the top of the Torch, and the room was getting darker by degrees.
 
-"We have to vote," the paramedic said. "We have to say a name out loud. How do we vote?"
+"We have to vote," Tomas said. "We have to say a name out loud. How do we vote?"
 
-"Out loud," Player 2 said. "We say the name. The voice will hear."
+"Out loud," Victor said. "We say the name. The voice will hear."
 
 The dark kept coming.
 
-"Then I'll say it first," the psychiatrist said. "Player 2."
+"Then I'll say it first," Adrian said. "Player 2."
 
-"Player 9," Player 2 said, without heat. "For voting on a killer as though a killer were an Imposter. It is the single most dangerous mistake this room can make, and you made it in the first five minutes."
+"Player 9," Victor said, without heat. "For voting on a killer as though a killer were an Imposter. It is the single most dangerous mistake this room can make, and you made it in the first five minutes."
 
 "I'm not the one who was accused."
 
 "You are the one who accused. That is all I have. I admit it is not much."
 
-The archivist looked at Mara. She wrote, small: WHO DO YOU TRUST?
+Nina looked at Mara. She wrote, small: WHO DO YOU TRUST?
 
 Mara looked at the paper. Then at the dimming Torch. Then at the man in the suit, who might be exactly what he appeared and might be the best liar in the room, and at the psychiatrist, who might be frightened and honest and might be steering them all.
 
 She wrote back, slowly: NOBODY. BUT I THINK WE SHOULD NOT GIVE THEM WHAT THEY WANT.
 
-The archivist nodded once.
+Nina nodded once.
 
-"Player 2," the psychiatrist said again, louder.
+"Player 2," Adrian said again, louder.
 
-"Player 9," said Player 2.
+"Player 9," said Victor.
 
-"Player 2," said Player 5, the paramedic, not looking at anyone.
+"Player 2," said Tomas, the paramedic, not looking at anyone.
 
-"Player 2," said Player 10.
+"Player 2," said Rowan.
 
 Mara's heart was pounding. She said nothing. The Torch dimmed further. Two more names came, and she did not hear who said them, and then the light was nearly gone and the voice returned, high and pleased and quick.
 
@@ -888,42 +910,42 @@ Mara's heart was pounding. She said nothing. The Torch dimmed further. Two more 
 
 The floor beneath the other nine of them went gray and cold and somehow final, and Mara found she could not speak, could not write, could only watch.
 
-Player 2 and Player 9 stood facing each other in the dimming light.
+Victor Hale and Adrian Cross stood facing each other in the dimming light.
 
 Somewhere above them, through the hole in the ceiling, the sky had not changed at all.`
   });
 
-  // --- EPISODE 3 ---
+  // --- EPISODE 4 ---
   PAGES.push({
     type: 'episode',
-    title: 'Episode 3 — Ten Seconds',
+    title: 'Episode 4 — The Revote',
     body: `The revote did not last long.
 
-Player 9 spoke first. He spoke quickly, and his voice cracked once in the middle, and he kept glancing at the Torch as though he expected it to interrupt him.
+Adrian spoke first. He spoke quickly, and his voice cracked once in the middle, and he kept glancing at the Torch as though he expected it to interrupt him.
 
 "Look at him. Look at his face. He's not afraid. Everybody else is afraid. He's standing there like he's waiting for a train."
 
-"I am afraid," Player 2 said. "I am simply not performing it for you."
+"I am afraid," Victor said. "I am simply not performing it for you."
 
 "That's exactly what—"
 
 "I have not lied to this room. I have not denied the accusation. I have said only that killing and being an Imposter are two different things, and that if you kill me for the first, you may be doing the second's work. If that is a lie, show me where."
 
-Player 9 opened his mouth. Closed it. Opened it again.
+Adrian opened his mouth. Closed it. Opened it again.
 
 "You're better at this than I am," he said finally. "That's what I've got. You're better at this than I am."
 
 "That is not a reason to kill me."
 
-"No." Player 9 looked around at the silent, frozen faces of the others. "No, it isn't."
+"No." Adrian looked around at the silent, frozen faces of the others. "No, it isn't."
 
 The Torch flared.
 
 "The revote is complete," the voice said, high and brisk. "Player 9 will be eliminated."
 
-The psychiatrist did not scream. He looked at Player 2 with something that was almost relief, and then the floor opened under him, and he was gone.
+The psychiatrist did not scream. He looked at Victor with something that was almost relief, and then the floor opened under him, and he was gone.
 
-Player 2 stood alone in the center of the room, and for a moment nobody could look at him.
+Victor Hale stood alone in the center of the room, and for a moment nobody could look at him.
 
 The voice returned.
 
@@ -933,27 +955,15 @@ The voice returned.
 
 Mara went to the shop first.
 
-It was a recess in the far wall, softly lit, shelves of equipment with small paper tags. The voice had not lied: each item had a price, and her Q Points were visible on a small card she had not noticed before, tucked in her pocket. One hundred.
+The shelves were the same. The tags were the same. The Murderer Tool was still there, still free, still undescribed.
 
-Identity Device Upgrade — 80 Q. A one-time attempt to identify a player's role. Ten seconds to use. The tag said nothing about accuracy.
+She was still standing there when Jamie Frost appeared beside her.
 
-Reinforced Wall — 60 Q.
+He did not speak — talking was allowed, but he did not speak — but he held up his notebook, open to a fresh page, and on it he had written: THE TOOL IS FREE. THAT MEANS SOMEONE WILL USE IT.
 
-Kill Shield — 100 Q.
+Mara wrote on her own paper: WHAT DOES IT DO?
 
-Torch Scanner — 75 Q.
-
-The Murderer Tool — 0 Q. Once per round. The tag was handwritten, and the handwriting was very neat and very small, and it said nothing else.
-
-Mara stared at that last one for a long time.
-
-She was still standing there when Player 6 appeared beside her.
-
-He did not speak — speaking was forbidden again — but he held up his notebook, open to a fresh page, and on it he had written: THE TOOL IS FREE. THAT MEANS SOMEONE WILL USE IT.
-
-Mara took out her pencil and wrote on her own scrap: WHAT DOES IT DO?
-
-Player 6 shook his head. He had not bought it. He had written, beneath his first line: I DON'T KNOW. BUT FREE THINGS IN THIS PLACE ARE NOT GIFTS.
+Jamie shook his head. He wrote: I DON'T KNOW. BUT FREE THINGS IN THIS PLACE ARE NOT GIFTS.
 
 She bought the Identity Device. Eighty points. The device was small and cold and fit in her palm, and it had a single button and a small screen that showed nothing at all.
 
@@ -967,29 +977,29 @@ PLAYER 2 IS TOO CALM.
 
 PLAYER 3 HAS BEEN WATCHING THE SHOP.
 
-PLAYER 9 HAS BEEN WATCHING EVERYONE. (This one had been written before Player 9 was eliminated. It stayed. That was the point.)
+PLAYER 9 HAS BEEN WATCHING EVERYONE. (This one had been written before Adrian was eliminated. It stayed. That was the point.)
 
 Mara watched the notes accumulate and thought about how none of them could be erased, and how none of them had a name attached.
 
-On the second day — if it was a day; the sky never changed — she found Player 12, Iris Bell, sitting alone on a bench near the Torch, and she sat down beside her, and she took out her identity device and showed it to her, and Iris looked at it and then at Mara and then, very deliberately, she nodded toward Player 2 across the room.
+On the second day — if it was a day; the sky never changed — she found Iris Bell sitting alone on a bench near the Torch, and she sat down beside her, and she took out her identity device and showed it to her, and Iris looked at it and then at Mara and then, very deliberately, she nodded toward Victor across the room.
 
 Mara understood.
 
-She stood up. She walked toward Player 2 with the device in her hand.
+She stood up. She walked toward Victor with the device in her hand.
 
 Ten seconds was a long time when you were walking toward a man who might be a killer. Ten seconds was longer when he turned and saw what she was holding and did not move.
 
 She pressed the button.
 
-The screen flickered. Numbers. A progress bar. Player 2 watched her without expression.
+The screen flickered. Numbers. A progress bar. Victor watched her without expression.
 
 Five seconds. Six. Seven.
 
-Player 3 stepped out of the crowd and knocked the device out of her hand.
+Felix Arden stepped out of the crowd and knocked the device out of her hand.
 
-It clattered across the floor. The screen went dark. Player 2 had not moved at all.
+It clattered across the floor. The screen went dark. Victor had not moved at all.
 
-Player 3 stood there with his hands up, and on his face was an expression Mara could not read, and he mouthed — silently, because speaking was forbidden — I'm sorry, I'm sorry, I'm sorry.
+Felix stood there with his hands up, and on his face was an expression Mara could not read, and he said — aloud, because talking was allowed — "I'm sorry. I'm sorry. I'm sorry."
 
 The device was broken. Her one use was gone.
 
@@ -997,15 +1007,133 @@ And the voice, high and amused, came from everywhere at once.
 
 "The identity attempt has failed. The round continues."
 
-Mara picked up the broken device and looked at Player 3.
+Mara picked up the broken device and looked at Felix.
 
 He would not meet her eyes.`
   });
 
-  // --- EPISODE 4 ---
+  // --- EPISODE 5 ---
   PAGES.push({
     type: 'episode',
-    title: 'Episode 4 — Permanent Paper',
+    title: 'Episode 5 — The Body That Went Limp',
+    body: `The round ended quietly. No kill had been registered. The voice announced the voting period with something that might almost have been disappointment.
+
+Nobody had died. It was the first time.
+
+Then the voice said something new.
+
+"The Murderer Tool has been used. One body went limp. One body did not."
+
+Nobody understood what it meant. Nobody wanted to ask.
+
+Mara counted the players. Ten. Adrian was gone. Owen was gone. The shaved-head man was gone. Ten remained.
+
+She found Felix standing by the Torch, alone.
+
+"What does it mean?" she said.
+
+"The tool." He did not look at her. "The Murderer Tool. It lets you take control of someone else. Your body goes limp. Theirs doesn't."
+
+"How do you know that?"
+
+"Because I've seen it before." He turned to look at her. "Not here. Before. In a place like this. In a room with a torch."
+
+"You've been here before?"
+
+"I don't know. I don't remember. But I know what the tool does. And I know that the person who uses it can commit a kill while wearing someone else's body."
+
+Mara stared at him.
+
+"That means—"
+
+"It means the voice can name an innocent person and be telling the truth." He looked at the Torch. "It means the registered kill is real. It means the accused is real. It just doesn't mean they're an Imposter."
+
+The voice returned.
+
+"Voting has begun. A registered kill has been logged. The victim: Player 10."
+
+Rowan Hale. The maintenance worker. The one who had voted for Victor.
+
+"The accused: Player 2."
+
+Victor did not move.
+
+"Of course," he said.`
+  });
+
+  // --- EPISODE 6 ---
+  PAGES.push({
+    type: 'episode',
+    title: 'Episode 6 — The Scapegoat',
+    body: `The vote was quick.
+
+"Player 2," said Tomas.
+
+"Player 2," said Felix.
+
+"Player 2," said Jamie.
+
+"Player 2," said Victor, quietly.
+
+Mara said nothing. The Torch dimmed. The vote was not tied.
+
+Victor looked at her.
+
+"I did not kill anyone," he said. "I want you to know that."
+
+The floor opened beneath him.
+
+He fell.
+
+---
+
+The room was quiet.
+
+Tomas sat down on a bench and put his head in his hands. Felix stood by the Torch. Jamie sat in the corner and did not move.
+
+Mara walked to the wall and read the notes.
+
+PLAYER 2 WAS TOO CALM.
+
+PLAYER 2 WAS TOO QUIET.
+
+PLAYER 2 WAS TOO EVERYTHING.
+
+She found a fresh scrap of paper and wrote:
+
+PLAYER 2 WAS A DECOY. THE VOICE NAMED HIM EVERY ROUND BECAUSE THE VOICE WANTED US TO KILL HIM. WE DID. WE DID WHAT THE VOICE WANTED. WE ARE PLAYING THE VOICE'S GAME.
+
+She placed it on the wall.
+
+Felix came to stand beside her.
+
+"The tool," he said. "The Murderer Tool. It was used last round. The body that went limp was the tool-user's. The body that did not was the victim's."
+
+"Who used it?"
+
+"I don't know."
+
+"Who was the victim?"
+
+"I don't know." He looked at her. "But I know that whoever used it is still here. And I know that they are going to use it again."
+
+The voice returned.
+
+"The round has ended. The next round has begun. The Murderer Tool is available. The shop is open."
+
+Mara looked at the shop.
+
+The Murderer Tool was still there. Free. Once per round.
+
+She looked at Felix.
+
+He was looking at the shop too.`
+  });
+
+  // --- EPISODE 7 ---
+  PAGES.push({
+    type: 'episode',
+    title: 'Episode 7 — The Notes That Stay',
     body: `The notes were becoming a problem.
 
 Not because they were wrong — most of them were guesses, and guesses were all anyone had — but because they stayed. They stayed on the walls, on the benches, on the floor near the shop, and they could not be taken down, and they could not be signed.
@@ -1026,7 +1154,7 @@ WHY IS THE SHOP FREE FOR ONE ITEM AND EXPENSIVE FOR EVERYTHING ELSE.
 
 WHERE IS PLAYER 11.
 
-Mara stopped at that last one. Player 11. The shaved-head man. The one who had spoken and fallen through the floor. Nobody had written his name in days. Nobody had mentioned him at all.
+Mara stopped at that last one. Player 11. The shaved-head man. The one who had been removed. Nobody had written his name in days. Nobody had mentioned him at all.
 
 She found a scrap of paper and wrote, slowly: PLAYER 11 WAS HERE. WE SAW HIM. HE WAS NOT A LIE.
 
@@ -1034,9 +1162,9 @@ She placed it on the wall beside the note about the shop. It stuck. It would sta
 
 ---
 
-Player 3 — Felix Arden — had not spoken to anyone since the scan. But during the next voting period, when speech was permitted, he stood up before anyone else could and said:
+Felix had not spoken to anyone since the scan. But during the next voting period, when speech was permitted — and speech was always permitted, Mara reminded herself; the rules had changed — he stood up before anyone else could and said:
 
-"I stopped the scan because I have seen this system before. Not this exact one. Something called TORCH_PROTOCOL. I worked on a security contract five years ago and there was a name in the code and the name was this. The Torch. I know how the identity tools work, and I know they are not reliable, and I knew that if Mara used it on Player 2 and got an answer, right or wrong, this room would treat it as a verdict."
+"I stopped the scan because I have seen this system before. Not this exact one. Something called TORCH_PROTOCOL. I worked on a security contract five years ago and there was a name in the code and the name was this. The Torch. I know how the identity tools work, and I know they are not reliable, and I knew that if Mara used it on Victor and got an answer, right or wrong, this room would treat it as a verdict."
 
 "You broke my device," Mara said.
 
@@ -1046,9 +1174,9 @@ Player 3 — Felix Arden — had not spoken to anyone since the scan. But during
 
 "No." He met her eyes. "It wasn't. And I'm sorry. But I'd do it again."
 
-The room was silent. Player 2 was watching Felix with an expression that might have been respect.
+The room was silent. Jamie was watching Felix with an expression that might have been respect.
 
-"What else do you know about TORCH_PROTOCOL?" Player 8 asked.
+"What else do you know about TORCH_PROTOCOL?" Tomas asked.
 
 "Not much. It was a protocol for managing groups under pressure. I never saw the source. I saw the name, and I saw that it had been removed from the archive, and I saw that somebody had been paid a great deal of money to remove it."
 
@@ -1056,362 +1184,29 @@ The room was silent. Player 2 was watching Felix with an expression that might h
 
 "I don't know. The payment came through a shell company. It had a name. The name was Hale Holdings."
 
-Everyone turned to look at Player 2.
+Everyone turned to look at the empty space where Victor had been.
 
-Victor Hale did not blink.
+"He's gone," Jamie said. "We can't ask him."
 
-"That is a very old company," he said, "and I am not the only Hale in the world."
+"No," Felix said. "We can't."
 
-"You are the only one in this room," Felix said.
-
-"Yes." Victor's voice was quiet. "I am."
-
-The Torch flared before anyone could speak again.
+The voice returned.
 
 "Voting has begun. A registered kill has been logged. The victim: Player 3."
 
 Felix had time to look surprised. Then the floor opened and he was gone, and the room had one fewer person in it, and the note he had written about TORCH_PROTOCOL was still on the wall because notes never came down.
 
-"The accused: Player 2."
+"The accused: Player 6."
 
-"Of course," Victor said. He did not sound surprised at all.
+Jamie Frost looked up from his notebook.
 
-"We're not voting for him," Player 5 said. The paramedic's voice was flat. "We're not doing this again. He's being set up. Two rounds, two kills, both pointing at the same man. That's not evidence. That's a pattern, and the pattern is a message."
+"Me?" he said. "I didn't—"
 
-"Or the message is that he did it," Player 8 said. "Twice."
-
-"Then why name him? If he were an Imposter, why would the system keep handing us his name for free?"
-
-"To make us think exactly what you're thinking."
-
-"Then we can't know," Player 5 said. "That's the point. We can't know."
-
-Mara looked at the wall. At the note Player 6 had written in the second round, the one about killing not being the same as being an Imposter, the one that was starting to look like the truest sentence in the room.
-
-She walked to the wall and wrote, carefully, where everyone could see it:
-
-WE VOTED OUT PLAYER 9 FOR BEING AFRAID. HE WAS AFRAID AND HE WAS WRONG AND WE KILLED HIM FOR IT. LET'S NOT DO THAT AGAIN.
-
-Player 8 read it. Player 5 read it. Victor read it and looked at her for a long moment.
-
-"Player 8," Player 5 said.
-
-"Player 5," Player 8 said.
-
-"Player 8," said someone else.
-
-"Player 8," said another.
-
-Mara said nothing. The Torch dimmed. The vote was not tied.
-
-Sera Quinn — Player 8 — looked around the room once, and then the floor opened beneath her, and she was gone.
-
-Nobody had voted for Victor at all.
-
-"The round has ended," the voice said, high and pleased. "The next round has begun."
-
-And then, very softly, almost too softly to hear:
-
-"The Murderer Tool is available."`
-  });
-
-  // --- EPISODE 5 ---
-  PAGES.push({
-    type: 'episode',
-    title: 'Episode 5 — The Torch',
-    body: `The Torch was taller than it had looked on the first day.
-
-Mara walked around it slowly, one hand out, not touching. The metal was warm. Not hot — warm, like a body. The light at the top was steady and white, and it did not flicker, and it cast no shadow she could see.
-
-Player 12 — Iris Bell — was already there. She had a hand raised toward the light, not touching it, palm open, as though she were testing for rain.
-
-Mara found a scrap of paper and wrote: WHAT ARE YOU DOING?
-
-Iris took the paper and the pencil, and wrote back, in a hand that was very small and very careful: IT'S WARM. IT'S ALWAYS WARM. I CHECK EVERY ROUND.
-
-WHY?
-
-Iris looked at her. Then she wrote: BECAUSE WARM THINGS ARE ALIVE.
-
-Mara felt something move in her chest. She looked up at the Torch, at the white light that showed no flame, and thought about how nobody had ever asked what it was made of, or where the light came from, or why it did not go out.
-
-The shop had a Torch Scanner. Seventy-five points. She had twenty left.
-
-She had spent most of her Q Points on the Identity Device, and the device was broken, and she had nothing to show for it. She sat down on a bench and put her head in her hands.
-
-A shadow fell across her. Victor Hale.
-
-He did not speak — the round was still active, no speech permitted — but he sat down on the bench beside her, at a careful distance, and he placed a folded piece of paper on the bench between them.
-
-She unfolded it.
-
-I DID NOT KILL PLAYER 3. I DID NOT KILL PLAYER 7. I DO NOT KNOW WHO DID. I HAVE SPENT NO POINTS AND I HAVE PURCHASED NOTHING AND I HAVE NOTHING TO HIDE AND I KNOW THAT NONE OF THIS IS PROOF. I AM TELLING YOU BECAUSE YOU ARE THE ONLY ONE HERE WHO HAS NOT ALREADY DECIDED WHAT I AM.
-
-Mara read it twice. Then she wrote beneath it: WHY ME?
-
-He took the paper back, wrote, and returned it.
-
-BECAUSE YOU SAID NOBODY. AND YOU MEANT IT.
-
----
-
-The round ended quietly. No kill had been registered. The voice announced the voting period with something that might almost have been disappointment.
-
-Nobody had died. It was the first time.
-
-The room felt different. Lighter. The players gathered near the Torch without being told to, and for a moment nobody accused anybody of anything.
-
-Then Player 10 — Rowan Hale — spoke.
-
-"I want to say something," he said. He was a broad man with a maintenance worker's hands, and he had been quiet all season. "I've been having dreams. Since before I got here. Dreams about a room with a torch in it. I never told anyone because it sounds insane. But I wrote down what I saw in the dream, and I've been comparing it to this room, and it's the same room. Every detail. The benches. The shop. The hole in the ceiling."
-
-"What does that mean?" Player 5 asked.
-
-"I don't know. But I know I've been here before. Or I've seen it before. Or something." He looked at Victor. "And I know our names are the same. Hale. I don't know if that means anything. I've never met him before in my life."
-
-Victor said nothing. He was watching Rowan with an expression Mara could not read.
-
-"The Torch," Rowan said. "I dreamed about the Torch. And in the dream, there was something underneath it."
-
-Nobody spoke.
-
-"Something underneath it," he said again. "And it was alive."
-
-The voice came back before anyone could ask a question.
-
-"Voting has begun. The round's registered kill has been logged. The victim: Player 10."
-
-Rowan Hale looked down at the floor beneath his feet. He looked almost relieved.
-
-"The accused," the voice said, "is Player 2."
-
-The floor opened. Rowan Hale fell.
-
-And in the silence afterward, the voice said, very softly:
-
-"The Murderer Tool has been used. One body went limp. One body did not."`
-  });
-
-  // --- EPISODE 6 ---
-  PAGES.push({
-    type: 'episode',
-    title: 'Episode 6 — The Investor',
-    body: `The round ended and the room did not settle.
-
-The voice had said something new. One body went limp. One body did not. Nobody understood what it meant, and nobody wanted to ask.
-
-Mara found Victor standing by the Torch, alone.
-
-"Rowan knew you," she said. It was permitted now. Speech was permitted during voting, and voting had begun, and the voice had not yet called for names.
-
-"He knew my name," Victor said. "That is not the same thing."
-
-"He dreamed about this room. Before he came here. He dreamed about a thing under the Torch that was alive."
-
-"Yes." Victor looked up at the light. "He told me that, once, before the round ended. In writing. He said he had dreamed of it since he was a child. He said he had never told anyone because he was afraid they would think he was ill."
-
-"Did you believe him?"
-
-"I believed that he believed it. That is the most anyone can offer." He turned to look at her. "I have been a rich man for a long time, Mara. I have been accused of many things. I have been accused of worse than murder. I have never been accused of being a rich man who is also a liar, because I have never needed to lie. I have only ever needed to be patient."
-
-"Are you patient now?"
-
-"Yes."
-
-"Why?"
-
-"Because someone in this room is trying very hard to make me the answer to their question, and the more they try, the more clearly I can see the shape of them."
-
-Mara stared at him. "That's a very good answer."
-
-"It is." He smiled, thinly. "That is exactly the problem, isn't it."
-
----
-
-The voting period was long.
-
-Nobody died. The registered kill belonged to Rowan, and Rowan was already gone, and the voice had said nothing about a second victim. The players sat near the Torch and talked, and for the first time the talking was not all accusation.
-
-Player 4, Nina Sol, said: "I found documents before I came here. A list of names. Twelve names. But the list had been corrected — someone had crossed out two and added two in different ink. I remember because the ink was a different colour. It bothered me."
-
-"Do you remember the names?" Mara asked.
-
-"Only one. It was mine."
-
-Player 6, Jamie Frost, opened his notebook and showed the drawing again — the Torch, the ring of figures. "I drew this before I came here," he said. "I don't remember drawing it. I don't remember owning the notebook. But it was in my pocket when I woke up, and the ink is old, and I know it's my handwriting."
-
-Player 12, Iris Bell, said nothing. She had not spoken all season.
-
-Player 5, the paramedic, said: "When I was a child I heard knocking under a building. Under the floor. Nobody else heard it. I've been thinking about that knock ever since I got here."
-
-One by one, they talked. And one by one, Mara noticed something.
-
-Every single person in this room had seen something impossible before they arrived. Every single one had a story about a room that should not exist, or a voice that should not speak, or a thing under a floor that should not be alive.
-
-Every single one.
-
-Except herself.
-
-She had been investigating those stories. She had never lived one.
-
-Or had she? She could not remember the train. She could not remember the folder. She could not remember anything before the stone floor and the cold air and the Torch.
-
-She looked around the room at these people — these witnesses, every one of them — and she thought: I am not like them. I was never like them. Why am I here?
-
-The voice returned.
-
-"Voting has begun. The registered kill has been logged. The victim: Player 6."
-
-Jamie Frost looked up from his notebook. He looked calm. He closed the notebook and set it on the bench beside him.
-
-"The accused," the voice said, "is Player 2."
-
-Victor Hale said nothing.
-
-The vote was quick. Player 4 voted for Victor. Player 5 voted for Victor. Player 8 was gone. Player 9 was gone. Player 10 was gone. The room was shrinking.
-
-Mara said: "Player 4."
-
-Nina Sol looked at her. "What?"
-
-"You found the list. You said the names were corrected. You said the ink was different. You know something about who was supposed to be here and who wasn't." Mara's voice was steady. "You've been writing notes since the first day. You've been steering this room. And every note you've written has been careful. Every single note. You never once put your own name on anything."
-
-"That's what the notes are," Nina said. "Anonymous."
-
-"Yes," Mara said. "And that's very convenient for whoever writes them."
-
-The vote was tied. Nina and Victor. A revote.
-
-Nina Sol and Victor Hale stood facing each other in the dimming light, and Nina said, "You killed Player 3. You killed Player 7. I know you did."
-
-"How do you know?" Victor said.
-
-"Because the voice named you."
-
-"The voice named me," Victor agreed. "And the voice has named me four times, and four times this room has voted, and twice this room has killed someone else. So tell me, Nina — if I were an Imposter, would I be the most named man in this room? Would the system keep pointing at me and letting me live?"
-
-Nina opened her mouth.
-
-"What if," Victor said quietly, "the voice is not trying to get you to kill me. What if it is trying to teach you what happens when you trust it?"
-
-The Torch flared.
-
-"The revote is complete. Player 4 will be eliminated."
-
-Nina Sol's eyes went wide. She looked at Mara.
-
-"You," she said. "You did this."
+The Torch dimmed. The vote was not tied.
 
 The floor opened.
 
-She was gone.`
-  });
-
-  // --- EPISODE 7 ---
-  PAGES.push({
-    type: 'episode',
-    title: 'Episode 7 — The Wrong Answer',
-    body: `The room was getting smaller.
-
-Mara counted them: herself, Victor, Felix — no, Felix was gone — Player 5, Player 6 — no, Jamie was gone — Player 8 — gone — Player 12.
-
-Myself, Victor, Tomas Reed, Iris Bell.
-
-Four people.
-
-She sat down on a bench and stared at the Torch and did not move for a long time.
-
-Tomas Reed sat down beside her. He did not say anything. He was a paramedic, and he had seen people in shock before, and he knew that the best thing to do was to be there and be quiet.
-
-After a while, Mara said: "I killed Nina."
-
-"The room killed Nina."
-
-"I said her name."
-
-"You said a name. The room decided what it meant." He looked at her. "I voted for Victor twice. I was wrong at least once. Maybe twice. I don't know. That's the thing, isn't it. We never know."
-
-"I don't remember anything." Mara's voice was very quiet. "Before I woke up here. The train. The folder. I've been telling myself I'm an investigative journalist. I've been telling myself I know why I'm here. But I don't. I don't remember the train. I don't remember the folder. I don't remember anything."
-
-Tomas was silent for a moment.
-
-"Everyone here had a story about something impossible," he said. "You told me that. You noticed it. Every one of us had seen something we couldn't explain." He paused. "Maybe you didn't have a story because you are the story."
-
-"What does that mean?"
-
-"I don't know." He rubbed his face. "I'm a paramedic. I don't do riddles. I do pressure and broken bones and telling people things they don't want to hear."
-
-"Tell me something I don't want to hear."
-
-"You're the one the voice has never named." Tomas looked at her. "Four rounds. Four kills. Every name the voice gave us was someone else. Player 2 every time. Never you. Never Iris. Never me."
-
-Mara stared at him.
-
-"You think the voice is protecting me?"
-
-"I think the voice is doing something," Tomas said. "And I think you're the only one in this room it has never once pointed at."
-
----
-
-The round ended.
-
-The voice said: "Voting has begun. No registered kill has been logged."
-
-No kill.
-
-For the second time, nobody had died.
-
-The players gathered near the Torch. Victor stood a little apart. Iris Bell stood close to the light.
-
-"I want to try something," Mara said.
-
-She walked to the wall and found the note Player 6 had written in the second round — the one about killing and being an Imposter, the one that was still there, the one that was starting to look like the truest sentence in the room.
-
-She found a fresh scrap of paper and wrote beneath it:
-
-IF THE VOICE IS TEACHING US TO TRUST IT, THEN THE SMARTEST THING WE CAN DO IS MISTRUST IT. FOUR TIMES IT NAMED PLAYER 2. FOUR TIMES WE VOTED. THREE TIMES WE KILLED SOMEONE ELSE. PLAYER 2 IS STILL HERE. PLAYER 2 IS STILL ALIVE. EITHER THE VOICE IS LYING, OR PLAYER 2 IS PLAYING A VERY LONG GAME.
-
-She placed it on the wall. It stuck.
-
-Victor read it. He did not look pleased.
-
-"That is not what I would have written," he said.
-
-"What would you have written?"
-
-"I would have written that the voice is not lying and not telling the truth. I would have written that the voice is a third player." He looked at her. "It has its own agenda. It is not for the Imposters and it is not for us. It is doing something else, and we are all pieces."
-
-"And what is it doing?"
-
-"I don't know." He smiled, thinly. "But I would very much like to live long enough to find out."
-
-The voice returned.
-
-"The round has ended. The next round has begun. The Murderer Tool is available."
-
-Mara felt the words land like cold water.
-
-"Once per round," she said. "It's free. It's always free."
-
-"Yes," Victor said.
-
-"What does it do?"
-
-He looked at her for a long moment.
-
-"I don't know," he said. "But I know what it is called. And I know that the voice has never once told us what it does, and that the voice tells us everything it wants us to know." He paused. "The name is the message, Mara. It's called the Murderer Tool."
-
-Iris Bell stepped away from the Torch.
-
-She had not spoken all season.
-
-"The body that goes limp," she said, very quietly, "is the one that isn't there. The one that's empty. The one that's waiting."
-
-Everyone turned to look at her.
-
-"What?" Mara said.
-
-Iris looked at her hands. She did not say anything else.`
+He fell.`
   });
 
   // --- EPISODE 8 ---
@@ -1424,9 +1219,9 @@ Mara woke to find that the benches had moved. Not much — a few feet to the lef
 
 "There are more beds," Tomas said. "Look. There were four. Now there are six."
 
-"There are four of us," Mara said.
+"There are six of us," Mara said.
 
-"Yes." He looked at the beds. "Two of these beds are not for anyone."
+"Yes." He looked at the beds. "But there are six beds. That means the room knows how many of us are left."
 
 The shop was different too. The shelves had been rearranged. The Identity Device was gone from the shelf. The Murderer Tool was still there, still free, and beside it now was a new item with a handwritten tag:
 
@@ -1436,31 +1231,13 @@ Mara looked at the price. She had twenty points. Nobody had 120. Not anymore.
 
 "We can't afford it," Tomas said. "None of us can. That's the point."
 
-"Someone can," Mara said. "Victor. He's spent nothing."
+"Someone can," Mara said. "Jamie had points. He spent nothing."
 
-They both looked at the man in the suit, who was sitting on one of the new beds, reading a note that he had found on the floor.
+They both looked at the empty space where Jamie had been.
 
-"What does it say?" Mara asked.
+"He's gone," Tomas said.
 
-Victor held it up. It was in the small, careful handwriting Mara had come to recognize.
-
-IT SHOULD HAVE BEEN TEN. I WAS ON THE LIST. I CROSSED OUT TWO NAMES AND WROTE IN TWO MORE. I DON'T REMEMBER WHY. I DON'T REMEMBER WHO. I ONLY REMEMBER THAT THE INK WAS DIFFERENT AND THE HAND THAT HELD IT WAS MINE.
-
-— NINA
-
-"She wrote this," Mara said. "She wrote it before she died."
-
-"Yes."
-
-"And she put it on the floor."
-
-"Yes." Victor folded the note carefully. "She put it where someone would find it. She could not sign a note on the wall. So she wrote this one and left it on the floor, where it would not stick, and where it would be found by whoever cleaned up after the round."
-
-Mara stared at him.
-
-"You think she planned her own death?"
-
-"I think she was trying to leave a message that would outlive her." Victor looked at the note. "And she did."
+"Yes." Mara looked at the shop. "He is."
 
 ---
 
@@ -1502,13 +1279,13 @@ The floor opened.
 
 "The accused," the voice said, "is Player 12."
 
-Iris Bell did not look surprised.
+Iris did not look surprised.
 
 "That's not right," Mara said. "Tomas was killed. She can't have killed him. She was here. She's been here the whole time."
 
 "The accused is Player 12," the voice repeated.
 
-Iris looked at Mara. Then she looked at Victor. Then she looked at the Torch.
+Iris looked at Mara. Then she looked at the Torch.
 
 "The body that goes limp," she said, "is the one that isn't there."
 
@@ -1520,153 +1297,18 @@ The voice said:
 
 "The Murderer Tool has been used. One body went limp. One body did not."
 
-Victor Hale looked at Mara.
+Mara looked at the empty space where Iris had been.
 
-"That," he said, "was not a vote."
-
-Mara stared at the empty space where Iris had been.
-
-"No," she said. "That was a demonstration."`
+"That," she said, "was not a vote."`
   });
 
   // --- EPISODE 9 ---
   PAGES.push({
     type: 'episode',
-    title: 'Episode 9 — Two Imposters',
+    title: 'Episode 9 — Two People Left',
     body: `Two people were left.
 
-Mara and Victor. The room was vast and gray and quiet, and the Torch burned white at the center of it, and the floor was smooth and gray and unmarked.
-
-"Fourteen pages of rules," Victor said, "and it comes down to this. Two people. One question."
-
-"One of us is an Imposter," Mara said.
-
-"One of us is an Imposter." He sat down on a bench. "Or both of us. Or neither. The game said two among the original twelve. Two. Not one. If there are two, and one of us is one, then the other is already dead. If there are two, and neither of us is one, then both are dead, and we are the only two people in this room, and the game is already over."
-
-"The game isn't over."
-
-"No." He looked at the Torch. "It isn't."
-
-Mara sat down on the bench across from him. The Torch was warm. It was warmer than it had been. It was casting shadows now — faint ones, but shadows — and that was new.
-
-"Tell me something true," she said. "Something I can check."
-
-"I am Victor Hale. I am fifty-three years old. I have a company called Hale Holdings. I have never killed anyone. I have never been to this room before. I do not know what is under the Torch. I do not know who built the shop. I do not know who the Imposters are."
-
-"That's all true?"
-
-"It is all true." He paused. "It is also all useless. None of it can be checked. You have no way to know whether I am lying."
-
-"No," Mara said. "I don't."
-
-They sat in silence for a while.
-
-"The notes," Mara said. "They're still on the wall. Every single one. We could read them all. We could try to figure out who wrote what, and when, and why."
-
-"We could." Victor did not move. "But they're anonymous. And they were written by people who are now dead. And even if we could identify every writer, we would still not know who was lying."
-
-"Then what do we do?"
-
-"We do the only thing we can do." He looked at her. "We decide what kind of person we are, and we act like it, and we accept the consequences."
-
-"That's not a plan."
-
-"No," Victor said. "It isn't."
-
----
-
-The voice returned.
-
-"Voting has begun. A registered kill has been logged. The victim: Player 5."
-
-"Tomas is already dead," Mara said.
-
-"Yes," the voice said. "The kill was logged before he was eliminated. The system is recording all kills. The system is keeping a complete record."
-
-"The accused?"
-
-"Player 2."
-
-Victor did not move.
-
-"Every time," Mara said. "Every single time. Four kills. Four accusations. All of them you."
-
-"Yes."
-
-"Why?"
-
-"I don't know." Victor looked at her. "But I know that whoever is doing this has never once accused you. And I know that you are the only one in this room who does not remember anything before the Torch."
-
-Mara stared at him.
-
-"You've noticed."
-
-"Of course I've noticed. I'm an investor. I notice things that people don't want me to notice." He smiled, thinly. "You are the only one here with no story. No impossible room. No knocking under a floor. No dreams of a torch. You are the only one who doesn't belong."
-
-"I was investigating the stories."
-
-"Were you?" He looked at her. "Or did the voice give you that story? Did it put it in your head, the way it puts names on walls? Did it tell you that you were a journalist so that you would ask questions, and so that you would trust yourself, and so that you would not notice that you are the only person in this room with no memory of anything before the light?"
-
-Mara's hands were cold.
-
-"That's not—" she said. "That's not possible."
-
-"Nothing here is possible," Victor said. "That's the only thing we know for sure."
-
----
-
-The Torch flared.
-
-"The vote is tied," the voice said. "Player 2 and Player 12."
-
-"Player 12 is dead," Mara said.
-
-"Player 12 is dead," the voice agreed. "But the vote is tied. A revote will now occur. Only Player 2 may speak."
-
-Victor stood up. He looked at the Torch. He looked at Mara.
-
-"I have one thing to say," he said. "And it is this."
-
-He reached into his jacket pocket and took out a small, folded piece of paper.
-
-"Nina Sol left this on the floor," he said. "I picked it up. I read it. And I did not tell you what it said."
-
-He unfolded it.
-
-Mara read it.
-
-IT WAS NOT ME. I WROTE THE NAMES. I CROSSED OUT TWO AND ADDED TWO. BUT I WAS NOT THE ONE WHO CHOSE THE GAME. I WAS ONLY THE ONE WHO CHOSE THE PLAYERS.
-
-— NINA
-
-"The list," Mara said. "She wrote the list."
-
-"Yes." Victor looked at her. "Nina Sol chose who came here. She crossed out two names and wrote in two more. She was not an Imposter. She was the person who decided who the Imposters would be."
-
-"Then who did she choose?"
-
-"I don't know," Victor said. "But I know she wrote this note for someone to find, and I know she left it on the floor, and I know that I am the one who picked it up."
-
-The Torch flared.
-
-"Player 2 has spoken," the voice said. "The revote is complete. Player 2 will be eliminated."
-
-Victor Hale looked at Mara.
-
-"I did not kill anyone," he said. "I want you to know that."
-
-The floor opened beneath him.
-
-He fell.`
-  });
-
-  // --- EPISODE 10 ---
-  PAGES.push({
-    type: 'episode',
-    title: 'Episode 10 — The Torches Wind',
-    body: `Mara was alone.
-
-The room was vast and gray and quiet. The Torch burned white at the center of it. The floor was smooth. The notes were still on the walls, every single one, and there was nobody left to read them.
+Mara and the Torch. The room was vast and gray and quiet, and the Torch burned white at the center of it, and the floor was smooth and gray and unmarked.
 
 She walked to the Torch. She put her hand on the metal. It was warm. It was very warm.
 
@@ -1732,11 +1374,14 @@ The voice was very quiet now.
 
 "You already know," it said. "You have known since the second round. You have known since the moment you read the note that said killing is not the same as being an Imposter. You have known since the moment you realized that the only person in this room with no story was you."
 
-The light went out.
+The light went out.`
+  });
 
----
-
-Mara woke on a train.
+  // --- EPISODE 10 ---
+  PAGES.push({
+    type: 'episode',
+    title: 'Episode 10 — The Train',
+    body: `Mara woke on a train.
 
 She was sitting in a window seat. There was a folder on her lap. The folder was full of photographs, and the photographs were of people, and the people were all of the people she had just watched die.
 
@@ -1902,7 +1547,7 @@ She walked into the room. She walked past the benches and past the notes and pas
 
 The woman looked straight through her.
 
-"Rule one," the voice said. "No speaking outside of voting."
+"Rule one," the voice said. "Talking is allowed. You may speak freely at all times."
 
 Mara reached out and touched the woman's shoulder.
 
@@ -1968,27 +1613,7 @@ The voice spoke behind her, high and thin and very fast.
 
 "The door is not for you. The door is not part of the game. The door is—"
 
-Mara opened the door.
-
-On the other side was a room. It was small and white and it had a table and two chairs. There was a man sitting in one of the chairs. He was wearing a suit. He was not Victor Hale.
-
-He looked up when she came in.
-
-"Hello, Mara," he said.
-
-"Who are you?"
-
-"I'm the one who pays for all this." He gestured vaguely at the room behind her. "The Torch. The voice. The game. It's all very expensive. Somebody has to foot the bill."
-
-"Why?"
-
-"Because I want to know what people do when they're afraid." He smiled. "And because I've been watching you. You're the only one who ever asked the right question."
-
-"What question?"
-
-He leaned forward.
-
-"You asked who the Imposters were," he said. "Nobody else did. They all just voted."`
+Mara opened the door.`
   });
 
   // --- EPISODE 13 ---
@@ -2063,47 +1688,7 @@ She sat down in the chair across from him and she put her head in her hands and 
 
 "That's not enough."
 
-"No," he said. "It isn't."
-
-Mara looked up.
-
-"There's going to be a second season," she said. "There are twelve new players in the other room. You're going to do it again."
-
-"Yes."
-
-"And this time there are going to be Imposters. Real ones."
-
-"Yes."
-
-Mara stood up.
-
-"Then I want to be in the game," she said. "Not as a witness. Not as a journalist. As a player."
-
-The man in the gray suit looked at her for a long moment.
-
-"You understand that if you go in, you might die."
-
-"I understand."
-
-"And you understand that if you go in, you might be an Imposter."
-
-Mara was silent.
-
-"I don't know what Nina wrote," the man said. "I don't know who the Imposters are this time. She wrote the list before I saw it. She always does. It's part of the game. The witness chooses the players."
-
-"The witness chooses the players?"
-
-"Nina Sol was the witness of the first game. You are the witness of the second. You choose the players. You write the list. And then you go in."
-
-Mara looked at the folder on the table. The photographs of the twelve new players were in it. She had not seen them before. She had not chosen them.
-
-But she would.
-
-"When do I start?"
-
-The man in the gray suit smiled.
-
-"Now," he said.`
+"No," he said. "It isn't."`
   });
 
   // --- EPISODE 14 ---
@@ -2278,7 +1863,7 @@ And the other one was still writing, still sleeping, still waking up, still not 
 
 The voice began again.
 
-"Rule one. No speaking outside of voting."
+"Rule one. Talking is allowed. You may speak freely at all times."
 
 Mara wrote another note.
 
@@ -2324,7 +1909,7 @@ End of Season 1.`
   });
 
   // -------------------------------------------------------
-  //  TRAILER PAGE (Page 27)
+  //  TRAILER SEASON 2 (Page 28)
   // -------------------------------------------------------
   PAGES.push({
     type: 'trailer',
@@ -2397,12 +1982,12 @@ COMING SOON`
   });
 
   // -------------------------------------------------------
-  //  GUESS THE IMPOSTERS PAGE (Page 28)
+  //  GUESS THE IMPOSTERS (Page 29)
   // -------------------------------------------------------
   PAGES.push({
     type: 'guess',
     title: 'GUESS THE IMPOSTERS',
-    body: '', // handled specially
+    body: '',
     suspects: [
       { num: 1, name: 'Mara Vale' },
       { num: 2, name: 'Victor Hale' },
@@ -2420,7 +2005,7 @@ COMING SOON`
   });
 
   // -------------------------------------------------------
-  //  REVEAL PAGE (Page 29) — hidden until requested
+  //  REVEAL (Page 30) — hidden until requested
   // -------------------------------------------------------
   PAGES.push({
     type: 'reveal',
@@ -2429,7 +2014,7 @@ COMING SOON`
   });
 
   // -------------------------------------------------------
-  //  END PAGE (Page 30)
+  //  END PAGE (Page 31)
   // -------------------------------------------------------
   PAGES.push({
     type: 'end',
@@ -2469,9 +2054,10 @@ And somewhere, in a white room with a table and two chairs, a man in a gray suit
 
   const STORAGE_KEY_PAGE = 'torches-wind-page';
   const STORAGE_KEY_MARK = 'torches-wind-mark';
+  const STORAGE_KEY_SETTINGS = 'torches-wind-settings';
 
   let currentPage = 0;
-  let markedWordData = null; // { page, wordIndex }
+  let markedWordData = null;
 
   // Load saved state
   function loadState() {
@@ -2490,15 +2076,11 @@ And somewhere, in a white room with a table and two chairs, a man in a gray suit
           markedWordData = parsed;
         }
       }
-    } catch (e) {
-      // localStorage unavailable — ignore
-    }
+    } catch (e) {}
   }
 
   function savePage() {
-    try {
-      localStorage.setItem(STORAGE_KEY_PAGE, String(currentPage));
-    } catch (e) {}
+    try { localStorage.setItem(STORAGE_KEY_PAGE, String(currentPage)); } catch (e) {}
   }
 
   function saveMark() {
@@ -2510,6 +2092,95 @@ And somewhere, in a white room with a table and two chairs, a man in a gray suit
       }
     } catch (e) {}
   }
+
+  function loadSettings() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_SETTINGS);
+      if (saved) {
+        const s = JSON.parse(saved);
+        if (s.textSize) {
+          document.documentElement.style.setProperty('--text-size', s.textSize);
+          document.getElementById('text-size-slider').value = parseFloat(s.textSize);
+          document.getElementById('text-size-value').textContent = s.textSize;
+        }
+        if (s.lineHeight) {
+          document.documentElement.style.setProperty('--line-height', s.lineHeight);
+          document.getElementById('line-height-slider').value = parseFloat(s.lineHeight);
+          document.getElementById('line-height-value').textContent = s.lineHeight;
+        }
+        if (s.wordSpacing) {
+          document.documentElement.style.setProperty('--word-spacing', s.wordSpacing);
+          document.getElementById('word-spacing-slider').value = parseFloat(s.wordSpacing);
+          document.getElementById('word-spacing-value').textContent = s.wordSpacing;
+        }
+        if (s.letterSpacing) {
+          document.documentElement.style.setProperty('--letter-spacing', s.letterSpacing);
+          document.getElementById('letter-spacing-slider').value = parseFloat(s.letterSpacing);
+          document.getElementById('letter-spacing-value').textContent = s.letterSpacing;
+        }
+      }
+    } catch (e) {}
+  }
+
+  function saveSettings() {
+    try {
+      const s = {
+        textSize: document.getElementById('text-size-value').textContent,
+        lineHeight: document.getElementById('line-height-value').textContent,
+        wordSpacing: document.getElementById('word-spacing-value').textContent,
+        letterSpacing: document.getElementById('letter-spacing-value').textContent
+      };
+      localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(s));
+    } catch (e) {}
+  }
+
+  // ============================================================
+  //  SETTINGS SLIDERS
+  // ============================================================
+
+  document.getElementById('text-size-slider').addEventListener('input', function() {
+    const val = this.value + 'rem';
+    document.documentElement.style.setProperty('--text-size', val);
+    document.getElementById('text-size-value').textContent = val;
+    saveSettings();
+  });
+
+  document.getElementById('line-height-slider').addEventListener('input', function() {
+    const val = this.value;
+    document.documentElement.style.setProperty('--line-height', val);
+    document.getElementById('line-height-value').textContent = val;
+    saveSettings();
+  });
+
+  document.getElementById('word-spacing-slider').addEventListener('input', function() {
+    const val = this.value + 'em';
+    document.documentElement.style.setProperty('--word-spacing', val);
+    document.getElementById('word-spacing-value').textContent = val;
+    saveSettings();
+  });
+
+  document.getElementById('letter-spacing-slider').addEventListener('input', function() {
+    const val = this.value + 'em';
+    document.documentElement.style.setProperty('--letter-spacing', val);
+    document.getElementById('letter-spacing-value').textContent = val;
+    saveSettings();
+  });
+
+  document.getElementById('reset-settings').addEventListener('click', function() {
+    document.documentElement.style.setProperty('--text-size', '1.15rem');
+    document.documentElement.style.setProperty('--line-height', '1.8');
+    document.documentElement.style.setProperty('--word-spacing', '0.04em');
+    document.documentElement.style.setProperty('--letter-spacing', '0.01em');
+    document.getElementById('text-size-slider').value = '1.15';
+    document.getElementById('line-height-slider').value = '1.8';
+    document.getElementById('word-spacing-slider').value = '0.04';
+    document.getElementById('letter-spacing-slider').value = '0.01';
+    document.getElementById('text-size-value').textContent = '1.15rem';
+    document.getElementById('line-height-value').textContent = '1.8';
+    document.getElementById('word-spacing-value').textContent = '0.04em';
+    document.getElementById('letter-spacing-value').textContent = '0.01em';
+    saveSettings();
+  });
 
   // ============================================================
   //  RENDER
@@ -2526,7 +2197,9 @@ And somewhere, in a white room with a table and two chairs, a man in a gray suit
     pageContentEl.style.opacity = '0';
 
     setTimeout(() => {
-      if (page.type === 'character') {
+      if (page.type === 'cover') {
+        renderCoverPage(page);
+      } else if (page.type === 'character') {
         renderCharacterPage(page);
       } else if (page.type === 'episode') {
         renderEpisodePage(page);
@@ -2543,43 +2216,62 @@ And somewhere, in a white room with a table and two chairs, a man in a gray suit
     }, 40);
 
     pageIndicatorEl.textContent = `Page ${currentPage + 1} / ${PAGES.length}`;
-    if (typeof updateReaderTools === 'function') updateReaderTools();
     prevBtn.disabled = currentPage === 0;
     nextBtn.disabled = currentPage === PAGES.length - 1;
 
-    // Restore marked word after render
-    setTimeout(() => {
-      restoreMark();
-    }, 60);
+    setTimeout(() => { restoreMark(); }, 60);
+  }
+
+  // ---- COVER PAGE ----
+  function renderCoverPage(page) {
+    const wrapper = document.createElement('div');
+    const h2 = document.createElement('h2');
+    h2.textContent = page.title;
+    wrapper.appendChild(h2);
+    const h3 = document.createElement('h3');
+    h3.textContent = page.subtitle;
+    h3.style.textAlign = 'center';
+    h3.style.fontStyle = 'italic';
+    h3.style.color = '#6a5e4e';
+    h3.style.marginBottom = '1em';
+    wrapper.appendChild(h3);
+    const bodyDiv = document.createElement('div');
+    const paragraphs = page.body.split(/\n\n+/);
+    paragraphs.forEach((pText, idx) => {
+      if (idx > 0) {
+        const spacer = document.createElement('div');
+        spacer.style.height = '0.4em';
+        bodyDiv.appendChild(spacer);
+      }
+      const p = document.createElement('p');
+      p.textContent = pText.trim();
+      bodyDiv.appendChild(p);
+    });
+    wrapper.appendChild(bodyDiv);
+    pageContentEl.appendChild(wrapper);
   }
 
   // ---- CHARACTER PAGE ----
   function renderCharacterPage(page) {
     const wrapper = document.createElement('div');
-
     const h2 = document.createElement('h2');
     h2.textContent = page.title;
     wrapper.appendChild(h2);
-
     const card = document.createElement('div');
     card.className = 'character-card';
-
     const nameLine = document.createElement('div');
     nameLine.innerHTML = `<strong>${escapeHTML(page.title)}</strong><span class="player-num">${escapeHTML(page.player)}</span>`;
     card.appendChild(nameLine);
-
     const desc = document.createElement('div');
     desc.className = 'desc';
     desc.textContent = page.desc;
     card.appendChild(desc);
-
     if (page.note) {
       const note = document.createElement('div');
       note.className = 'note';
       note.textContent = page.note;
       card.appendChild(note);
     }
-
     wrapper.appendChild(card);
     pageContentEl.appendChild(wrapper);
   }
@@ -2587,27 +2279,22 @@ And somewhere, in a white room with a table and two chairs, a man in a gray suit
   // ---- EPISODE PAGE ----
   function renderEpisodePage(page) {
     const wrapper = document.createElement('div');
-
     const h2 = document.createElement('h2');
     h2.textContent = page.title;
     wrapper.appendChild(h2);
-
     const bodyDiv = document.createElement('div');
     bodyDiv.className = 'episode-body';
-
-    // Split into paragraphs on double newlines
     const paragraphs = page.body.split(/\n\n+/);
     paragraphs.forEach((pText, idx) => {
       if (idx > 0) {
         const spacer = document.createElement('div');
-        spacer.style.height = '0.6em';
+        spacer.style.height = '0.4em';
         bodyDiv.appendChild(spacer);
       }
       const p = document.createElement('p');
       p.textContent = pText.trim();
       bodyDiv.appendChild(p);
     });
-
     wrapper.appendChild(bodyDiv);
     pageContentEl.appendChild(wrapper);
   }
@@ -2615,14 +2302,11 @@ And somewhere, in a white room with a table and two chairs, a man in a gray suit
   // ---- TRAILER PAGE ----
   function renderTrailerPage(page) {
     const wrapper = document.createElement('div');
-
     const h2 = document.createElement('h2');
     h2.textContent = page.title;
     wrapper.appendChild(h2);
-
     const box = document.createElement('div');
     box.className = 'trailer-box';
-
     const lines = page.body.split('\n');
     lines.forEach(line => {
       const div = document.createElement('div');
@@ -2630,7 +2314,6 @@ And somewhere, in a white room with a table and two chairs, a man in a gray suit
       div.textContent = line;
       box.appendChild(div);
     });
-
     wrapper.appendChild(box);
     pageContentEl.appendChild(wrapper);
   }
@@ -2639,33 +2322,26 @@ And somewhere, in a white room with a table and two chairs, a man in a gray suit
   function renderGuessPage(page) {
     const wrapper = document.createElement('div');
     wrapper.className = 'guess-section';
-
     const h2 = document.createElement('h2');
     h2.textContent = page.title;
     wrapper.appendChild(h2);
-
     const p = document.createElement('p');
     p.textContent = 'Select exactly two players you believe are the Imposters. You will receive evidence for each, but not everyone is an Imposter. Choose carefully.';
     wrapper.appendChild(p);
-
     const grid = document.createElement('div');
     grid.className = 'suspect-grid';
-
     const selected = new Set();
-
     page.suspects.forEach(suspect => {
       const btn = document.createElement('button');
       btn.className = 'suspect-btn';
       btn.dataset.num = suspect.num;
       btn.innerHTML = `<span class="num">${suspect.num}</span> ${escapeHTML(suspect.name)}`;
-
       btn.addEventListener('click', () => {
         if (selected.has(suspect.num)) {
           selected.delete(suspect.num);
           btn.classList.remove('selected');
         } else {
           if (selected.size >= 2) {
-            // deselect the oldest
             const first = selected.values().next().value;
             selected.delete(first);
             const firstBtn = grid.querySelector(`[data-num="${first}"]`);
@@ -2676,32 +2352,25 @@ And somewhere, in a white room with a table and two chairs, a man in a gray suit
         }
         updateFeedback();
       });
-
       grid.appendChild(btn);
     });
-
     wrapper.appendChild(grid);
-
     const feedback = document.createElement('div');
     feedback.id = 'guess-feedback';
     feedback.textContent = 'Select two players to see the evidence.';
     wrapper.appendChild(feedback);
-
     const revealBtn = document.createElement('button');
     revealBtn.id = 'reveal-btn';
     revealBtn.textContent = 'WHO WAS IT?';
     revealBtn.style.display = 'none';
     revealBtn.addEventListener('click', () => {
-      // Navigate to reveal page
       currentPage = PAGES.findIndex(p => p.type === 'reveal');
       savePage();
       renderPage();
     });
     wrapper.appendChild(revealBtn);
-
     pageContentEl.appendChild(wrapper);
 
-    // Evidence data for each suspect
     const evidenceData = {
       1: 'Mara is the only player with no story about an impossible place. She was the witness. She was the one who was supposed to remember. But she also wrote the list. She chose the players. She chose the Imposters. And she does not remember doing it.',
       2: 'Victor was named by the voice every single round. He spent no points. He purchased nothing. He was calm. He was composed. He was exactly what an Imposter would pretend to be — or exactly what an innocent man would be forced to become.',
@@ -2723,17 +2392,13 @@ And somewhere, in a white room with a table and two chairs, a man in a gray suit
         revealBtn.style.display = 'none';
         return;
       }
-
       const nums = Array.from(selected);
       let html = '';
-
       nums.forEach(num => {
         const suspect = page.suspects.find(s => s.num === num);
         html += `<div class="evidence-block"><strong>Player ${num} — ${escapeHTML(suspect.name)}:</strong><br>${escapeHTML(evidenceData[num])}</div>`;
       });
-
-      html += '<div style="margin-top:16px;font-size:0.9rem;color:#9a8e78;">This is evidence, not proof. Not everyone is an Imposter. Only two are.</div>';
-
+      html += '<div style="margin-top:10px;font-size:0.85em;color:#9a8e78;">This is evidence, not proof. Not everyone is an Imposter. Only two are.</div>';
       feedback.innerHTML = html;
       revealBtn.style.display = 'inline-block';
     }
@@ -2743,15 +2408,12 @@ And somewhere, in a white room with a table and two chairs, a man in a gray suit
   function renderRevealPage(page) {
     const wrapper = document.createElement('div');
     wrapper.className = 'guess-section';
-
     const h2 = document.createElement('h2');
     h2.textContent = page.title;
     wrapper.appendChild(h2);
-
     const p = document.createElement('p');
     p.textContent = 'The two Imposters of Season 1 were:';
     wrapper.appendChild(p);
-
     const revealBox = document.createElement('div');
     revealBox.className = 'reveal-text';
     revealBox.innerHTML = `
@@ -2772,43 +2434,37 @@ They were the two who were never on the list.<br><br>
 They were the two who were supposed to be innocent.<br><br>
 But they weren't.`;
     wrapper.appendChild(revealBox);
-
     const backBtn = document.createElement('button');
     backBtn.textContent = '← BACK TO GUESS';
-    backBtn.style.cssText = 'background:#2a2a3a;color:#f0e6d2;border:none;padding:12px 28px;border-radius:40px;font-family:"Courier New",monospace;font-weight:bold;font-size:0.95rem;cursor:pointer;margin-top:20px;';
+    backBtn.style.cssText = 'background:#2a2a3a;color:#f0e6d2;border:none;padding:10px 24px;border-radius:30px;font-family:"Courier New",monospace;font-weight:bold;font-size:0.85em;cursor:pointer;margin-top:16px;';
     backBtn.addEventListener('click', () => {
       currentPage = PAGES.findIndex(p => p.type === 'guess');
       savePage();
       renderPage();
     });
     wrapper.appendChild(backBtn);
-
     pageContentEl.appendChild(wrapper);
   }
 
   // ---- END PAGE ----
   function renderEndPage(page) {
     const wrapper = document.createElement('div');
-
     const h2 = document.createElement('h2');
     h2.textContent = page.title;
     wrapper.appendChild(h2);
-
     const bodyDiv = document.createElement('div');
     bodyDiv.className = 'episode-body';
-
     const paragraphs = page.body.split(/\n\n+/);
     paragraphs.forEach((pText, idx) => {
       if (idx > 0) {
         const spacer = document.createElement('div');
-        spacer.style.height = '0.6em';
+        spacer.style.height = '0.4em';
         bodyDiv.appendChild(spacer);
       }
       const p = document.createElement('p');
       p.textContent = pText.trim();
       bodyDiv.appendChild(p);
     });
-
     wrapper.appendChild(bodyDiv);
     pageContentEl.appendChild(wrapper);
   }
@@ -2841,75 +2497,62 @@ But they weren't.`;
     return nodes;
   }
 
-  function getWordSpans() {
-    // Returns all text nodes split into word-level spans
-    // We'll handle this differently: on click, find the word
-    return [];
-  }
-
-  // Handle word click
   pageContentEl.addEventListener('click', (e) => {
     const target = e.target;
-    if (target.closest('button, .suspect-btn, .guess-section, .trailer-box, .character-card, .reveal-text, input, textarea, select, a')) return;
-
-    if (target.classList && target.classList.contains('marked-word')) {
+    if (target.classList.contains('marked-word')) {
       unmarkWord();
       return;
     }
-
-    let range = null;
-    if (document.caretRangeFromPoint) {
-      range = document.caretRangeFromPoint(e.clientX, e.clientY);
-    } else if (document.caretPositionFromPoint) {
-      const pos = document.caretPositionFromPoint(e.clientX, e.clientY);
-      if (pos) {
-        range = document.createRange();
-        range.setStart(pos.offsetNode, pos.offset);
-        range.collapse(true);
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+    let range = selection.getRangeAt(0);
+    if (!range || range.collapsed) {
+      if (document.caretRangeFromPoint) {
+        range = document.caretRangeFromPoint(e.clientX, e.clientY);
+      } else if (document.caretPositionFromPoint) {
+        const pos = document.caretPositionFromPoint(e.clientX, e.clientY);
+        if (pos) {
+          range = document.createRange();
+          range.setStart(pos.offsetNode, pos.offset);
+          range.setEnd(pos.offsetNode, pos.offset);
+        }
       }
     }
-    if (!range || !range.startContainer || range.startContainer.nodeType !== Node.TEXT_NODE) return;
-
+    if (!range) return;
     const textNode = range.startContainer;
-    const parentElement = textNode.parentElement;
-    if (!parentElement || parentElement.closest('button, .suspect-btn, .guess-section, .trailer-box, .character-card, .reveal-text, .marked-word')) return;
-
+    if (textNode.nodeType !== Node.TEXT_NODE) return;
+    if (textNode.parentElement.closest('button, .suspect-btn, .guess-section, .trailer-box, .character-card, .reveal-text')) {
+      return;
+    }
     const text = textNode.textContent;
-    let offset = range.startOffset;
-    if (offset === text.length && offset > 0) offset--;
-    const isWordChar = ch => /[A-Za-z0-9_’'\-À-ž]/.test(ch || '');
-    if (!isWordChar(text[offset]) && offset > 0 && isWordChar(text[offset - 1])) offset--;
-
+    const offset = range.startOffset;
     let start = offset;
     let end = offset;
-    while (start > 0 && isWordChar(text[start - 1])) start--;
-    while (end < text.length && isWordChar(text[end])) end++;
+    while (start > 0 && /\S/.test(text[start - 1])) start--;
+    while (end < text.length && /\S/.test(text[end])) end++;
     if (start === end) return;
-
     const word = text.slice(start, end);
+    if (!word.trim()) return;
     unmarkWord();
-
     const before = text.slice(0, start);
     const after = text.slice(end);
+    const parent = textNode.parentNode;
     const span = document.createElement('span');
     span.className = 'marked-word';
     span.textContent = word;
     const wordIndex = getWordIndexInPage(word, textNode);
-    markedWordData = { page: currentPage, wordIndex, word };
-
+    markedWordData = { page: currentPage, wordIndex: wordIndex, word: word };
     const frag = document.createDocumentFragment();
     if (before) frag.appendChild(document.createTextNode(before));
     frag.appendChild(span);
     if (after) frag.appendChild(document.createTextNode(after));
-    textNode.parentNode.replaceChild(frag, textNode);
+    parent.replaceChild(frag, textNode);
     saveMark();
   });
 
   function getWordIndexInPage(word, textNode) {
-    // Simple index: count how many times this word appears before this text node
     const allText = pageContentEl.textContent;
     const beforeText = allText.substring(0, allText.indexOf(word));
-    // This is approximate — good enough for persistence
     return beforeText.split(/\s+/).length;
   }
 
@@ -2928,39 +2571,30 @@ But they weren't.`;
 
   function restoreMark() {
     if (!markedWordData || markedWordData.page !== currentPage) return;
-    // Try to find the word in the page text and re-mark it
-    // We'll use a simplified approach: find the nth occurrence of the word
     const word = markedWordData.word;
     if (!word) return;
-
     const textNodes = getAllTextNodes();
     let found = false;
-
     for (const node of textNodes) {
       const text = node.textContent;
       const index = text.indexOf(word);
       if (index !== -1) {
         const before = text.slice(0, index);
         const after = text.slice(index + word.length);
-
         const span = document.createElement('span');
         span.className = 'marked-word';
         span.textContent = word;
-
         const parent = node.parentNode;
         const frag = document.createDocumentFragment();
         if (before) frag.appendChild(document.createTextNode(before));
         frag.appendChild(span);
         if (after) frag.appendChild(document.createTextNode(after));
-
         parent.replaceChild(frag, node);
         found = true;
         break;
       }
     }
-
     if (!found) {
-      // Word not found on this page — clear mark
       markedWordData = null;
       saveMark();
     }
@@ -2991,188 +2625,19 @@ But they weren't.`;
 
   prevBtn.addEventListener('click', () => goToPage(currentPage - 1));
   nextBtn.addEventListener('click', () => goToPage(currentPage + 1));
-  document.getElementById('side-page-prev').addEventListener('click', () => goToPage(currentPage - 1));
-  document.getElementById('side-page-next').addEventListener('click', () => goToPage(currentPage + 1));
 
-  // Keyboard navigation
   document.addEventListener('keydown', (e) => {
-    const tag = e.target && e.target.tagName;
-    if (e.altKey || e.ctrlKey || e.metaKey || tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (e.target && e.target.isContentEditable)) return;
-    if (e.key === 'ArrowLeft') {
-      e.preventDefault();
-      goToPage(currentPage - 1);
-    } else if (e.key === 'ArrowRight') {
-      e.preventDefault();
-      goToPage(currentPage + 1);
-    }
+    if (e.key === 'ArrowLeft') goToPage(currentPage - 1);
+    else if (e.key === 'ArrowRight') goToPage(currentPage + 1);
   });
 
   // ============================================================
   //  INIT
   // ============================================================
 
-
-  // Enhanced reader state and optional Google Sheets sync
-  const READER_STATE_KEY = 'torchWindReaderStateV2';
-  const READER_ID_KEY = 'torchWindReaderIdV1';
-  const SHEET_URL_KEY = 'torchWindSheetEndpointV1';
-  const DEFAULT_SHEET_URL = 'https://script.google.com/macros/s/AKfycbzH8d-59ulHto_TEDqmxoSKITz1WdthFu0rHzWO6IU7fp3c-QadBPO_X_Yx6fuMmcOH/exec';
-  if (!localStorage.getItem(SHEET_URL_KEY)) {
-    localStorage.setItem(SHEET_URL_KEY, DEFAULT_SHEET_URL);
-  }
-  let readerState = { bookmarks: [], notes: {}, fontSize: 1.35, night: false };
-  let readerId = localStorage.getItem(READER_ID_KEY);
-  if (!readerId) {
-    readerId = 'reader-' + (window.crypto && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
-    localStorage.setItem(READER_ID_KEY, readerId);
-  }
-  function readerStatus(message) {
-    const el = document.getElementById('reader-status');
-    if (el) el.textContent = message;
-  }
-  function readReaderState() {
-    try {
-      const saved = JSON.parse(localStorage.getItem(READER_STATE_KEY) || '{}');
-      readerState = {...readerState, ...saved, notes: saved.notes || {}, bookmarks: saved.bookmarks || []};
-    } catch (_) {}
-    applyReaderSettings();
-  }
-  function applyReaderSettings() {
-    const content = document.getElementById('page-content');
-    if (content) content.style.fontSize = Math.max(0.9, Math.min(2.1, Number(readerState.fontSize) || 1.35)) + 'rem';
-    document.body.classList.toggle('reader-night', !!readerState.night);
-    const theme = document.getElementById('theme-btn');
-    if (theme) theme.textContent = readerState.night ? '☀ Day mode' : '☾ Night mode';
-    updateReaderTools();
-  }
-  function currentPageKey() { return String(currentPage); }
-  function updateReaderTools() {
-    const b = document.getElementById('bookmark-btn');
-    if (b) {
-      const on = readerState.bookmarks.includes(currentPage);
-      b.textContent = on ? '★ Bookmarked' : '☆ Bookmark page';
-    }
-    const note = document.getElementById('reader-note');
-    if (note && note.value !== (readerState.notes[currentPageKey()] || '')) note.value = readerState.notes[currentPageKey()] || '';
-    const fill = document.getElementById('reading-progress-fill');
-    if (fill) fill.style.width = (((currentPage + 1) / PAGES.length) * 100) + '%';
-  }
-  function persistReaderState(sync = true) {
-    try { localStorage.setItem(READER_STATE_KEY, JSON.stringify(readerState)); } catch (_) {}
-    if (sync) syncReaderState();
-  }
-  function snapshotReaderState() {
-    return {
-      page: currentPage,
-      pageTitle: PAGES[currentPage] ? PAGES[currentPage].title : '',
-      markedWord: markedWordData || null,
-      bookmarks: readerState.bookmarks,
-      notes: readerState.notes,
-      fontSize: readerState.fontSize,
-      night: readerState.night,
-      updatedAt: new Date().toISOString()
-    };
-  }
-  let syncTimer = null;
-  function syncReaderState() {
-    const endpoint = localStorage.getItem(SHEET_URL_KEY);
-    if (!endpoint) return;
-    clearTimeout(syncTimer);
-    syncTimer = setTimeout(() => {
-      const payload = {readerId, state: snapshotReaderState()};
-      fetch(endpoint, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(payload)})
-        .then(() => readerStatus('Sync request sent · check the Reader Saves tab if the save does not appear'))
-        .catch(() => readerStatus('Google Sheets sync failed. Check the web-app URL and deployment access.'));
-    }, 500);
-  }
-  function loadSheetState() {
-    const endpoint = localStorage.getItem(SHEET_URL_KEY);
-    if (!endpoint) return;
-    const callbackName = '__torchWindSheetLoadCallback';
-    window[callbackName] = function(data) {
-      try {
-        if (!data || !data.state) { readerStatus('Connected to Google Sheets. No previous cloud save found yet.'); return; }
-        const cloud = data.state;
-        if (cloud.notes) readerState.notes = {...readerState.notes, ...cloud.notes};
-        if (Array.isArray(cloud.bookmarks)) readerState.bookmarks = [...new Set([...readerState.bookmarks, ...cloud.bookmarks])];
-        if (cloud.fontSize) readerState.fontSize = cloud.fontSize;
-        if (typeof cloud.night === 'boolean') readerState.night = cloud.night;
-        if (Number.isInteger(cloud.page) && cloud.page >= 0 && cloud.page < PAGES.length) currentPage = cloud.page;
-        if (cloud.markedWord) markedWordData = cloud.markedWord;
-        savePage(); saveMark(); persistReaderState(false); renderPage(); updateReaderTools();
-        readerStatus('Reading progress loaded from Google Sheets.');
-      } catch (_) { readerStatus('Could not apply cloud save. Local progress remains available.'); }
-      delete window[callbackName];
-    };
-    const script = document.createElement('script');
-    script.src = endpoint + (endpoint.includes('?') ? '&' : '?') + 'readerId=' + encodeURIComponent(readerId) + '&callback=' + callbackName + '&t=' + Date.now();
-    script.onerror = () => readerStatus('Could not load Google Sheets save. Check the deployment URL and access settings.');
-    document.head.appendChild(script);
-  }
-  document.getElementById('bookmark-btn').addEventListener('click', () => {
-    const i = readerState.bookmarks.indexOf(currentPage);
-    if (i >= 0) readerState.bookmarks.splice(i, 1); else readerState.bookmarks.push(currentPage);
-    readerState.bookmarks.sort((a,b)=>a-b); persistReaderState(); updateReaderTools();
-    readerStatus(i >= 0 ? 'Bookmark removed.' : 'Page bookmarked and saved.');
-  });
-  document.getElementById('font-up').addEventListener('click', () => {
-    readerState.fontSize = Math.min(2.1, (Number(readerState.fontSize) || 1.35) + 0.1);
-    applyReaderSettings(); persistReaderState(); readerStatus('Text size saved.');
-  });
-  document.getElementById('font-down').addEventListener('click', () => {
-    readerState.fontSize = Math.max(0.9, (Number(readerState.fontSize) || 1.35) - 0.1);
-    applyReaderSettings(); persistReaderState(); readerStatus('Text size saved.');
-  });
-  document.getElementById('theme-btn').addEventListener('click', () => {
-    readerState.night = !readerState.night; applyReaderSettings(); persistReaderState();
-    readerStatus('Reading theme saved.');
-  });
-  document.getElementById('save-note-btn').addEventListener('click', () => {
-    const value = document.getElementById('reader-note').value;
-    if (value.trim()) readerState.notes[currentPageKey()] = value; else delete readerState.notes[currentPageKey()];
-    persistReaderState(); readerStatus('Page note saved.');
-  });
-  document.getElementById('reader-note').addEventListener('change', () => {
-    const value = document.getElementById('reader-note').value;
-    if (value.trim()) readerState.notes[currentPageKey()] = value; else delete readerState.notes[currentPageKey()];
-    persistReaderState(); readerStatus('Page note saved.');
-  });
-  document.getElementById('sheet-config-btn').addEventListener('click', () => document.getElementById('sheet-settings').classList.toggle('open'));
-  document.getElementById('connect-sheet-btn').addEventListener('click', () => {
-    const url = DEFAULT_SHEET_URL;
-    localStorage.setItem(SHEET_URL_KEY, url);
-    document.getElementById('sheet-url').value = url;
-    syncReaderState(); loadSheetState();
-    readerStatus('Google Sheets sync configured. Connecting…');
-  });
-
-  document.getElementById('use-reader-id-btn').addEventListener('click', () => {
-    const nextId = document.getElementById('reader-id-field').value.trim();
-    if (!/^[A-Za-z0-9_-]{4,100}$/.test(nextId)) { readerStatus('Reader ID must be 4–100 letters, numbers, underscores, or hyphens.'); return; }
-    readerId = nextId;
-    localStorage.setItem(READER_ID_KEY, readerId);
-    loadSheetState();
-    readerStatus('Reader ID saved. Loading its Google Sheets reading progress…');
-  });
-
-  function restoreSheetUrlField() {
-    const url = localStorage.getItem(SHEET_URL_KEY) || DEFAULT_SHEET_URL;
-    document.getElementById('sheet-url').value = url;
-    document.getElementById('reader-id-field').value = readerId;
-    document.getElementById('sheet-config-btn').textContent = '☁ Google Sheets sync · Settings';
-    document.getElementById('sheet-config-btn').title = 'Google Sheets sync is configured automatically';
-  }
-  readReaderState();
-  restoreSheetUrlField();
-  const originalSavePage = savePage;
-  savePage = function() { originalSavePage(); persistReaderState(); updateReaderTools(); };
-  const originalSaveMark = saveMark;
-  saveMark = function() { originalSaveMark(); persistReaderState(); };
-
+  loadSettings();
   loadState();
   renderPage();
-  updateReaderTools();
-  loadSheetState();
 
 </script>
 
