@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "files": [
     ".github/workflows/check-device-ai.yml",
     "app.js",
@@ -16,7 +16,9 @@
     "evergreen/index.html",
     "evergreen/site.json",
     "THE TORCHES WIND - Book/index.html",
-    "THE TORCHES WIND - Book/site.json"
+    "THE TORCHES WIND - Book/site.json",
+    "Unity C# Blocks/index.html",
+    "Unity C# Blocks/site.json"
   ],
   "sites": [
     "cookie-clicker",
@@ -25,6 +27,7 @@
     "notes",
     "Text to 3D",
     "evergreen",
-    "THE TORCHES WIND - Book"
+    "THE TORCHES WIND - Book",
+    "Unity C# Blocks"
   ]
 }
