@@ -9,6 +9,27 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./styles.css">
+<style>
+.source-dialog[hidden],.source-progress[hidden]{display:none}
+.source-dialog{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:20px;background:#08080bd9;backdrop-filter:blur(12px)}
+.source-card{width:min(440px,100%);padding:25px;border:1px solid #ffffff1c;border-radius:20px;background:#191820;box-shadow:0 25px 90px #0009}
+.source-eyebrow{color:#b9a7ff;font-size:10px;font-weight:700;letter-spacing:1.8px}
+.source-card h2{margin:10px 0 8px;font:600 25px "Space Grotesk",sans-serif}
+.source-card p{color:#a6a2b2;font-size:13px;line-height:1.65}
+.source-options{display:grid;gap:10px;margin-top:20px}
+.source-option{display:flex;align-items:center;gap:13px;width:100%;padding:15px;border:1px solid #ffffff17;border-radius:13px;background:#ffffff05;text-align:left;cursor:pointer}
+.source-option:hover{border-color:#b9a5ff80;background:#b5a1ff0c}
+.source-option:disabled{opacity:.5;cursor:wait}
+.source-option-icon{display:grid;place-items:center;width:39px;height:39px;border-radius:12px;background:#b5a1ff17;color:#d8ccff;font-size:20px}
+.source-option span:nth-child(2){display:flex;flex-direction:column;gap:5px;flex:1}
+.source-option strong{font-size:13px}
+.source-option small{color:#9691a4;font-size:11px;line-height:1.4}
+.source-cancel{margin-top:14px;padding:9px 0;border:0;background:transparent;color:#aaa5b8;font-size:12px;cursor:pointer}
+.source-progress{margin-top:18px}
+.source-progress-track{height:6px;margin:12px 0;border-radius:10px;background:#ffffff12;overflow:hidden}
+.source-progress-bar{width:0;height:100%;border-radius:10px;background:linear-gradient(90deg,#a48aff,#7bd7bd);transition:width .2s}
+.source-progress-label{color:#c8c1d9;font-size:11px}
+</style>
 </head>
 <body>
 <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
@@ -48,10 +69,23 @@
       <button id="openNewTab" class="viewer-menu-item"><span class="menu-item-icon">↗</span><span><strong>Open in new tab</strong><small>Open outside the launcher</small></span></button>
       <div class="viewer-menu-divider"></div>
       <button id="refreshLibraryButton" class="viewer-menu-item"><span class="menu-item-icon">⟳</span><span><strong>Refresh library</strong><small>Update the project list</small></span></button>
-      <button id="exitPageButton" class="viewer-menu-item exit-item"><span class="menu-item-icon">←</span><span><strong>Exit project</strong><small>Return to Ikirumi Stuff</small></span><kbd>Esc</kbd></button>
+      <button id="exitPageButton" class="viewer-menu-item"><span class="menu-item-icon">←</span><span><strong>Exit project</strong><small>Return to Ikirumi Stuff</small></span><kbd>Esc</kbd></button>
     </div>
   </div>
 </section>
+<div id="sourceDialog" class="source-dialog" hidden role="dialog" aria-modal="true" aria-labelledby="sourceTitle">
+  <div class="source-card">
+    <div class="source-eyebrow">CHOOSE PROJECT SOURCE</div>
+    <h2 id="sourceTitle">Load project</h2>
+    <p id="sourceDescription">Choose where this project should be loaded from.</p>
+    <div class="source-options">
+      <button id="sourceSiteButton" class="source-option"><span class="source-option-icon">◈</span><span><strong>Load from site data</strong><small>Open the copy hosted with Ikirumi Stuff.</small></span><span>↗</span></button>
+      <button id="sourceGithubButton" class="source-option"><span class="source-option-icon">↓</span><span><strong>Download from GitHub now</strong><small>Fetch the latest project files and show download progress.</small></span><span>↗</span></button>
+    </div>
+    <div id="sourceProgress" class="source-progress" hidden><div id="sourceProgressLabel" class="source-progress-label">Connecting to GitHub…</div><div class="source-progress-track"><div id="sourceProgressBar" class="source-progress-bar"></div></div></div>
+    <button id="sourceCancelButton" class="source-cancel">Cancel</button>
+  </div>
+</div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" defer></script>
 <script src="./app.js" defer></script>
