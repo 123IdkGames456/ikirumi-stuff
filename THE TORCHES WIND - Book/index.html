@@ -184,6 +184,13 @@
 
     .setting-row .reset-btn:hover { background: #c8bca4; }
 
+    .cloud-save { margin-top: 12px; padding-top: 12px; border-top: 1px solid #c8bca4; font-family: 'Courier New', monospace; font-size: .7rem; }
+    .cloud-save label { display:block; margin:8px 0 4px; font-weight:bold; }
+    .cloud-save input { width:100%; min-width:0; padding:9px 10px; border:1px solid #b8ac98; border-radius:8px; background:#fffaf0; color:#24242b; font: .72rem 'Courier New',monospace; }
+    .cloud-row { display:flex; gap:7px; align-items:center; margin-top:7px; flex-wrap:wrap; }
+    .cloud-row input { flex:1; }
+    #cloud-status { margin-top:8px; line-height:1.45; overflow-wrap:anywhere; color:#514536; }
+    .cloud-row button { min-height:34px; }
     /* ============================================================
        PAGE CONTENT
        ============================================================ */
@@ -663,6 +670,15 @@
     <div class="setting-row" style="justify-content:flex-end;">
       <button class="reset-btn" id="reset-settings">Reset</button>
     </div>
+    <div class="cloud-save">
+      <div class="settings-title">☁ SAVE TO ALL YOUR BOOKS</div>
+      <label for="cloud-url">Google Apps Script Web App URL</label>
+      <input id="cloud-url" type="url" placeholder="Paste your deployed URL ending in /exec" autocomplete="url">
+      <label for="reader-id">Reader ID (same ID on each device)</label>
+      <div class="cloud-row"><input id="reader-id" type="text" autocomplete="off"><button class="reset-btn" id="copy-reader-id" type="button">Copy ID</button></div>
+      <div class="cloud-row"><button class="reset-btn" id="connect-cloud" type="button">Save connection &amp; sync</button><button class="reset-btn" id="sync-now" type="button">Sync now</button></div>
+      <div id="cloud-status" role="status">Device saving is active. Connect Google Sheets to sync between devices.</div>
+    </div>
   </div>
 
   <!-- MARK HINT -->
@@ -780,9 +796,13 @@
   //  STATE & PERSISTENCE
   // ============================================================
 
-  const STORAGE_KEY_PAGE = 'torches-wind-hollow-count-page-v4';
-  const STORAGE_KEY_MARK = 'torches-wind-hollow-count-mark-v4';
-  const STORAGE_KEY_SETTINGS = 'torches-wind-settings';
+  const BOOK_ID = 'the-hollow-count-season-1';
+  const STORAGE_KEY_PAGE = 'torches-wind-' + BOOK_ID + '-page-v5';
+  const STORAGE_KEY_MARK = 'torches-wind-' + BOOK_ID + '-mark-v5';
+  const STORAGE_KEY_SETTINGS = 'torches-wind-' + BOOK_ID + '-settings-v5';
+  const STORAGE_KEY_STATE = 'torches-wind-' + BOOK_ID + '-full-state-v1';
+  const STORAGE_KEY_READER = 'torches-wind-reader-id';
+  const STORAGE_KEY_CLOUD_URL = 'torches-wind-google-sheets-url';
 
   let currentPage = 0;
   let markedWordData = null;
@@ -808,6 +828,7 @@
 
   function savePage() {
     try { localStorage.setItem(STORAGE_KEY_PAGE, String(currentPage)); } catch (e) {}
+    saveAllState();
   }
 
   function saveMark() {
@@ -859,7 +880,150 @@
       };
       localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(s));
     } catch (e) {}
+    saveAllState();
   }
+
+  function getReaderId() {
+    let id = '';
+    try { id = localStorage.getItem(STORAGE_KEY_READER) || ''; } catch (e) {}
+    if (!id) {
+      id = 'reader-' + (window.crypto && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36));
+      try { localStorage.setItem(STORAGE_KEY_READER, id); } catch (e) {}
+    }
+    return id;
+  }
+
+  function getCurrentSettings() {
+    return {
+      textSize: document.getElementById('text-size-value').textContent,
+      lineHeight: document.getElementById('line-height-value').textContent,
+      wordSpacing: document.getElementById('word-spacing-value').textContent,
+      letterSpacing: document.getElementById('letter-spacing-value').textContent
+    };
+  }
+
+  function saveAllState() {
+    const state = {
+      bookId: BOOK_ID,
+      page: currentPage,
+      pageTitle: (PAGES[currentPage] && PAGES[currentPage].title) || '',
+      markedWord: markedWordData,
+      settings: getCurrentSettings(),
+      updatedAt: new Date().toISOString()
+    };
+    try { localStorage.setItem(STORAGE_KEY_STATE, JSON.stringify(state)); } catch (e) {}
+    syncStateToCloud(state);
+  }
+
+  function setCloudStatus(message) {
+    const el = document.getElementById('cloud-status');
+    if (el) el.textContent = message;
+  }
+
+  let cloudSyncBusy = false;
+  function syncStateToCloud(state) {
+    const url = (document.getElementById('cloud-url') && document.getElementById('cloud-url').value.trim()) || '';
+    const readerId = (document.getElementById('reader-id') && document.getElementById('reader-id').value.trim()) || getReaderId();
+    if (!url || !/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/.test(url) || cloudSyncBusy) return;
+    cloudSyncBusy = true;
+    fetch(url, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ readerId, bookId: BOOK_ID, state })
+    }).then(() => setCloudStatus('Sync sent. Device copy is saved; if Google is unavailable, it will retry on the next save.'))
+      .catch(() => setCloudStatus('Google Sheets is unreachable. Your latest save remains on this device.'))
+      .finally(() => { cloudSyncBusy = false; });
+  }
+
+  function loadCloudState() {
+    const url = (document.getElementById('cloud-url') && document.getElementById('cloud-url').value.trim()) || '';
+    const readerId = (document.getElementById('reader-id') && document.getElementById('reader-id').value.trim()) || getReaderId();
+    if (!url || !/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/.test(url)) {
+      setCloudStatus('Device saving is active. Add your deployed Google Apps Script URL to enable cloud sync.');
+      return;
+    }
+    setCloudStatus('Checking Google Sheets for this book…');
+    const callback = 'twSheetCallback' + Math.random().toString(36).slice(2);
+    const script = document.createElement('script');
+    const timeout = setTimeout(() => {
+      delete window[callback];
+      script.remove();
+      setCloudStatus('Google Sheets is unreachable. Using the last save on this device.');
+    }, 9000);
+    window[callback] = result => {
+      clearTimeout(timeout);
+      script.remove();
+      delete window[callback];
+      if (!result || !result.ok || !result.state) {
+        setCloudStatus('No cloud save found for this book yet. Device saving is active.');
+        return;
+      }
+      let local = null;
+      try { local = JSON.parse(localStorage.getItem(STORAGE_KEY_STATE) || 'null'); } catch (e) {}
+      const remoteTime = Date.parse(result.state.updatedAt || 0) || 0;
+      const localTime = Date.parse((local && local.updatedAt) || 0) || 0;
+      if (remoteTime > localTime) {
+        const s = result.state;
+        if (Number.isInteger(s.page) && s.page >= 0 && s.page < PAGES.length) currentPage = s.page;
+        markedWordData = s.markedWord && typeof s.markedWord.page === 'number' ? s.markedWord : null;
+        if (s.settings) {
+          try { localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(s.settings)); } catch (e) {}
+          applySettings(s.settings);
+        }
+        try {
+          localStorage.setItem(STORAGE_KEY_PAGE, String(currentPage));
+          if (markedWordData) localStorage.setItem(STORAGE_KEY_MARK, JSON.stringify(markedWordData));
+          localStorage.setItem(STORAGE_KEY_STATE, JSON.stringify(s));
+        } catch (e) {}
+        renderPage();
+        setCloudStatus('Loaded the newer save from Google Sheets. This book has its own separate save.');
+      } else {
+        if (local) syncStateToCloud(local);
+        setCloudStatus('This device has the newest save, or the cloud save is empty.');
+      }
+    };
+    script.onerror = () => {
+      clearTimeout(timeout);
+      delete window[callback];
+      setCloudStatus('Google Sheets is unreachable. Using the last save on this device.');
+    };
+    script.src = url + (url.includes('?') ? '&' : '?') + 'readerId=' + encodeURIComponent(readerId) + '&bookId=' + encodeURIComponent(BOOK_ID) + '&callback=' + callback;
+    document.body.appendChild(script);
+  }
+
+  function applySettings(s) {
+    if (s.textSize) { document.documentElement.style.setProperty('--text-size', s.textSize); document.getElementById('text-size-slider').value = parseFloat(s.textSize); document.getElementById('text-size-value').textContent = s.textSize; }
+    if (s.lineHeight) { document.documentElement.style.setProperty('--line-height', s.lineHeight); document.getElementById('line-height-slider').value = parseFloat(s.lineHeight); document.getElementById('line-height-value').textContent = s.lineHeight; }
+    if (s.wordSpacing) { document.documentElement.style.setProperty('--word-spacing', s.wordSpacing); document.getElementById('word-spacing-slider').value = parseFloat(s.wordSpacing); document.getElementById('word-spacing-value').textContent = s.wordSpacing; }
+    if (s.letterSpacing) { document.documentElement.style.setProperty('--letter-spacing', s.letterSpacing); document.getElementById('letter-spacing-value').textContent = s.letterSpacing; }
+  }
+
+  function connectCloud() {
+    const url = document.getElementById('cloud-url').value.trim();
+    const readerId = document.getElementById('reader-id').value.trim() || getReaderId();
+    if (!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/.test(url)) {
+      setCloudStatus('Paste a valid Google Apps Script Web App URL ending in /exec.');
+      return;
+    }
+    try {
+      localStorage.setItem(STORAGE_KEY_CLOUD_URL, url);
+      localStorage.setItem(STORAGE_KEY_READER, readerId);
+    } catch (e) {}
+    document.getElementById('reader-id').value = readerId;
+    saveAllState();
+    loadCloudState();
+  }
+
+  document.getElementById('cloud-url').value = localStorage.getItem(STORAGE_KEY_CLOUD_URL) || '';
+  document.getElementById('reader-id').value = getReaderId();
+  document.getElementById('connect-cloud').addEventListener('click', connectCloud);
+  document.getElementById('sync-now').addEventListener('click', () => { saveAllState(); loadCloudState(); });
+  document.getElementById('copy-reader-id').addEventListener('click', async () => {
+    const id = document.getElementById('reader-id').value.trim() || getReaderId();
+    try { await navigator.clipboard.writeText(id); setCloudStatus('Reader ID copied. Use the same ID and web app URL on your other devices.'); }
+    catch (e) { setCloudStatus('Your Reader ID is: ' + id + ' — copy it manually to your other devices.'); }
+  });
 
   // ============================================================
   //  SETTINGS SLIDERS
@@ -1371,7 +1535,13 @@
 
   loadSettings();
   loadState();
+  try {
+    const savedFull = JSON.parse(localStorage.getItem(STORAGE_KEY_STATE) || 'null');
+    if (savedFull && Number.isInteger(savedFull.page) && savedFull.page >= 0 && savedFull.page < PAGES.length) currentPage = savedFull.page;
+    if (savedFull && savedFull.markedWord) markedWordData = savedFull.markedWord;
+  } catch (e) {}
   renderPage();
+  if (document.getElementById('cloud-url').value.trim()) loadCloudState();
 
 </script>
 
