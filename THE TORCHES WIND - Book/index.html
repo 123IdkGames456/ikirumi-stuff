@@ -932,6 +932,10 @@
     const readerId = (document.getElementById('reader-id') && document.getElementById('reader-id').value.trim()) || getReaderId();
     if (!url || !/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/.test(url)) return;
     queuedCloudState = state;
+    if (missingSaveCheckPending) {
+      setCloudStatus('Local save is queued. Checking for an existing cloud save before syncing.');
+      return;
+    }
     if (!navigator.onLine) {
       setCloudStatus('Saved on this device. Cloud sync is waiting for internet.');
       return;
@@ -1025,7 +1029,7 @@
     setCloudStatus('Internet returned. Resuming automatic save and sync…');
     if (missingSaveCheckPending) scheduleMissingSaveCheck();
     else if (document.getElementById('cloud-url').value.trim()) loadCloudState();
-    if (queuedCloudState) syncStateToCloud(queuedCloudState);
+    else if (queuedCloudState) syncStateToCloud(queuedCloudState);
   });
   window.addEventListener('offline', () => {
     setCloudStatus('Offline. Automatic saving continues on this device; cloud sync will resume online.');
