@@ -1019,7 +1019,7 @@
     loadCloudState();
   }
 
-  document.getElementById('cloud-url').value = localStorage.getItem(STORAGE_KEY_CLOUD_URL) || '';
+  document.getElementById('cloud-url').value = localStorage.getItem(STORAGE_KEY_CLOUD_URL) || 'https://script.google.com/macros/s/AKfycbwXuPAXVrLcOODHijeAzQ4pAfMaLbT4lf84AnbUl53_rN8VIzZSGTMXKeATykapf7lx/exec';
   document.getElementById('reader-id').value = getReaderId();
   document.getElementById('connect-cloud').addEventListener('click', connectCloud);
   document.getElementById('sync-now').addEventListener('click', () => { saveAllState(); loadCloudState(); });
