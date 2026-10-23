@@ -937,11 +937,41 @@
       .finally(() => { cloudSyncBusy = false; });
   }
 
-  function loadCloudState() {
+  let missingSaveTimer = null;
+  let missingSaveCheckPending = false;
+
+  function scheduleMissingSaveCheck() {
+    missingSaveCheckPending = true;
+    if (missingSaveTimer) clearTimeout(missingSaveTimer);
+    if (!navigator.onLine) {
+      setCloudStatus('Offline. This book is saved on this device; cloud save check will wait until Wi-Fi returns.');
+      return;
+    }
+    setCloudStatus('No cloud save found yet. Waiting 15 seconds, then checking again before creating one…');
+    missingSaveTimer = setTimeout(() => {
+      missingSaveTimer = null;
+      if (!navigator.onLine) {
+        setCloudStatus('Offline. Waiting for Wi-Fi before checking or creating a cloud save.');
+        return;
+      }
+      loadCloudState(true);
+    }, 15000);
+  }
+
+  window.addEventListener('online', () => {
+    if (missingSaveCheckPending) scheduleMissingSaveCheck();
+    else if (document.getElementById('cloud-url').value.trim()) loadCloudState();
+  });
+
+  function loadCloudState(createIfStillMissing = false) {
     const url = (document.getElementById('cloud-url') && document.getElementById('cloud-url').value.trim()) || '';
     const readerId = (document.getElementById('reader-id') && document.getElementById('reader-id').value.trim()) || getReaderId();
     if (!url || !/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/.test(url)) {
       setCloudStatus('Device saving is active. Add your deployed Google Apps Script URL to enable cloud sync.');
+      return;
+    }
+    if (!navigator.onLine) {
+      setCloudStatus('Offline. Using the last save on this device; cloud checks wait until Wi-Fi returns.');
       return;
     }
     setCloudStatus('Checking Google Sheets for this book…');
@@ -956,13 +986,29 @@
       clearTimeout(timeout);
       script.remove();
       delete window[callback];
-      if (!result || !result.ok || !result.state) {
-        let local = null;
-        try { local = JSON.parse(localStorage.getItem(STORAGE_KEY_STATE) || 'null'); } catch (e) {}
-        if (local) syncStateToCloud(local);
-        setCloudStatus('No cloud save found for this book yet. Device saving is active.');
+      if (!result || !result.ok) {
+        setCloudStatus('Google Sheets is unreachable. Using the last save on this device.');
         return;
       }
+      if (!result.state) {
+        if (!createIfStillMissing) {
+          scheduleMissingSaveCheck();
+          return;
+        }
+        missingSaveCheckPending = false;
+        if (missingSaveTimer) clearTimeout(missingSaveTimer);
+        let local = null;
+        try { local = JSON.parse(localStorage.getItem(STORAGE_KEY_STATE) || 'null'); } catch (e) {}
+        if (local && local.bookId === BOOK_ID) {
+          syncStateToCloud(local);
+        } else {
+          saveAllState();
+        }
+        setCloudStatus('Created the first save for this book. Device saving remains active.');
+        return;
+      }
+      missingSaveCheckPending = false;
+      if (missingSaveTimer) clearTimeout(missingSaveTimer);
       let local = null;
       try { local = JSON.parse(localStorage.getItem(STORAGE_KEY_STATE) || 'null'); } catch (e) {}
       const remoteTime = Date.parse(result.state.updatedAt || 0) || 0;
@@ -984,7 +1030,7 @@
         setCloudStatus('Loaded the newer save from Google Sheets. This book has its own separate save.');
       } else {
         if (local) syncStateToCloud(local);
-        setCloudStatus('This device has the newest save, or the cloud save is empty.');
+        setCloudStatus('This device has the newest save, or the cloud save is up to date.');
       }
     };
     script.onerror = () => {
