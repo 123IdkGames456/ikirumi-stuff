@@ -971,6 +971,7 @@
       return;
     }
     if (!navigator.onLine) {
+      missingSaveCheckPending = true;
       setCloudStatus('Offline. Using the last save on this device; cloud checks wait until Wi-Fi returns.');
       return;
     }
