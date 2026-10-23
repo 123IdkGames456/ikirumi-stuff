@@ -5,8 +5,13 @@ function getSaveSheet_() {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   let sheet = ss.getSheetByName(SHEET_NAME);
   if (!sheet) sheet = ss.insertSheet(SHEET_NAME);
+  const headers = ['readerId', 'bookId', 'updatedAt', 'page', 'pageTitle', 'markedWord', 'bookmarks', 'notes', 'fontSize', 'nightMode', 'stateJson'];
   if (sheet.getLastRow() === 0) {
-    sheet.appendRow(['readerId', 'bookId', 'updatedAt', 'page', 'pageTitle', 'markedWord', 'bookmarks', 'notes', 'fontSize', 'nightMode', 'stateJson']);
+    sheet.appendRow(headers);
+    sheet.setFrozenRows(1);
+  } else if (String(sheet.getRange(1, 2).getValue()) !== 'bookId') {
+    sheet.insertColumnAfter(1);
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
     sheet.setFrozenRows(1);
   }
   return sheet;
