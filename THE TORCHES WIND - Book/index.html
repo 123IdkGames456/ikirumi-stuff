@@ -809,14 +809,14 @@
 
   function loadState() {
     try {
-      const savedPage = localStorage.getItem(STORAGE_KEY_PAGE);
+      const savedPage = localStorage.getItem(STORAGE_KEY_PAGE) || localStorage.getItem('torches-wind-hollow-count-page-v4');
       if (savedPage !== null) {
         const p = parseInt(savedPage, 10);
         if (!isNaN(p) && p >= 0 && p < PAGES.length) {
           currentPage = p;
         }
       }
-      const savedMark = localStorage.getItem(STORAGE_KEY_MARK);
+      const savedMark = localStorage.getItem(STORAGE_KEY_MARK) || localStorage.getItem('torches-wind-hollow-count-mark-v4');
       if (savedMark) {
         const parsed = JSON.parse(savedMark);
         if (parsed && typeof parsed.page === 'number' && typeof parsed.wordIndex === 'number') {
@@ -844,7 +844,7 @@
 
   function loadSettings() {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY_SETTINGS);
+      const saved = localStorage.getItem(STORAGE_KEY_SETTINGS) || localStorage.getItem('torches-wind-settings');
       if (saved) {
         const s = JSON.parse(saved);
         if (s.textSize) {
@@ -957,6 +957,9 @@
       script.remove();
       delete window[callback];
       if (!result || !result.ok || !result.state) {
+        let local = null;
+        try { local = JSON.parse(localStorage.getItem(STORAGE_KEY_STATE) || 'null'); } catch (e) {}
+        if (local) syncStateToCloud(local);
         setCloudStatus('No cloud save found for this book yet. Device saving is active.');
         return;
       }
