@@ -1,4 +1,4 @@
-const SPREADSHEET_ID = '1Vs8WDTeq_ivpTxgwncUKtOm6W-tONza_6XyFzPFAO0o';
+const SPREADSHEET_ID = '1we4udRf2CZPz2KH3vVT6gp6xQ7ZUdil96Ev-l3Ziv6w';
 const SHEET_NAME = 'Reader Saves';
 
 function getSaveSheet_() {
@@ -6,7 +6,7 @@ function getSaveSheet_() {
   let sheet = ss.getSheetByName(SHEET_NAME);
   if (!sheet) sheet = ss.insertSheet(SHEET_NAME);
   if (sheet.getLastRow() === 0) {
-    sheet.appendRow(['readerId', 'updatedAt', 'page', 'pageTitle', 'markedWord', 'bookmarks', 'notes', 'fontSize', 'nightMode', 'stateJson']);
+    sheet.appendRow(['readerId', 'bookId', 'updatedAt', 'page', 'pageTitle', 'markedWord', 'bookmarks', 'notes', 'fontSize', 'nightMode', 'stateJson']);
     sheet.setFrozenRows(1);
   }
   return sheet;
@@ -19,7 +19,7 @@ function setup() {
 function doPost(e) {
   try {
     const payload = JSON.parse((e && e.postData && e.postData.contents) || '{}');
-    if (!payload.readerId || !payload.state) {
+    if (!payload.readerId || !payload.bookId || !payload.state) {
       return ContentService.createTextOutput(JSON.stringify({ ok: false, error: 'Missing readerId or state' }))
         .setMimeType(ContentService.MimeType.JSON);
     }
@@ -27,11 +27,12 @@ function doPost(e) {
     const values = sheet.getDataRange().getValues();
     let row = -1;
     for (let i = 1; i < values.length; i++) {
-      if (String(values[i][0]) === String(payload.readerId)) { row = i + 1; break; }
+      if (String(values[i][0]) === String(payload.readerId) && String(values[i][1]) === String(payload.bookId)) { row = i + 1; break; }
     }
     const state = payload.state;
     const record = [
       String(payload.readerId),
+      String(payload.bookId),
       new Date(),
       Number(state.page || 0),
       String(state.pageTitle || ''),
@@ -62,8 +63,8 @@ function doGet(e) {
       const sheet = getSaveSheet_();
       const values = sheet.getDataRange().getValues();
       for (let i = 1; i < values.length; i++) {
-        if (String(values[i][0]) === readerId) {
-          const raw = values[i][9];
+        if (String(values[i][0]) === readerId && String(values[i][1]) === String(params.bookId || '')) {
+          const raw = values[i][10];
           result.state = raw ? JSON.parse(String(raw)) : null;
           break;
         }
