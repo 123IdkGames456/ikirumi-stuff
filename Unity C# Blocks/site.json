@@ -1,0 +1,22 @@
+{
+  "name": "Unity C# Blocks",
+  "description": "Build Unity C# scripts by assembling configurable visual blocks. Generate code for MonoBehaviour, Editor tools, UI, physics, input, gameplay, AI, animation, audio, scenes, networking and advanced C#.",
+  "tags": [
+    "Unity",
+    "C#",
+    "visual scripting",
+    "blocks",
+    "MonoBehaviour",
+    "Editor",
+    "code generator",
+    "game development",
+    "physics",
+    "UI",
+    "AI",
+    "animation",
+    "audio",
+    "input"
+  ],
+  "category": "Tools",
+  "icon": "🧩"
+}
