@@ -839,6 +839,7 @@
         localStorage.removeItem(STORAGE_KEY_MARK);
       }
     } catch (e) {}
+    saveAllState();
   }
 
   function loadSettings() {
@@ -996,7 +997,7 @@
     if (s.textSize) { document.documentElement.style.setProperty('--text-size', s.textSize); document.getElementById('text-size-slider').value = parseFloat(s.textSize); document.getElementById('text-size-value').textContent = s.textSize; }
     if (s.lineHeight) { document.documentElement.style.setProperty('--line-height', s.lineHeight); document.getElementById('line-height-slider').value = parseFloat(s.lineHeight); document.getElementById('line-height-value').textContent = s.lineHeight; }
     if (s.wordSpacing) { document.documentElement.style.setProperty('--word-spacing', s.wordSpacing); document.getElementById('word-spacing-slider').value = parseFloat(s.wordSpacing); document.getElementById('word-spacing-value').textContent = s.wordSpacing; }
-    if (s.letterSpacing) { document.documentElement.style.setProperty('--letter-spacing', s.letterSpacing); document.getElementById('letter-spacing-value').textContent = s.letterSpacing; }
+    if (s.letterSpacing) { document.documentElement.style.setProperty('--letter-spacing', s.letterSpacing); document.getElementById('letter-spacing-slider').value = parseFloat(s.letterSpacing); document.getElementById('letter-spacing-value').textContent = s.letterSpacing; }
   }
 
   function connectCloud() {
