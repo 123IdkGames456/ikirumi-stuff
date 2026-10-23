@@ -922,20 +922,83 @@
   }
 
   let cloudSyncBusy = false;
+  let queuedCloudState = null;
+  let cloudRetryTimer = null;
+  let cloudLoadComplete = false;
+  let lastCloudSyncAt = 0;
+
   function syncStateToCloud(state) {
     const url = (document.getElementById('cloud-url') && document.getElementById('cloud-url').value.trim()) || '';
     const readerId = (document.getElementById('reader-id') && document.getElementById('reader-id').value.trim()) || getReaderId();
-    if (!url || !/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/.test(url) || cloudSyncBusy) return;
+    if (!url || !/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/.test(url)) return;
+    queuedCloudState = state;
+    if (!navigator.onLine) {
+      setCloudStatus('Saved on this device. Cloud sync is waiting for internet.');
+      return;
+    }
+    if (cloudSyncBusy) return;
     cloudSyncBusy = true;
+    const stateBeingSent = queuedCloudState;
+    queuedCloudState = null;
     fetch(url, {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ readerId, bookId: BOOK_ID, state })
-    }).then(() => setCloudStatus('Sync sent. Device copy is saved; if Google is unavailable, it will retry on the next save.'))
-      .catch(() => setCloudStatus('Google Sheets is unreachable. Your latest save remains on this device.'))
-      .finally(() => { cloudSyncBusy = false; });
+      body: JSON.stringify({ readerId, bookId: BOOK_ID, state: stateBeingSent })
+    }).then(() => {
+      lastCloudSyncAt = Date.now();
+      setCloudStatus('Auto-sync sent. Device copy is saved.');
+    }).catch(() => {
+      queuedCloudState = queuedCloudState || stateBeingSent;
+      setCloudStatus('Google Sheets is unreachable. Your save is safe on this device; sync will retry.');
+    }).finally(() => {
+      cloudSyncBusy = false;
+      if (queuedCloudState && navigator.onLine) {
+        const next = queuedCloudState;
+        queuedCloudState = null;
+        syncStateToCloud(next);
+      }
+    });
   }
+
+  function scheduleCloudRetry() {
+    if (cloudRetryTimer) clearTimeout(cloudRetryTimer);
+    cloudRetryTimer = setTimeout(() => {
+      cloudRetryTimer = null;
+      if (!navigator.onLine) return;
+      if (queuedCloudState) syncStateToCloud(queuedCloudState);
+      else if (document.getElementById('cloud-url').value.trim() && !cloudLoadComplete) loadCloudState();
+    }, 15000);
+  }
+
+  function autoSaveNow() {
+    const state = {
+      bookId: BOOK_ID,
+      page: currentPage,
+      pageTitle: (PAGES[currentPage] && PAGES[currentPage].title) || '',
+      markedWord: markedWordData,
+      settings: getCurrentSettings(),
+      updatedAt: new Date().toISOString()
+    };
+    try {
+      localStorage.setItem(STORAGE_KEY_PAGE, String(currentPage));
+      if (markedWordData) localStorage.setItem(STORAGE_KEY_MARK, JSON.stringify(markedWordData));
+      else localStorage.removeItem(STORAGE_KEY_MARK);
+      localStorage.setItem(STORAGE_KEY_STATE, JSON.stringify(state));
+    } catch (e) {}
+    if (navigator.onLine) syncStateToCloud(state);
+    else setCloudStatus('Auto-saved on this device. Cloud sync will resume when internet returns.');
+  }
+
+  setInterval(() => {
+    autoSaveNow();
+  }, 15000);
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') autoSaveNow();
+  });
+  window.addEventListener('pagehide', autoSaveNow);
+  window.addEventListener('beforeunload', autoSaveNow);
 
   let missingSaveTimer = null;
   let missingSaveCheckPending = false;
@@ -959,8 +1022,13 @@
   }
 
   window.addEventListener('online', () => {
+    setCloudStatus('Internet returned. Resuming automatic save and sync…');
     if (missingSaveCheckPending) scheduleMissingSaveCheck();
     else if (document.getElementById('cloud-url').value.trim()) loadCloudState();
+    if (queuedCloudState) syncStateToCloud(queuedCloudState);
+  });
+  window.addEventListener('offline', () => {
+    setCloudStatus('Offline. Automatic saving continues on this device; cloud sync will resume online.');
   });
 
   function loadCloudState(createIfStillMissing = false) {
@@ -981,14 +1049,16 @@
     const timeout = setTimeout(() => {
       delete window[callback];
       script.remove();
-      setCloudStatus('Google Sheets is unreachable. Using the last save on this device.');
+      setCloudStatus('Google Sheets is unreachable. Using the last save on this device; automatic retry scheduled.');
+      scheduleCloudRetry();
     }, 9000);
     window[callback] = result => {
       clearTimeout(timeout);
       script.remove();
       delete window[callback];
       if (!result || !result.ok) {
-        setCloudStatus('Google Sheets is unreachable. Using the last save on this device.');
+        setCloudStatus('Google Sheets is unreachable. Using the last save on this device; automatic retry scheduled.');
+        scheduleCloudRetry();
         return;
       }
       if (!result.state) {
@@ -1009,6 +1079,8 @@
         return;
       }
       missingSaveCheckPending = false;
+      cloudLoadComplete = true;
+      if (cloudRetryTimer) clearTimeout(cloudRetryTimer);
       if (missingSaveTimer) clearTimeout(missingSaveTimer);
       let local = null;
       try { local = JSON.parse(localStorage.getItem(STORAGE_KEY_STATE) || 'null'); } catch (e) {}
@@ -1037,7 +1109,8 @@
     script.onerror = () => {
       clearTimeout(timeout);
       delete window[callback];
-      setCloudStatus('Google Sheets is unreachable. Using the last save on this device.');
+      setCloudStatus('Google Sheets is unreachable. Using the last save on this device; automatic retry scheduled.');
+      scheduleCloudRetry();
     };
     script.src = url + (url.includes('?') ? '&' : '?') + 'readerId=' + encodeURIComponent(readerId) + '&bookId=' + encodeURIComponent(BOOK_ID) + '&callback=' + callback;
     document.body.appendChild(script);
