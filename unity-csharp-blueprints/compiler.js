@@ -107,7 +107,7 @@ function compile(inputNodes,inputLinks,inputVars,className){
   if(n.type==="compare"||n.type==="logic"||n.type==="input")return "bool";
   if(n.type==="transform"){
    const op=n.values?.operation||"setPosition";
-   return op==="getPosition"||op==="getScale"?"Vector3":op==="getRotation"?"Quaternion":"none";
+   return op==="getPosition"||op==="getScale"||op==="getRotation"?"Vector3":"none";
   }
   if(n.type==="gameobject")return (n.values?.operation||"setActive")==="instantiate"?"GameObject":"none";
   return "dynamic";
@@ -274,8 +274,14 @@ function compile(inputNodes,inputLinks,inputVars,className){
    expression=op==="not"?"!("+a+")":"("+a+" "+({and:"&&",or:"||",xor:"^"}[op]||"&&")+" "+b+")";
   }else if(n.type==="transform"){
    const op=n.values?.operation||"setPosition",link=dataLink(n.id,"target");
-   if(!link){valueForInput(n,"target",path,"GameObject");expression=typedDefault(nodeType(n));}
-   else{const target=valueExpr(link.from,new Set(path),"GameObject",link.fromPin)+".transform";expression=op==="getPosition"?target+".position":op==="getRotation"?target+".rotation":op==="getScale"?target+".localScale":typedDefault("Vector3");}
+   if(!link){valueForInput(n,"target",path,"GameObject");expression=typedDefault(outputPin==="rotation4"?"Vector4":"Vector3");}
+   else{const target=valueExpr(link.from,new Set(path),"GameObject",link.fromPin)+".transform";
+    if(op==="getPosition")expression=target+".position";
+    else if(op==="getScale")expression=target+".localScale";
+    else if(op==="getRotation"&&outputPin==="rotation4"){sourceType="Vector4";expression="new Vector4("+target+".rotation.x, "+target+".rotation.y, "+target+".rotation.z, "+target+".rotation.w)";}
+    else if(op==="getRotation"){sourceType="Vector3";expression=target+".eulerAngles";}
+    else expression=typedDefault("Vector3");
+   }
    if(!["getPosition","getRotation","getScale"].includes(op))report("A Transform setter cannot be used as a value output.");
   }else if(n.type==="gameobject"&&(n.values?.operation||"setActive")==="instantiate"){
    expression=spawnedNames.get(n.id)||("__blueprintSpawned_"+n.id);
@@ -376,11 +382,14 @@ function compile(inputNodes,inputLinks,inputVars,className){
 
     }
    }else if(n.type==="transform"){
-    const op=n.values?.operation||"setPosition",v=valueForInput(n,"vector",new Set(),"Vector3"),targetLink=dataLink(n.id,"target");
+    const op=n.values?.operation||"setPosition",targetLink=dataLink(n.id,"target"),v3Link=dataLink(n.id,"vector"),v4Link=dataLink(n.id,"vector4");
     if(!targetLink){valueForInput(n,"target",new Set(),"GameObject");}
     else{
      const target=valueExpr(targetLink.from,new Set(),"GameObject",targetLink.fromPin),transform=target+".transform";
-     const code={setPosition:transform+".position = "+v+";",translate:transform+".Translate("+v+" * Time.deltaTime);",rotate:transform+".Rotate("+v+" * Time.deltaTime);",setRotation:transform+".rotation = Quaternion.Euler("+v+");",setScale:transform+".localScale = "+v+";"};
+     const v3=valueForInput(n,"vector",new Set(),"Vector3"),v4=valueForInput(n,"vector4",new Set(),"Vector4");
+     const rotationValue=v4Link?"new Quaternion(("+v4+").x, ("+v4+").y, ("+v4+").z, ("+v4+").w)":"Quaternion.Euler("+v3+")";
+     const code={setPosition:transform+".position = "+v3+";",translate:transform+".Translate("+v3+" * Time.deltaTime);",rotate:transform+".Rotate("+v3+" * Time.deltaTime);",setRotation:transform+".rotation = "+rotationValue+";",setScale:transform+".localScale = "+v3+";"};
+     if(op==="setRotation"&&!v4Link&&!v3Link)report("Connect a Vector3 or Vector4 input to Set Rotation.");
      if(code[op])out.push(p+"if ("+target+" != null) "+code[op]);
     }
    }else if(n.type==="gameobject"){
