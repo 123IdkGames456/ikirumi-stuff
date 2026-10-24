@@ -163,8 +163,11 @@ function compile(inputNodes,inputLinks,inputVars,className){
    if(type==="string")expression=escString(raw);
    else if(type==="null")expression="null";
    else if(type==="bool")expression=raw==="true"||raw===true?"true":"false";
-   else if(numericTypes.has(type))expression=cleanNumber(raw,type);
-   else expression=typedFallback(raw,type);
+   else if(numericTypes.has(type)){
+    const literalType=expectedType&&numericTypes.has(expectedType)?expectedType:type;
+    expression=cleanNumber(raw,literalType);
+    sourceType=literalType;
+   }else expression=typedFallback(raw,type);
   }else if(n.type==="getvar"){
    const v=findVar(n.values?.variable);
    if(!v){report("Choose a variable in Get Variable.");expression=typedDefault(expectedType||"int")}
