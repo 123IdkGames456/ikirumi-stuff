@@ -87,8 +87,9 @@ function renderNodes(){
  nodes.forEach(n=>{
   const d=getDef(n.type);if(!d)return;
   const el=document.createElement("div");el.className="node"+(selectedNode===n.id?" selected":"");el.dataset.id=n.id;el.style.left=n.x+"px";el.style.top=n.y+"px";el.style.setProperty("--accent",n.color||d.color);
-  let html='<div class="node-head"><span class="node-accent"></span>'+esc(d.name)+'</div><div class="node-body">';
-  if(d.flowIn)d.flowIn.forEach(p=>html+='<div class="pin-row flow-input-row"><span class="pin-label"><button class="pin in exec-pin" data-direction="input" data-kind="flow" data-type="exec" data-pin="'+p+'" title="Execution input"></button>'+esc(p)+'</span></div>');
+  let html='<div class="node-head"><span class="node-accent"></span>'+esc(d.name)+'</div>';
+  if(d.flowIn)d.flowIn.forEach(p=>html+='<div class="pin-row flow-input-row exec-input-top"><span class="pin-label"><button class="pin in exec-pin" data-direction="input" data-kind="flow" data-type="exec" data-pin="'+p+'" title="Execution input"></button>'+esc(p)+'</span></div>');
+  html+='<div class="node-body">';
   html+='<div class="node-description">'+esc(d.desc)+'</div>';
   (d.fields||[]).forEach(f=>html+=fieldHtml(n,f));
   (d.dataIn||[]).filter(p=>!(n.type==="setcomponent"&&p.id==="component"&&n.values.source!=="connected")&&!(n.type==="setcomponent"&&((p.id==="minimumValue"&&(n.values.property!=="limits"||n.values.setMinimum!=="true"))||(p.id==="maximumValue"&&(n.values.property!=="limits"||n.values.setMaximum!=="true"))))).forEach(p=>html+='<div class="pin-row"><span class="pin-label"><button class="pin in" data-direction="input" data-kind="data" data-type="'+esc(p.type||"dynamic")+'" data-pin="'+p.id+'" title="Connect value input"></button>'+esc(p.label)+(p.type!=="dynamic"?" · "+esc(p.type):"")+'</span><span></span></div>');
@@ -100,7 +101,7 @@ function renderNodes(){
   const head=el.querySelector(".node-head");
   head.addEventListener("pointerdown",e=>{if(e.target.closest("button,input,select"))return;selectedNode=n.id;const sx=e.clientX,sy=e.clientY,ox=n.x,oy=n.y;head.setPointerCapture?.(e.pointerId);function move(ev){n.x=Math.max(0,ox+ev.clientX-sx);n.y=Math.max(0,oy+ev.clientY-sy);el.style.left=n.x+"px";el.style.top=n.y+"px";drawWires()}function end(){window.removeEventListener("pointermove",move);window.removeEventListener("pointerup",end);renderInspector()}window.addEventListener("pointermove",move);window.addEventListener("pointerup",end);e.preventDefault()});
   el.querySelectorAll("[data-field]").forEach(input=>input.addEventListener("change",()=>{n.values[input.dataset.field]=input.type==="checkbox"?String(input.checked):input.value;if(n.type==="setcomponent"&&input.dataset.field==="componentType"){n.values.property=(componentProperties[input.value]||[["enabled","Enabled"]])[0][0]}renderAll()}));
-  el.querySelectorAll(".pin").forEach(pin=>{pin.addEventListener("pointerdown",e=>{if(pin.dataset.direction!=="output")return;e.preventDefault();e.stopPropagation();beginWireDrag(e,n,pin)});pin.addEventListener("click",e=>{e.preventDefault();e.stopPropagation()})});
+  el.querySelectorAll(".pin").forEach(pin=>{pin.addEventListener("pointerdown",e=>{e.stopPropagation();if(pin.dataset.direction==="output"){e.preventDefault();beginWireDrag(e,n,pin)}});pin.addEventListener("click",e=>{e.preventDefault();e.stopPropagation()})});
   $("canvas").appendChild(el);
  });
  $("emptyState").style.display=nodes.length?"none":"flex";
@@ -110,6 +111,7 @@ function renderNodes(){
 let wireDrag=null;
 function canvasPoint(clientX,clientY){const r=$("canvas").getBoundingClientRect(),w=$("workspace");return{x:clientX-r.left+w.scrollLeft,y:clientY-r.top+w.scrollTop}}
 function beginWireDrag(e,node,pin){
+ if(e.button!==undefined&&e.button!==0)return;
  if(wireDrag)finishWireDrag(null,true);
  const start=pinPos(node.id,pin.dataset.kind,true,pin.dataset.pin);if(!start)return;
  const path=document.createElementNS("http://www.w3.org/2000/svg","path");path.setAttribute("class","wire wire-preview");path.style.pointerEvents="none";path.style.stroke="#efbd70";path.style.strokeWidth="3";$("wires").appendChild(path);
@@ -140,7 +142,7 @@ function findSnapInput(x,y,requireNear=true){
   const r=pin.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,d=Math.hypot(cx-x,cy-y);
   if(d<bestDist){bestDist=d;best={pin,nodeId,distance:d}}
  });
- return best&&(!requireNear||bestDist<=42)?best:null;
+ return best&&(!requireNear||bestDist<=90)?best:null;
 }
 function endWireDrag(e){
  if(!wireDrag)return;
@@ -158,7 +160,7 @@ function finishWireDrag(target,cancelled){
   links=links.filter(l=>!(l.to===target.nodeId&&l.toPin===target.pin.dataset.pin&&l.kind===drag.kind));
   links.push({from:drag.node,fromPin:drag.pin,to:target.nodeId,toPin:target.pin.dataset.pin,kind:drag.kind});
   status("Connected to nearest input");renderAll();
- }else if(!cancelled)status("No compatible input close enough; drag onto an input pin");
+ }else if(!cancelled)status("No compatible input nearby; release within 90 px of an input pin");
  drawWires();
 }
 function pinClick(n,kind,isOut,pin){
