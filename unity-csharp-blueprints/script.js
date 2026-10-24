@@ -155,7 +155,7 @@ function removeIncompatibleLinksForInput(nodeId){
  const n=getNode(nodeId),td=getDef(n?.type);
  links=links.filter(l=>{
   if(l.kind!=="data"||l.to!==nodeId)return true;
-  const source=getNode(l.from),input=nodeInputs(target).find(p=>p.id===l.toPin);
+  const source=getNode(l.from),input=nodeInputs(n).find(p=>p.id===l.toPin);
   return !!input&&inputActive(n,input)&&typesCompatible(actualOutputType(source),expectedInputType(n,input));
  });
 }
