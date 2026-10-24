@@ -2,7 +2,7 @@
 const $ = id => document.getElementById(id);
 const defs = BlueprintBlocks.defs;
 let nodes = [], links = [], variables = [], nextNode = 1, nextVariable = 1;
-let selectedNode = null, pendingPin = null, activeCategory = "All", codeVisible = true;
+let selectedNode = null, pendingPin = null, activeCategory = "All", codeVisible = true, activeView = "graph";
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const getDef = id => defs.find(d => d.id === id);
 const getNode = id => nodes.find(n => n.id === id);
@@ -13,7 +13,16 @@ function actualOutputType(n){
  if(n.type==="literal")return n.values.type==="null"?"null":(n.values.type||"int");
  if(n.type==="getvar")return getVar(n.values.variable)?.type||"dynamic";
  if(n.type==="getcomponent")return n.values.componentType||"Rigidbody";
- if(n.type==="math")return "number";
+ if(n.type==="math"){
+  const connected=links.filter(l=>l.kind==="data"&&l.to===n.id&&["a","b"].includes(l.toPin)).map(l=>actualOutputType(getNode(l.from)));
+  const types=connected.filter(t=>["int","float","double","decimal","long","short","byte"].includes(t));
+  if(types.includes("double"))return "double";
+  if(types.includes("decimal"))return "decimal";
+  if(types.includes("float"))return "float";
+  if(types.includes("long"))return "long";
+  if(types.length&&types.every(t=>t==="int"))return "int";
+  return "number";
+}
  return d?.valueOut||"dynamic";
 }
 function typesCompatible(from,to){
@@ -256,6 +265,14 @@ function renderInspector(){
  $("nodeInspector").querySelectorAll("[data-inspect]").forEach(el=>el.onchange=()=>{const field=el.dataset.inspect;n.values[field]=el.value;if(["type","variable","componentType"].includes(field))removeIncompatibleLinksForOutput(n.id);removeIncompatibleLinksForInput(n.id);renderAll()});
  $("deleteNode").onclick=()=>{nodes=nodes.filter(x=>x.id!==n.id);links=links.filter(l=>l.from!==n.id&&l.to!==n.id);selectedNode=null;renderAll()};
 }
+function setView(view){
+ activeView=view;
+ const main=document.querySelector(".main");
+ main.classList.toggle("code-mode",view==="code");
+ $("graphTab").classList.toggle("active",view==="graph");
+ $("csharpTab").classList.toggle("active",view==="code");
+ if(view==="code"){renderCode();$("codeOutput").hidden=false;document.querySelector(".code-panel").classList.remove("collapsed");$("toggleCode").textContent="Hide code";codeVisible=true}
+}
 function renderCode(){
  const result=BlueprintCompiler.compile(nodes,links,variables,$("projectName").value||"BlueprintScript");
  $("codeOutput").textContent=result.code;
@@ -272,6 +289,8 @@ function example(){
  links.push({from:start.id,fromPin:"Then",to:set.id,toPin:"Exec",kind:"flow"},{from:a.id,fromPin:"value",to:math.id,toPin:"a",kind:"data"},{from:b.id,fromPin:"value",to:math.id,toPin:"b",kind:"data"});
  status("Starter example loaded");renderAll();
 }
+$("graphTab").addEventListener("click",()=>setView("graph"));
+$("csharpTab").addEventListener("click",()=>setView("code"));
 $("blockSearch").addEventListener("input",renderBlocks);
 $("addVariable").onclick=$("addVariableSide").onclick=()=>openVariableModal();
 $("modalClose").onclick=$("modalCancel").onclick=()=>{$("modal").hidden=true};
