@@ -7,6 +7,37 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt
 const getDef = id => defs.find(d => d.id === id);
 const getNode = id => nodes.find(n => n.id === id);
 const getVar = id => variables.find(v => v.id === id);
+function actualOutputType(n){
+ if(!n)return "dynamic";
+ const d=getDef(n.type);
+ if(n.type==="literal")return n.values.type==="null"?"null":(n.values.type||"int");
+ if(n.type==="getvar")return getVar(n.values.variable)?.type||"dynamic";
+ if(n.type==="getcomponent")return n.values.componentType||"Rigidbody";
+ if(n.type==="math")return "number";
+ return d?.valueOut||"dynamic";
+}
+function typesCompatible(from,to){
+ if(!from||!to||from==="dynamic"||from==="any"||to==="dynamic"||to==="any")return true;
+ if(from==="number")return ["number","int","float","double","decimal","long","short","byte"].includes(to);
+ if(to==="number")return ["number","int","float","double","decimal","long","short","byte"].includes(from);
+ return BlueprintTypes.compatible(from,to);
+}
+function removeIncompatibleLinksForOutput(nodeId){
+ const n=getNode(nodeId),fromType=actualOutputType(n);
+ links=links.filter(l=>{
+  if(l.kind!=="data"||l.from!==nodeId)return true;
+  const target=getNode(l.to),td=getDef(target?.type),input=(td?.dataIn||[]).find(p=>p.id===l.toPin);
+  return !!input&&typesCompatible(fromType,input.type);
+ });
+}
+function removeIncompatibleLinksForInput(nodeId){
+ const n=getNode(nodeId),td=getDef(n?.type);
+ links=links.filter(l=>{
+  if(l.kind!=="data"||l.to!==nodeId)return true;
+  const source=getNode(l.from),fromType=actualOutputType(source),input=(td?.dataIn||[]).find(p=>p.id===l.toPin);
+  return !!input&&typesCompatible(fromType,input.type);
+ });
+}
 const allCategories = ["All", ...BlueprintBlocks.categories];
 function status(s){$("graphStatus").textContent=" · "+s}
 function addNode(type,x,y,values={}) {
@@ -93,7 +124,7 @@ function renderNodes(){
   html+='<div class="node-description">'+esc(d.desc)+'</div>';
   (d.fields||[]).forEach(f=>html+=fieldHtml(n,f));
   (d.dataIn||[]).filter(p=>!(n.type==="setcomponent"&&p.id==="component"&&n.values.source!=="connected")&&!(n.type==="setcomponent"&&((p.id==="minimumValue"&&(n.values.property!=="limits"||n.values.setMinimum!=="true"))||(p.id==="maximumValue"&&(n.values.property!=="limits"||n.values.setMaximum!=="true"))))).forEach(p=>html+='<div class="pin-row"><span class="pin-label"><button class="pin in" data-direction="input" data-kind="data" data-type="'+esc(p.type||"dynamic")+'" data-pin="'+p.id+'" title="Connect value input"></button>'+esc(p.label)+(p.type!=="dynamic"?" · "+esc(p.type):"")+'</span><span></span></div>');
-  if(d.valueOut)html+='<div class="pin-row"><span>Value · '+esc(d.valueOut==="dynamic"?"any":d.valueOut)+'</span><button class="pin out" data-direction="output" data-kind="data" data-type="'+esc(d.valueOut||"dynamic")+'" data-pin="value" title="Connect value output"></button></div>';
+  if(d.valueOut){const outputType=actualOutputType(n);html+='<div class="pin-row"><span>Value · '+esc(outputType==="dynamic"?"any":outputType)+'</span><button class="pin out" data-direction="output" data-kind="data" data-type="'+esc(outputType)+'" data-pin="value" title="Connect value output"></button></div>'}
   if(d.flowOut)d.flowOut.forEach(p=>html+='<div class="pin-row"><span>'+esc(p)+'</span><button class="pin out exec-pin" data-direction="output" data-kind="flow" data-type="exec" data-pin="'+p+'" title="Execution output"></button></div>');
   html+='</div>';el.innerHTML=html;
   el.addEventListener("click",e=>{if(e.target.closest(".pin, input, select, textarea, button, label"))return;selectedNode=n.id;renderNodes();renderInspector()});
@@ -110,7 +141,9 @@ function renderNodes(){
      rebuildNode=true;
     }
     if(n.type==="setcomponent"&&["property","source","setMinimum","setMaximum"].includes(field))rebuildNode=true;
-    if(rebuildNode){renderNodes();renderInspector()}
+    if(["type","variable","componentType"].includes(field))removeIncompatibleLinksForOutput(n.id);
+    removeIncompatibleLinksForInput(n.id);
+    if(rebuildNode){renderNodes();renderInspector()}else if(["type","variable","componentType"].includes(field))renderNodes();
     renderCode();
    });
   });
@@ -149,8 +182,8 @@ function findSnapInput(x,y,requireNear=true){
   if(pin.dataset.kind!==wireDrag.kind)return;
   if(wireDrag.kind==="data"){
    const fromDef=getDef(getNode(wireDrag.node)?.type),toDef=getDef(getNode(nodeId)?.type);
-   const outType=fromDef?.valueOut||"dynamic",input=(toDef?.dataIn||[]).find(p=>p.id===pin.dataset.pin);
-   if(!input||(!BlueprintTypes.compatible(outType,input.type)&&outType!=="dynamic"&&input.type!=="dynamic"))return;
+   const outType=actualOutputType(getNode(wireDrag.node)),input=(toDef?.dataIn||[]).find(p=>p.id===pin.dataset.pin);
+   if(!input||!typesCompatible(outType,input.type))return;
   }
   const r=pin.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,d=Math.hypot(cx-x,cy-y);
   if(d<bestDist){bestDist=d;best={pin,nodeId,distance:d}}
@@ -183,8 +216,8 @@ function pinClick(n,kind,isOut,pin){
  if(kind!==a.kind||isOut){status(isOut?"Connections must go from an output to an input":"Pin types do not match");renderNodes();return}
  const from=getNode(a.node),to=n,fd=getDef(from.type),td=getDef(to.type);
  if(kind==="data"){
-  const outType=fd.valueOut||"exec", input=(td.dataIn||[]).find(p=>p.id===pin);
-  if(!input||!BlueprintTypes.compatible(outType,input.type)&&outType!=="dynamic"&&input.type!=="dynamic"){status("Incompatible data types");renderNodes();return}
+  const outType=actualOutputType(from), input=(td.dataIn||[]).find(p=>p.id===pin);
+  if(!input||!typesCompatible(outType,input.type)){status("Incompatible data types");renderNodes();return}
  }
  links=links.filter(l=>!(l.to===n.id&&l.toPin===pin&&l.kind===kind));
  links.push({from:a.node,fromPin:a.pin,to:n.id,toPin:pin,kind});
