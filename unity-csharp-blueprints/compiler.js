@@ -305,18 +305,19 @@ function compile(inputNodes,inputLinks,inputVars,className){
     else out.push(p+v.codeName+" = "+valueForInput(n,"value",new Set(),v.type)+";");
    }else if(n.type==="setcomponent"){
     const sourceLink=dataLink(n.id,"component");
-    if(!sourceLink){
-     report("Connect a component to Set Component Info.");
+    const selectedVar=findVar(n.values?.componentVariable);
+    if(!sourceLink&&!selectedVar){
+     report("Connect a component or choose a component variable in Set Component Info.");
     }else{
-     const source=findNode(sourceLink.from);
-     const ct=source?.type==="getcomponent"?(source.values?.componentType||"Rigidbody"):source?.type==="getvar"?(findVar(source.values?.variable)?.type||"Component"):"Component";
-     const target=valueExpr(sourceLink.from,new Set(),"Component");
+     const source=sourceLink?findNode(sourceLink.from):null;
+     const ct=source?(source.type==="getcomponent"?(source.values?.componentType||"Rigidbody"):source.type==="getvar"?(findVar(source.values?.variable)?.type||"Component"):"Component"):(selectedVar?.type||"Component");
+     const target=sourceLink?valueExpr(sourceLink.from,new Set(),"Component"):(selectedVar?.codeName||selectedVar?.name||"null");
      const available=properties[ct]||{};
      const componentProps=Object.keys(available).filter(prop=>n.values?.["use_"+prop]==="true");
-     if(!componentProps.length)report("Enable at least one property supported by the connected component.");
+     if(!componentProps.length)report("Enable at least one property supported by the selected component.");
      componentProps.forEach(prop=>{
       const type=available[prop];
-      if(!Object.prototype.hasOwnProperty.call(available,prop)){report("The "+prop+" property is unavailable for "+ct+".");return}
+      if(!Object.prototype.hasOwnProperty.call(available,prop)){report("The "+prop+" property is unavailable for "+ct+";");return}
       const val=valueForInput(n,prop,new Set(),type);
       const accessType=ct==="Component"?"dynamic":ct;
       out.push(p+"{",p+"    var __component_"+n.id+"_"+prop+" = "+(accessType==="dynamic"?"("+target+")":"(("+accessType+")("+target+"))")+";",p+"    if (__component_"+n.id+"_"+prop+" != null)",p+"    {",p+"        __component_"+n.id+"_"+prop+"."+prop+" = "+val+";",p+"    }",p+"}");
