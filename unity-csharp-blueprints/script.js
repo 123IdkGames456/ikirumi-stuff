@@ -39,7 +39,6 @@ function displayInputType(n,p){
  return p.type||"any";
 }
 function typesCompatible(from,to){
- if(to==="string"&&(from==="dynamic"||from==="any"))return false;
  if(!from||!to||from==="dynamic"||from==="any"||to==="dynamic"||to==="any")return true;
  if(from==="number")return ["number","int","float","double","decimal","long","short","byte"].includes(to);
  if(to==="number")return ["number","int","float","double","decimal","long","short","byte"].includes(from);
