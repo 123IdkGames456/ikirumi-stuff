@@ -33,6 +33,7 @@ function actualOutputType(n){
  if(n.type==="getcomponent")return n.values.componentType||"Rigidbody";
  if(n.type==="math")return n.values.outputType||"float";
  if(n.type==="fromto")return n.values.toType||"string";
+ if(n.type==="vector")return n.values.vectorType||"Vector3";
  if(n.type==="transform"){
   const op=n.values.operation||"setPosition";
   return op==="getPosition"||op==="getScale"?"Vector3":op==="getRotation"?"Quaternion":"none";
@@ -75,6 +76,8 @@ function typesCompatible(from,to){
 }
 function inputActive(n,p){
  if(!n||!p)return false;
+ if(n.type==="vector"&&p.id==="z"&&n.values.vectorType==="Vector2")return false;
+ if(n.type==="vector"&&p.id==="w"&&["Vector2","Vector3"].includes(n.values.vectorType))return false;
  if(n.type==="transform"&&p.id==="vector"&&["getPosition","getRotation","getScale"].includes(n.values.operation))return false;
  if(n.type==="setcomponent"){
   const prop=n.values.property||"limits";
@@ -156,6 +159,8 @@ WheelCollider:[["motorTorque","Motor Torque"],["brakeTorque","Brake Torque"],["s
 const boolProperties=new Set(["useLimits","enableCollision","enablePreprocessing","useGravity","isKinematic","detectCollisions","simulated","isTrigger","enabled","loop","playOnAwake","mute","orthographic","isStopped"]);
 function fieldHtml(n,f){
  let val=n.values[f.id]??f.default??"";
+ if(n.type==="vector"&&f.id==="z"&&n.values.vectorType==="Vector2")return "";
+ if(n.type==="vector"&&f.id==="w"&&["Vector2","Vector3"].includes(n.values.vectorType))return "";
  if(n.type==="setcomponent"){
   const ct=n.values.componentType||"HingeJoint",prop=n.values.property||"limits";
   if(["minimum","maximum","setMinimum","setMaximum"].includes(f.id)&&prop!=="limits")return "";
@@ -213,7 +218,7 @@ function renderNodes(){
     }
     if(n.type==="setcomponent"&&["property","source","setMinimum","setMaximum"].includes(field))rebuildNode=true;
     const operationChangesOutput=field==="operation"&&["transform","gameobject"].includes(n.type);
-    const pinTypeChange=["type","variable","componentType","fromType","toType","outputType","operandType"].includes(field)||operationChangesOutput;
+    const pinTypeChange=["type","variable","componentType","fromType","toType","outputType","operandType","vectorType"].includes(field)||operationChangesOutput;
     if(pinTypeChange||rebuildNode){
      removeIncompatibleLinksForOutput(n.id);
      removeIncompatibleLinksForInput(n.id);
@@ -356,7 +361,7 @@ function renderInspector(){
  (d.fields||[]).forEach(f=>{let val=n.values[f.id]??f.default??(f.options?f.options[0][0]:"");if(f.type==="select")html+='<label>'+esc(f.label)+'</label><select data-inspect="'+f.id+'">'+f.options.map(o=>'<option value="'+esc(o[0])+'" '+(String(val)===String(o[0])?"selected":"")+'>'+esc(o[1])+'</option>').join("")+'</select>';else if(f.type==="variable")html+='<label>'+esc(f.label)+'</label><select data-inspect="'+f.id+'"><option value="">Choose variable…</option>'+variables.map(v=>'<option value="'+v.id+'" '+(v.id===val?"selected":"")+'>'+esc(v.name)+' · '+esc(v.type)+'</option>').join("")+'</select>';else html+='<label>'+esc(f.label)+'</label><input data-inspect="'+f.id+'" value="'+esc(val)+'">'});
  html+='<div style="margin-top:15px"><button id="deleteNode" style="width:100%">Delete node</button></div>';
  $("nodeInspector").innerHTML=html;
- $("nodeInspector").querySelectorAll("[data-inspect]").forEach(el=>el.onchange=()=>{const field=el.dataset.inspect;n.values[field]=el.value;if(["type","variable","componentType","toType","outputType","operandType"].includes(field)||(field==="operation"&&["transform","gameobject"].includes(n.type)))removeIncompatibleLinksForOutput(n.id);removeIncompatibleLinksForInput(n.id);renderAll()});
+ $("nodeInspector").querySelectorAll("[data-inspect]").forEach(el=>el.onchange=()=>{const field=el.dataset.inspect;n.values[field]=el.value;if(["type","variable","componentType","toType","outputType","operandType","vectorType"].includes(field)||(field==="operation"&&["transform","gameobject"].includes(n.type)))removeIncompatibleLinksForOutput(n.id);removeIncompatibleLinksForInput(n.id);renderAll()});
  $("deleteNode").onclick=()=>{nodes=nodes.filter(x=>x.id!==n.id);links=links.filter(l=>l.from!==n.id&&l.to!==n.id);selectedNode=null;renderAll()};
 }
 function setView(view){
