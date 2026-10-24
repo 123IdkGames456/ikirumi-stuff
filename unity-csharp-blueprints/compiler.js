@@ -26,8 +26,27 @@ function valueExpr(nodeId,seen=new Set(),expectedType=null){
  if(n.type==="input"){const key=n.values.key||"Space",mode=n.values.mode||"down";return "Input.GetKey"+(mode==="held"?"":mode==="up"?"Up":"Down")+"(KeyCode."+key+")"}
  if(n.type==="fromto"){
   const from=n.values.fromType||"float",to=n.values.toType||"string",raw=valueForInput(n,"value",new Set(seen),from);
-  const methods={int:"ToInt32",float:"ToSingle",double:"ToDouble",decimal:"ToDecimal",long:"ToInt64",bool:"ToBoolean",string:"ToString"};
-  return "Convert."+methods[to]+"("+raw+")";
+  if(from===to)return raw;
+  if(to==="string")return "("+raw+").ToString()";
+  if(from==="string")return to+".Parse("+raw+")";
+  if(to==="bool"){
+   if(from==="bool")return raw;
+   if(from==="int")return "("+raw+" != 0)";
+   if(from==="long")return "("+raw+" != 0L)";
+   if(from==="float")return "("+raw+" != 0f)";
+   if(from==="double")return "("+raw+" != 0d)";
+   if(from==="decimal")return "("+raw+" != 0m)";
+  }
+  if(from==="bool"){
+   const values={int:["1","0"],long:["1L","0L"],float:["1f","0f"],double:["1d","0d"],decimal:["1m","0m"]};
+   const pair=values[to];
+   if(pair)return "("+raw+" ? "+pair[0]+" : "+pair[1]+")";
+  }
+  if(to==="int"&&from==="float")return "Mathf.CeilToInt("+raw+")";
+  if(to==="int"&&["double","decimal"].includes(from))return "((int)Math.Ceiling("+raw+"))";
+  if(to==="long"&&["float","double","decimal"].includes(from))return "((long)Math.Ceiling("+raw+"))";
+  if(["int","float","double","decimal","long"].includes(to)&&["int","float","double","decimal","long"].includes(from))return "("+to+")("+raw+")";
+  return "("+to+")("+raw+")";
  }
  if(["math","compare","logic"].includes(n.type)){
   const op=n.values.operation||"add",resultType=n.values.outputType||"float";
@@ -52,10 +71,6 @@ function valueExpr(nodeId,seen=new Set(),expectedType=null){
 function debugValueExpr(nodeId,seen=new Set()){
  if(seen.has(nodeId))return "default";
  const n=nodes.find(x=>x.id===nodeId);
- if(n?.type==="fromto"){
-  const link=dataLinks.find(l=>l.to===n.id&&l.toPin==="value");
-  if(link){const nextSeen=new Set(seen);nextSeen.add(nodeId);return debugValueExpr(link.from,nextSeen)}
- }
  const expression=valueExpr(nodeId,new Set(seen));
  if(n?.type==="math"&&expression.startsWith("(")&&expression.endsWith(")"))return expression.slice(1,-1);
  return expression;
@@ -63,6 +78,8 @@ function debugValueExpr(nodeId,seen=new Set()){
 function valueForInput(n,pin,seen=new Set(),expectedType=null){
  const link=dataLinks.find(l=>l.to===n.id&&l.toPin===pin);
  if(link)return valueExpr(link.from,seen,expectedType);
+ const typedFallbacks={int:"0",float:"0f",double:"0d",decimal:"0m",long:"0L",string:'""',bool:"false"};
+ if(pin==="value"&&expectedType&&typedFallbacks[expectedType])return typedFallbacks[expectedType];
  const fallbacks={a:"0",b:"0",condition:"false",vector:"Vector3.zero",target:"gameObject",value:n.values?.value||"0"};
  return fallbacks[pin]||"0";
 }
