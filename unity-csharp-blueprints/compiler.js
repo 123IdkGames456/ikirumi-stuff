@@ -311,7 +311,9 @@ function compile(inputNodes,inputLinks,inputVars,className){
     }else{
      const source=sourceLink?findNode(sourceLink.from):null;
      const ct=source?(source.type==="getcomponent"?(source.values?.componentType||"Rigidbody"):source.type==="getvar"?(findVar(source.values?.variable)?.type||"Component"):"Component"):(selectedVar?.type||"Component");
-     const target=sourceLink?valueExpr(sourceLink.from,new Set(),"Component"):(selectedVar?.codeName||selectedVar?.name||"null");
+     const sourceIsVariable=sourceLink&&source?.type==="getvar";
+     const directVariable=selectedVar||(sourceIsVariable?findVar(source.values?.variable):null);
+     const target=directVariable?.codeName||(sourceLink?valueExpr(sourceLink.from,new Set(),"Component"):"null");
      const available=properties[ct]||{};
      const componentProps=Object.keys(available).filter(prop=>n.values?.["use_"+prop]==="true");
      if(!componentProps.length)report("Enable at least one property supported by the selected component.");
@@ -320,8 +322,14 @@ function compile(inputNodes,inputLinks,inputVars,className){
       if(!Object.prototype.hasOwnProperty.call(available,prop)){report("The "+prop+" property is unavailable for "+ct+";");return}
       const val=valueForInput(n,prop,new Set(),type);
       const accessType=ct==="Component"?"dynamic":ct;
-      out.push(p+"{",p+"    var __component_"+n.id+"_"+prop+" = "+(accessType==="dynamic"?"("+target+")":"(("+accessType+")("+target+"))")+";",p+"    if (__component_"+n.id+"_"+prop+" != null)",p+"    {",p+"        __component_"+n.id+"_"+prop+"."+prop+" = "+val+";",p+"    }",p+"}");
+      if(directVariable){
+       out.push(p+"if ("+target+" != null)",p+"{",p+"    "+target+"."+prop+" = "+val+";",p+"}");
+      }else{
+       const temp="__component_"+n.id+"_"+prop;
+       out.push(p+"{",p+"    var "+temp+" = "+(accessType==="dynamic"?"("+target+")":"(("+accessType+")("+target+"))")+";",p+"    if ("+temp+" != null)",p+"    {",p+"        "+temp+"."+prop+" = "+val+";",p+"    }",p+"}");
+      }
      });
+
     }
    }else if(n.type==="transform"){
     const op=n.values?.operation||"setPosition",v=valueForInput(n,"vector",new Set(),"Vector3");
