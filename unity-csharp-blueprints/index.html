@@ -12,7 +12,7 @@
   <a class="brand" href="../" title="Back to Ikirumi Stuff">◈ <span>UNITY C# <b>BLUEPRINTS</b></span></a>
   <input id="projectName" class="project-name" value="My Blueprint Project" aria-label="Project name">
   <div class="top-actions">
-    <button id="newProject">New</button><button id="saveProject">Save</button><button id="loadProject">Load</button>
+    <button id="newProject">New</button><button id="saveProject">Save</button><button id="loadProject">Load</button><button id="importCSharp">Import C#</button>
     <button id="exportProject">Export .cs</button><button id="downloadProject">Project JSON</button>
   </div>
 </header>
@@ -50,7 +50,7 @@
   </aside>
 </div>
 <div id="modal" class="modal" hidden><div class="modal-card"><div class="modal-title"><strong id="modalTitle">Create variable</strong><button id="modalClose">×</button></div><div id="modalBody"></div><div class="modal-actions"><button id="modalCancel">Cancel</button><button id="modalConfirm" class="primary">Create</button></div></div></div>
-<input id="fileInput" type="file" accept=".json,application/json" hidden>
+<input id="fileInput" type="file" accept=".json,application/json" hidden><input id="csharpInput" type="file" accept=".cs,text/plain" hidden>
 <script src="types.js?v=unity-audit-2"></script>
 <script src="blocks.js?v=unity-audit-2"></script>
 <script src="compiler.js?v=unity-audit-3"></script>
