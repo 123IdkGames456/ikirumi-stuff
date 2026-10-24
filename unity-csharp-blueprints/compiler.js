@@ -8,31 +8,46 @@ if(vars.length)lines.push("");
 const events=nodes.filter(n=>["start","update","fixed"].includes(n.type));
 const dataLinks=links.filter(l=>l.kind==="data");
 const extraMethods=[],generatedWaits=new Set(),diagnostics=[];
-function valueExpr(nodeId,seen=new Set()){
+function valueExpr(nodeId,seen=new Set(),expectedType=null){
  if(seen.has(nodeId))return "default";
  seen.add(nodeId);
  const n=nodes.find(x=>x.id===nodeId);if(!n)return "0";
  if(n.type==="getcomponent"){const ct=n.values.componentType||"Rigidbody";return valueForInput(n,"target",new Set(seen))+".GetComponent<"+ct+">()"}
- if(n.type==="literal"){const t=n.values.type||"int",v=n.values.value??"0";if(t==="string")return '"'+esc(v)+'"';if(t==="bool")return String(v==="true"||v===true);if(t==="null")return "null";if(t==="float"&&!String(v).endsWith("f"))return v+"f";return String(v)}
+ if(n.type==="literal"){
+  const t=n.values.type||"int",v=n.values.value??"0";
+  if(t==="string")return '"'+esc(v)+'"';
+  if(t==="bool")return String(v==="true"||v===true);
+  if(t==="null")return "null";
+  const numericType=expectedType&&["int","float","double","decimal","long"].includes(expectedType)?expectedType:t;
+  if(["int","float","double","decimal","long"].includes(numericType)){const raw=String(v).replace(/[fFdDmMlL]$/,"");const suffix={int:"",float:"f",double:"d",decimal:"m",long:"L"}[numericType];return raw+suffix}
+  return String(v);
+ }
  if(n.type==="getvar"){const v=vars.find(x=>x.id===n.values.variable);return v?v.name:"default"}
  if(n.type==="input"){const key=n.values.key||"Space",mode=n.values.mode||"down";return "Input.GetKey"+(mode==="held"?"":mode==="up"?"Up":"Down")+"(KeyCode."+key+")"}
+ if(n.type==="fromto"){
+  const from=n.values.fromType||"float",to=n.values.toType||"string",raw=valueForInput(n,"value",new Set(seen),from),typed="("+from+")("+raw+")";
+  const methods={int:"ToInt32",float:"ToSingle",double:"ToDouble",decimal:"ToDecimal",long:"ToInt64",bool:"ToBoolean",string:"ToString"};
+  return "Convert."+methods[to]+"("+typed+")";
+ }
  if(["math","compare","logic"].includes(n.type)){
-  const a=valueForInput(n,"a",new Set(seen)),b=valueForInput(n,"b",new Set(seen)),op=n.values.operation||"add";
+  const op=n.values.operation||"add",resultType=n.values.outputType||"float";
+  const inputType=n.type==="math"&&["int","float","double","decimal","long"].includes(resultType)?resultType:null;
+  const a=valueForInput(n,"a",new Set(seen),inputType),b=valueForInput(n,"b",new Set(seen),inputType);
   const ops={add:"+",subtract:"-",multiply:"*",divide:"/",modulo:"%",eq:"==",ne:"!=",gt:">",lt:"<",gte:">=",lte:"<=",and:"&&",or:"||",xor:"^"};
   if(op==="not")return "!("+a+")";
   let expression;
-  if(op==="power")expression="Math.Pow("+a+", "+b+")";
-  else if(op==="min")expression="Math.Min("+a+", "+b+")";
-  else if(op==="max")expression="Math.Max("+a+", "+b+")";
+  if(op==="power")expression=resultType==="float"?"Mathf.Pow("+a+", "+b+")":"Math.Pow("+a+", "+b+")";
+  else if(op==="min")expression=resultType==="float"?"Mathf.Min("+a+", "+b+")":"Math.Min("+a+", "+b+")";
+  else if(op==="max")expression=resultType==="float"?"Mathf.Max("+a+", "+b+")":"Math.Max("+a+", "+b+")";
   else expression="("+a+" "+(ops[op]||"+")+" "+b+")";
-  const resultType=n.values.outputType||"float";
+  if(n.type!=="math")return expression;
   return "("+resultType+")("+expression+")";
  }
  return "default";
 }
-function valueForInput(n,pin,seen=new Set()){
+function valueForInput(n,pin,seen=new Set(),expectedType=null){
  const link=dataLinks.find(l=>l.to===n.id&&l.toPin===pin);
- if(link)return valueExpr(link.from,seen);
+ if(link)return valueExpr(link.from,seen,expectedType);
  const fallbacks={a:"0",b:"0",condition:"false",vector:"Vector3.zero",target:"gameObject",value:n.values?.value||"0"};
  return fallbacks[pin]||"0";
 }
