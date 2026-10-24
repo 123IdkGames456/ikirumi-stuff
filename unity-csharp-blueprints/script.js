@@ -252,8 +252,11 @@ function fieldHtml(n,f){
   return '<label class="node-field"><span>'+esc(f.label)+'</span><select data-field="'+f.id+'"><option value="">Choose variable…</option>'+list.map(v=>'<option value="'+v.id+'" '+(val===v.id?"selected":"")+'>'+esc(v.name)+' · '+esc(v.type)+'</option>').join("")+'</select></label>';
  }
  if(f.type==="select")return '<label class="node-field"><span>'+esc(f.label)+'</span><select data-field="'+f.id+'">'+f.options.map(o=>'<option value="'+esc(o[0])+'" '+(String(val)===String(o[0])?"selected":"")+'>'+esc(o[1])+'</option>').join("")+'</select></label>';
- const type=f.type==="number"?"number":"text";
- return '<label class="node-field"><span>'+esc(f.label)+'</span><input data-field="'+f.id+'" type="'+type+'" value="'+esc(val)+'"></label>';
+ if(n.type==="literal"&&f.id==="value"&&(n.values.type||"int")==="bool")return '<label class="node-field checkbox-field"><span>Value</span><input data-field="value" type="checkbox" '+(val==="true"||val===true?"checked":"")+'></label>';
+ const literalType=n.type==="literal"&&f.id==="value"?(n.values.type||"int"):null;
+ const type=["int","float","double","long"].includes(literalType)||f.type==="number"?"number":"text";
+ const step=literalType==="int"||literalType==="long"?"1":literalType==="float"||literalType==="double"?"any":"";
+ return '<label class="node-field"><span>'+esc(f.label)+'</span><input data-field="'+f.id+'" type="'+type+'" '+(step?'step="'+step+'"':"")+' value="'+esc(val)+'"></label>';
 }
 function renderNodes(){
  document.querySelectorAll(".node").forEach(e=>e.remove());
@@ -298,7 +301,7 @@ function renderNodes(){
   el.querySelectorAll("[data-field]").forEach(input=>{
    input.addEventListener(input.type==="checkbox"?"input":"change",()=>{
     const field=input.dataset.field;
-    n.values[field]=input.type==="checkbox"?String(input.checked):input.value;
+    n.values[field]=input.type==="checkbox"?String(input.checked):input.value;if(n.type==="literal"&&field==="value"&&n.values.type==="int"&&input.type!=="checkbox"){n.values[field]=String(Math.trunc(Number(input.value)||0));input.value=n.values[field]}
     const componentField=field.startsWith("use_")&&n.type==="setcomponent";
     const rebuildNode=componentField||field==="component"||field==="componentVariable";
     const operationChangesOutput=field==="operation"&&["transform","gameobject"].includes(n.type);
@@ -443,7 +446,7 @@ function renderInspector(){
  const n=getNode(selectedNode);if(!n){$("nodeInspector").innerHTML='<p class="subtle">Select a node to edit its settings.</p>';return}
  const d=getDef(n.type);
  let html='<div class="subtle">'+esc(d.name)+' · '+esc(d.category)+'</div>';
- (d.fields||[]).forEach(f=>{if(n.type==="setcomponent"&&f.type==="checkbox")return;let val=n.values[f.id]??f.default??(f.options?f.options[0][0]:"");if(f.type==="select")html+='<label>'+esc(f.label)+'</label><select data-inspect="'+f.id+'">'+f.options.map(o=>'<option value="'+esc(o[0])+'" '+(String(val)===String(o[0])?"selected":"")+'>'+esc(o[1])+'</option>').join("")+'</select>';else if(f.type==="variable")html+='<label>'+esc(f.label)+'</label><select data-inspect="'+f.id+'"><option value="">Choose variable…</option>'+variables.map(v=>'<option value="'+v.id+'" '+(v.id===val?"selected":"")+'>'+esc(v.name)+' · '+esc(v.type)+'</option>').join("")+'</select>';else html+='<label>'+esc(f.label)+'</label><input data-inspect="'+f.id+'" value="'+esc(val)+'">'});
+ (d.fields||[]).forEach(f=>{if(n.type==="setcomponent"&&f.type==="checkbox")return;let val=n.values[f.id]??f.default??(f.options?f.options[0][0]:"");if(f.type==="select")html+='<label>'+esc(f.label)+'</label><select data-inspect="'+f.id+'">'+f.options.map(o=>'<option value="'+esc(o[0])+'" '+(String(val)===String(o[0])?"selected":"")+'>'+esc(o[1])+'</option>').join("")+'</select>';else if(f.type==="variable")html+='<label>'+esc(f.label)+'</label><select data-inspect="'+f.id+'"><option value="">Choose variable…</option>'+variables.map(v=>'<option value="'+v.id+'" '+(v.id===val?"selected":"")+'>'+esc(v.name)+' · '+esc(v.type)+'</option>').join("")+'</select>';else if(n.type==="literal"&&f.id==="value"&&(n.values.type||"int")==="bool")html+='<label class="node-field checkbox-field"><span>Value</span><input data-inspect="value" type="checkbox" '+(val==="true"||val===true?"checked":"")+'></label>';else{const literalType=n.type==="literal"&&f.id==="value"?(n.values.type||"int"):null;const inputType=["int","float","double","long"].includes(literalType)?"number":"text";const step=literalType==="int"||literalType==="long"?"1":literalType==="float"||literalType==="double"?"any":"";html+='<label>'+esc(f.label)+'</label><input data-inspect="'+f.id+'" type="'+inputType+'" '+(step?'step="'+step+'"':"")+' value="'+esc(val)+'">';}});
  if(n.type==="setcomponent"){
   const ct=connectedComponentType(n);
   html+='<div class="inspector-section"><strong>Component properties</strong></div>';
@@ -452,7 +455,7 @@ function renderInspector(){
  }
  html+='<div style="margin-top:15px"><button id="deleteNode" style="width:100%">Delete node</button></div>';
  $("nodeInspector").innerHTML=html;
- $("nodeInspector").querySelectorAll("[data-inspect]").forEach(el=>el.addEventListener(el.type==="checkbox"?"input":"change",()=>{const field=el.dataset.inspect;n.values[field]=el.type==="checkbox"?String(el.checked):el.value;const componentField=n.type==="setcomponent"&&field.startsWith("use_");if(["type","variable","componentType","componentVariable","toType","outputType","operandType","vectorType","property"].includes(field)||field.startsWith("use_")||(field==="operation"&&["transform","gameobject"].includes(n.type)))removeIncompatibleLinksForOutput(n.id);removeIncompatibleLinksForInput(n.id);if(componentField){pruneIncompatibleLinks();renderNodes();renderInspector();renderCode()}else renderAll()}));
+ $("nodeInspector").querySelectorAll("[data-inspect]").forEach(el=>el.addEventListener(el.type==="checkbox"?"input":"change",()=>{const field=el.dataset.inspect;n.values[field]=el.type==="checkbox"?String(el.checked):el.value;if(n.type==="literal"&&field==="value"&&n.values.type==="int"&&el.type!=="checkbox"){n.values[field]=String(Math.trunc(Number(el.value)||0));el.value=n.values[field]}const componentField=n.type==="setcomponent"&&field.startsWith("use_");if(["type","variable","componentType","componentVariable","toType","outputType","operandType","vectorType","property"].includes(field)||field.startsWith("use_")||(field==="operation"&&["transform","gameobject"].includes(n.type)))removeIncompatibleLinksForOutput(n.id);removeIncompatibleLinksForInput(n.id);if(componentField){pruneIncompatibleLinks();renderNodes();renderInspector();renderCode()}else renderAll()}));
  $("deleteNode").onclick=()=>{nodes=nodes.filter(x=>x.id!==n.id);links=links.filter(l=>l.from!==n.id&&l.to!==n.id);selectedNode=null;renderAll()};
 }
 function setView(view){
