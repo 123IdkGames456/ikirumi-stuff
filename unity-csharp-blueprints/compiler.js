@@ -49,6 +49,17 @@ function valueExpr(nodeId,seen=new Set(),expectedType=null){
  }
  return "default";
 }
+function debugValueExpr(nodeId,seen=new Set()){
+ if(seen.has(nodeId))return "default";
+ const n=nodes.find(x=>x.id===nodeId);
+ if(n?.type==="fromto"){
+  const link=dataLinks.find(l=>l.to===n.id&&l.toPin==="value");
+  if(link)return debugValueExpr(link.from,seen);
+ }
+ const expression=valueExpr(nodeId,new Set(seen));
+ if(n?.type==="math"&&expression.startsWith("(")&&expression.endsWith(")"))return expression.slice(1,-1);
+ return expression;
+}
 function valueForInput(n,pin,seen=new Set(),expectedType=null){
  const link=dataLinks.find(l=>l.to===n.id&&l.toPin===pin);
  if(link)return valueExpr(link.from,seen,expectedType);
@@ -92,7 +103,7 @@ function emitFlow(id,indent,visited=new Set()){
   }
   else if(n.type==="debug"){
    const level=n.values.level||"log",link=dataLinks.find(l=>l.to===n.id&&l.toPin==="value");
-   const msg=link?valueExpr(link.from):'"'+esc(n.values.message||"")+'"';
+   const msg=link?debugValueExpr(link.from):'"'+esc(n.values.message||"")+'"';
    out.push(p+"Debug.Log"+(level==="warning"?"Warning":level==="error"?"Error":"")+"("+msg+");");
   }
   else if(n.type==="transform"){
