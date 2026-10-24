@@ -141,10 +141,12 @@ function inputActive(n,p){
  return true;
 }
 function removeIncompatibleLinksForOutput(nodeId){
- const n=getNode(nodeId),fromType=actualOutputType(n);
+ const n=getNode(nodeId);
  links=links.filter(l=>{
   if(l.kind!=="data"||l.from!==nodeId)return true;
-  const target=getNode(l.to),td=getDef(target?.type),input=nodeInputs(target).find(p=>p.id===l.toPin);
+  const target=getNode(l.to),input=nodeInputs(target).find(p=>p.id===l.toPin);
+  let fromType=actualOutputType(n);
+  if(n?.type==="getcomponentvalue")fromType=nodeOutputs(n).find(p=>p.id===l.fromPin)?.type||"none";
   return !!input&&inputActive(target,input)&&typesCompatible(fromType,expectedInputType(target,input));
  });
 }
