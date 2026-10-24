@@ -33,6 +33,7 @@ function cleanNumber(value,type){
  const suffix={float:"f",double:"d",decimal:"m",long:"L",ulong:"UL",uint:"U",int:"",byte:"",sbyte:"",short:"",ushort:""}[type]??"";
  if(/^[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?[fFdDmMlLuU]*$/.test(raw)){
   raw=raw.replace(/[fFdDmMlLuU]+$/,"");
+  if(["byte","sbyte","short","ushort","int","uint","long","ulong"].includes(type)&&/[.eE]/.test(raw))return "("+type+")("+raw+")";
   return raw+suffix;
  }
  return raw||"0";
@@ -45,6 +46,7 @@ function compile(inputNodes,inputLinks,inputVars,className){
  const report=message=>{if(!diagnostics.includes(message))diagnostics.push(message)};
  const usedNames=new Set(["Start","Update","FixedUpdate"]);
  const safeClass=safeIdentifier(className||"BlueprintScript","BlueprintScript",new Set());
+ usedNames.add(safeClass);
  const varsById=new Map();
  for(const v of vars){
   const entry={...v,codeName:safeIdentifier(v.name,"Variable",usedNames),type:String(v.type||"int")};
@@ -135,7 +137,7 @@ function compile(inputNodes,inputLinks,inputVars,className){
  }
  function coerceExpression(expr,from,to,n){
   if(!to||to==="dynamic"||to==="any"||to==="number"||to==="object"||from===to||from==="dynamic"||from==="any")return expr;
-  if(from==="null"&&!BlueprintTypes.isValue(to))return expr;
+  if(from==="null"&&(to==="string"||to==="object"||!BlueprintTypes.isValue(to)))return expr;
   if(numericTypes.has(from)&&numericTypes.has(to))return convertNumeric(expr,from,to);
   if(BlueprintTypes.compatible(from,to))return expr;
   if(to==="Component"&&BlueprintTypes.unity.includes(from))return expr;
@@ -165,7 +167,7 @@ function compile(inputNodes,inputLinks,inputVars,className){
   }else if(n.type==="getcomponent"){
    const ct=n.values?.componentType||"Rigidbody";
    const target=valueForInput(n,"target",path,"GameObject");
-   expression="("+target+" != null ? "+target+".GetComponent<"+ct+">() : null)";
+   expression="((GameObject)("+target+"))?.GetComponent<"+ct+">()";
   }else if(n.type==="fromto"){
    expression=fromToExpression(n,path);
   }else if(n.type==="math"){
