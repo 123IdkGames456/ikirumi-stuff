@@ -90,6 +90,8 @@ function compile(inputNodes,inputLinks,inputVars,className){
   if(n.type==="literal")return n.values?.type==="null"?"null":(n.values?.type||"int");
   if(n.type==="getvar")return findVar(n.values?.variable)?.type||"dynamic";
   if(n.type==="getcomponent")return n.values?.componentType||"Rigidbody";
+  if(n.type==="getcomponentvalue")return propertyType(n.values?.componentType||"Rigidbody",n.values?.property||"mass");
+  if(n.type==="literal"&&["Vector2","Vector3","Vector4","Quaternion","Color","Color32"].includes(n.values?.type))return n.values.type;
   if(n.type==="math")return n.values?.outputType||"float";
   if(n.type==="fromto")return n.values?.toType||"string";
   if(n.type==="vector")return n.values?.vectorType||"Vector3";
@@ -197,7 +199,10 @@ function compile(inputNodes,inputLinks,inputVars,className){
    const ct=n.values?.componentType||"Rigidbody";
    const target=valueForInput(n,"target",path,"GameObject");
    expression="((GameObject)("+target+"))?.GetComponent<"+ct+">()";
-  }else if(n.type==="fromto"){
+  }else if(n.type==="getcomponentvalue"){
+    const ct=n.values?.componentType||"Rigidbody",prop=n.values?.property||"mass",target=valueForInput(n,"component",path,"Component");
+    expression="(("+ct+")("+target+"))."+prop;
+   }else if(n.type==="fromto"){
    expression=fromToExpression(n,path);
   }else if(n.type==="vector"){
    const type=n.values?.vectorType||"Vector3";
@@ -248,7 +253,7 @@ function compile(inputNodes,inputLinks,inputVars,className){
  function valueForInput(n,pin,seen=new Set(),expectedType=null){
   const link=dataLink(n.id,pin);
   if(link)return valueExpr(link.from,seen,expectedType);
-  if(n.type==="vector"&&["x","y","z","w"].includes(pin))return typedFallback(n.values?.[pin]??(pin==="w"?"1":"0"),expectedType||"float");
+  if((n.type==="vector"||n.type==="literal")&&["x","y","z","w"].includes(pin)&&["Vector2","Vector3","Vector4","Quaternion","Color","Color32"].includes(n.values?.vectorType||n.values?.type))return typedFallback(n.values?.[pin]??(pin==="w"?"1":"0"),expectedType||"float");
   if(pin==="minimumValue")return typedFallback(n.values?.minimum??"-45","float");
   if(pin==="maximumValue")return typedFallback(n.values?.maximum??"45","float");
   if(pin==="propertyValueInput")return propertyFallback(n);
