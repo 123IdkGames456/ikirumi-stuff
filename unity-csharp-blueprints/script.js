@@ -296,7 +296,12 @@ function renderNodes(){
      removeIncompatibleLinksForOutput(n.id);
      removeIncompatibleLinksForInput(n.id);
     }
-    renderAll();
+    if(componentField){
+     pruneIncompatibleLinks();
+     renderNodes();
+     renderInspector();
+     renderCode();
+    }else renderAll();
    });
   });
   el.querySelectorAll(".pin").forEach(pin=>{
@@ -436,7 +441,7 @@ function renderInspector(){
  }
  html+='<div style="margin-top:15px"><button id="deleteNode" style="width:100%">Delete node</button></div>';
  $("nodeInspector").innerHTML=html;
- $("nodeInspector").querySelectorAll("[data-inspect]").forEach(el=>el.onchange=()=>{const field=el.dataset.inspect;n.values[field]=el.type==="checkbox"?String(el.checked):el.value;if(["type","variable","componentType","componentVariable","toType","outputType","operandType","vectorType","property"].includes(field)||field.startsWith("use_")||(field==="operation"&&["transform","gameobject"].includes(n.type)))removeIncompatibleLinksForOutput(n.id);removeIncompatibleLinksForInput(n.id);renderAll()});
+ $("nodeInspector").querySelectorAll("[data-inspect]").forEach(el=>el.onchange=()=>{const field=el.dataset.inspect;n.values[field]=el.type==="checkbox"?String(el.checked):el.value;const componentField=n.type==="setcomponent"&&field.startsWith("use_");if(["type","variable","componentType","componentVariable","toType","outputType","operandType","vectorType","property"].includes(field)||field.startsWith("use_")||(field==="operation"&&["transform","gameobject"].includes(n.type)))removeIncompatibleLinksForOutput(n.id);removeIncompatibleLinksForInput(n.id);if(componentField){pruneIncompatibleLinks();renderNodes();renderInspector();renderCode()}else renderAll()});
  $("deleteNode").onclick=()=>{nodes=nodes.filter(x=>x.id!==n.id);links=links.filter(l=>l.from!==n.id&&l.to!==n.id);selectedNode=null;renderAll()};
 }
 function setView(view){
