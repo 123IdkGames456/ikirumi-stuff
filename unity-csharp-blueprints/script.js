@@ -13,16 +13,7 @@ function actualOutputType(n){
  if(n.type==="literal")return n.values.type==="null"?"null":(n.values.type||"int");
  if(n.type==="getvar")return getVar(n.values.variable)?.type||"dynamic";
  if(n.type==="getcomponent")return n.values.componentType||"Rigidbody";
- if(n.type==="math"){
-  const connected=links.filter(l=>l.kind==="data"&&l.to===n.id&&["a","b"].includes(l.toPin)).map(l=>actualOutputType(getNode(l.from)));
-  const types=connected.filter(t=>["int","float","double","decimal","long","short","byte"].includes(t));
-  if(types.includes("double"))return "double";
-  if(types.includes("decimal"))return "decimal";
-  if(types.includes("float"))return "float";
-  if(types.includes("long"))return "long";
-  if(types.length&&types.every(t=>t==="int"))return "int";
-  return "number";
-}
+ if(n.type==="math")return n.values.outputType||"float";
  return d?.valueOut||"dynamic";
 }
 function typesCompatible(from,to){
@@ -267,11 +258,19 @@ function renderInspector(){
 }
 function setView(view){
  activeView=view;
+ const isCode=view==="code";
  const main=document.querySelector(".main");
- main.classList.toggle("code-mode",view==="code");
- $("graphTab").classList.toggle("active",view==="graph");
- $("csharpTab").classList.toggle("active",view==="code");
- if(view==="code"){renderCode();$("codeOutput").hidden=false;document.querySelector(".code-panel").classList.remove("collapsed");$("toggleCode").textContent="Hide code";codeVisible=true}
+ const workspace=$("workspace");
+ const panel=document.querySelector(".code-panel");
+ main.classList.toggle("code-mode",isCode);
+ workspace.hidden=isCode;
+ $("graphTab").classList.toggle("active",!isCode);
+ $("csharpTab").classList.toggle("active",isCode);
+ panel.classList.toggle("collapsed",false);
+ $("codeOutput").hidden=false;
+ $("toggleCode").textContent="Hide code";
+ codeVisible=true;
+ if(isCode)renderCode();
 }
 function renderCode(){
  const result=BlueprintCompiler.compile(nodes,links,variables,$("projectName").value||"BlueprintScript");
@@ -289,8 +288,8 @@ function example(){
  links.push({from:start.id,fromPin:"Then",to:set.id,toPin:"Exec",kind:"flow"},{from:a.id,fromPin:"value",to:math.id,toPin:"a",kind:"data"},{from:b.id,fromPin:"value",to:math.id,toPin:"b",kind:"data"});
  status("Starter example loaded");renderAll();
 }
-$("graphTab").addEventListener("click",()=>setView("graph"));
-$("csharpTab").addEventListener("click",()=>setView("code"));
+$("graphTab").onclick=e=>{e.preventDefault();setView("graph")};
+$("csharpTab").onclick=e=>{e.preventDefault();setView("code")};
 $("blockSearch").addEventListener("input",renderBlocks);
 $("addVariable").onclick=$("addVariableSide").onclick=()=>openVariableModal();
 $("modalClose").onclick=$("modalCancel").onclick=()=>{$("modal").hidden=true};
