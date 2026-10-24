@@ -244,7 +244,6 @@ function fieldHtml(n,f){
   if(["x","y","z","w"].includes(f.id)&&!composite)return "";
   if(f.id==="z"&&type==="Vector2")return "";
   if(f.id==="w"&&["Vector2","Vector3"].includes(type))return "";
-  if(f.id==="w"&&type==="Quaternion")return "";
  }
  if(n.type==="vector"&&f.id==="z"&&n.values.vectorType==="Vector2")return "";
  if(n.type==="vector"&&f.id==="w"&&["Vector2","Vector3"].includes(n.values.vectorType))return "";
