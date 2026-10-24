@@ -3,7 +3,7 @@ const esc=s=>String(s??"").replace(/\\/g,"\\\\").replace(/"/g,'\\"').replace(/\n
 function compile(nodes,links,vars,className){
 const safeClass=(className||"BlueprintScript").replace(/[^A-Za-z0-9_]/g,"")||"BlueprintScript";
 const lines=["using UnityEngine;","using System;","using System.Collections;","using System.Collections.Generic;","","public class "+safeClass+" : MonoBehaviour","{"];
-for(const v of vars){const prefix=v.access==="public"?"public ":v.access==="private-inspector"?"[SerializeField] private ":"private ";lines.push("    "+prefix+v.type+" "+v.name+" = "+(v.initial||BlueprintTypes.defaultValue(v.type))+";")}
+for(const v of vars){const initial=v.initial||BlueprintTypes.defaultValue(v.type);if(v.access==="public-hidden"){lines.push("    public "+v.type+" "+v.name+" { get; set; } = "+initial+";")}else{const prefix=v.access==="private-inspector"?"[SerializeField] private ":"private ";lines.push("    "+prefix+v.type+" "+v.name+" = "+initial+";")}}
 if(vars.length)lines.push("");
 const events=nodes.filter(n=>["start","update","fixed"].includes(n.type));
 const dataLinks=links.filter(l=>l.kind==="data");
