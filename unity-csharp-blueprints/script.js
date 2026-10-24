@@ -70,7 +70,7 @@ function typesCompatible(from,to){
  if(from==="dynamic"||from==="any")return to==="dynamic"||to==="any";
  const numeric=["byte","sbyte","short","ushort","int","uint","long","ulong","float","double","decimal","number"];
  if(numeric.includes(from)&&numeric.includes(to))return true;
- if(from==="null")return !BlueprintTypes.isValue(to);
+ if(from==="null")return to==="string"||to==="object"||!BlueprintTypes.isValue(to);
  return BlueprintTypes.compatible(from,to);
 }
 function inputActive(n,p){
