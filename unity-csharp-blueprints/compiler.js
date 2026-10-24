@@ -54,7 +54,7 @@ function debugValueExpr(nodeId,seen=new Set()){
  const n=nodes.find(x=>x.id===nodeId);
  if(n?.type==="fromto"){
   const link=dataLinks.find(l=>l.to===n.id&&l.toPin==="value");
-  if(link)return debugValueExpr(link.from,seen);
+  if(link){const nextSeen=new Set(seen);nextSeen.add(nodeId);return debugValueExpr(link.from,nextSeen)}
  }
  const expression=valueExpr(nodeId,new Set(seen));
  if(n?.type==="math"&&expression.startsWith("(")&&expression.endsWith(")"))return expression.slice(1,-1);
