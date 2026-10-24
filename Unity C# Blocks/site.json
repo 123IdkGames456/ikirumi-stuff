@@ -1,6 +1,6 @@
 {
   "name": "Unity C# Blocks",
-  "description": "Build Unity C# scripts by assembling configurable visual blocks. Generate code for MonoBehaviour, Editor tools, UI, physics, input, gameplay, AI, animation, audio, scenes, networking and advanced C#.",
+  "description": "A visual Unity C# Blueprint editor with draggable nodes, searchable aliases, combined math/comparison/logical blocks, typed variable dropdowns, Inspector visibility settings, and generated C# output.",
   "tags": [
     "Unity",
     "C#",
@@ -15,7 +15,16 @@
     "AI",
     "animation",
     "audio",
-    "input"
+    "input",
+    "Blueprint Studio",
+    "combined operations",
+    "search aliases",
+    "Vector2",
+    "Vector3",
+    "Vector4",
+    "lists",
+    "variables",
+    "Inspector visibility"
   ],
   "category": "Tools",
   "icon": "🧩"
