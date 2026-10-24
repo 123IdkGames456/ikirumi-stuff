@@ -285,7 +285,7 @@ function renderNodes(){
   const head=el.querySelector(".node-head");
   head.addEventListener("pointerdown",e=>{if(e.target.closest("button,input,select"))return;selectedNode=n.id;const sx=e.clientX,sy=e.clientY,ox=n.x,oy=n.y;head.setPointerCapture?.(e.pointerId);function move(ev){n.x=Math.max(0,ox+ev.clientX-sx);n.y=Math.max(0,oy+ev.clientY-sy);el.style.left=n.x+"px";el.style.top=n.y+"px";drawWires()}function end(){window.removeEventListener("pointermove",move);window.removeEventListener("pointerup",end);renderInspector()}window.addEventListener("pointermove",move);window.addEventListener("pointerup",end);e.preventDefault()});
   el.querySelectorAll("[data-field]").forEach(input=>{
-   input.addEventListener("change",()=>{
+   input.addEventListener(input.type==="checkbox"?"input":"change",()=>{
     const field=input.dataset.field;
     n.values[field]=input.type==="checkbox"?String(input.checked):input.value;
     const componentField=field.startsWith("use_")&&n.type==="setcomponent";
@@ -441,7 +441,7 @@ function renderInspector(){
  }
  html+='<div style="margin-top:15px"><button id="deleteNode" style="width:100%">Delete node</button></div>';
  $("nodeInspector").innerHTML=html;
- $("nodeInspector").querySelectorAll("[data-inspect]").forEach(el=>el.onchange=()=>{const field=el.dataset.inspect;n.values[field]=el.type==="checkbox"?String(el.checked):el.value;const componentField=n.type==="setcomponent"&&field.startsWith("use_");if(["type","variable","componentType","componentVariable","toType","outputType","operandType","vectorType","property"].includes(field)||field.startsWith("use_")||(field==="operation"&&["transform","gameobject"].includes(n.type)))removeIncompatibleLinksForOutput(n.id);removeIncompatibleLinksForInput(n.id);if(componentField){pruneIncompatibleLinks();renderNodes();renderInspector();renderCode()}else renderAll()});
+ $("nodeInspector").querySelectorAll("[data-inspect]").forEach(el=>el.addEventListener(el.type==="checkbox"?"input":"change",()=>{const field=el.dataset.inspect;n.values[field]=el.type==="checkbox"?String(el.checked):el.value;const componentField=n.type==="setcomponent"&&field.startsWith("use_");if(["type","variable","componentType","componentVariable","toType","outputType","operandType","vectorType","property"].includes(field)||field.startsWith("use_")||(field==="operation"&&["transform","gameobject"].includes(n.type)))removeIncompatibleLinksForOutput(n.id);removeIncompatibleLinksForInput(n.id);if(componentField){pruneIncompatibleLinks();renderNodes();renderInspector();renderCode()}else renderAll()}));
  $("deleteNode").onclick=()=>{nodes=nodes.filter(x=>x.id!==n.id);links=links.filter(l=>l.from!==n.id&&l.to!==n.id);selectedNode=null;renderAll()};
 }
 function setView(view){
