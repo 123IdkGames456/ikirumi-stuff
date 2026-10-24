@@ -7,6 +7,9 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt
 const getDef = id => defs.find(d => d.id === id);
 const getNode = id => nodes.find(n => n.id === id);
 const getVar = id => variables.find(v => v.id === id);
+function nodeInputs(n){const d=getDef(n?.type);return [...(d?.dataIn||[]),...((n?.type==="setcomponent"?(d?.propertyInputs||[]).filter(p=>n.values?.["use_"+p.id]==="true"):[]))]}
+function nodeOutputs(n){const d=getDef(n?.type);return d?.dataOut||[]}
+
 function componentPropertyType(component,property){
  const map={
   Joint:{connectedBody:"Rigidbody",anchor:"Vector3",connectedAnchor:"Vector3",autoConfigureConnectedAnchor:"bool",breakForce:"float",breakTorque:"float",enableCollision:"bool",enablePreprocessing:"bool",massScale:"float",connectedMassScale:"float"},
@@ -114,7 +117,7 @@ function removeIncompatibleLinksForOutput(nodeId){
  const n=getNode(nodeId),fromType=actualOutputType(n);
  links=links.filter(l=>{
   if(l.kind!=="data"||l.from!==nodeId)return true;
-  const target=getNode(l.to),td=getDef(target?.type),input=(td?.dataIn||[]).find(p=>p.id===l.toPin);
+  const target=getNode(l.to),td=getDef(target?.type),input=nodeInputs(target).find(p=>p.id===l.toPin);
   return !!input&&inputActive(target,input)&&typesCompatible(fromType,expectedInputType(target,input));
  });
 }
@@ -122,7 +125,7 @@ function removeIncompatibleLinksForInput(nodeId){
  const n=getNode(nodeId),td=getDef(n?.type);
  links=links.filter(l=>{
   if(l.kind!=="data"||l.to!==nodeId)return true;
-  const source=getNode(l.from),input=(td?.dataIn||[]).find(p=>p.id===l.toPin);
+  const source=getNode(l.from),input=nodeInputs(target).find(p=>p.id===l.toPin);
   return !!input&&inputActive(n,input)&&typesCompatible(actualOutputType(source),expectedInputType(n,input));
  });
 }
@@ -232,11 +235,12 @@ function renderNodes(){
   html+='<div class="node-body">';
   html+='<div class="node-description">'+esc(d.desc)+'</div>';
   (d.fields||[]).forEach(f=>html+=fieldHtml(n,f));
-  (d.dataIn||[]).filter(p=>inputActive(n,p)).forEach(p=>{
+  nodeInputs(n).filter(p=>inputActive(n,p)).forEach(p=>{
     const inputType=displayInputType(n,p),pinType=inputType==="any"?"dynamic":inputType;
     html+='<div class="pin-row input-row"><span class="pin-label"><button class="pin in" data-direction="input" data-kind="data" data-type="'+esc(pinType)+'" data-pin="'+p.id+'" title="Drag to connect input"></button><span class="pin-name">'+esc(p.label)+'</span><span class="pin-type-badge input-type-badge">'+esc(inputType)+'</span></span></div>';
    });
-   if(d.valueOut&&actualOutputType(n)!=="none"){
+   if(n.type==="getcomponentvalue"){nodeOutputs(n).forEach(p=>{html+='<div class="pin-row output-row"><span class="output-info"><span class="output-name">'+esc(p.label)+'</span><span class="pin-type-badge output-type-badge">'+esc(p.type)+'</span></span><button class="pin out" data-direction="output" data-kind="data" data-type="'+esc(p.type)+'" data-pin="'+p.id+'" title="Drag to connect '+esc(p.label)+'"></button></div>'})}
+   if(d.valueOut&&actualOutputType(n)!=="none"&&n.type!=="getcomponentvalue"){
     const outputType=actualOutputType(n);
     const outputLabel=outputType==="dynamic"?(n.type==="getvar"?"Choose variable":"Select type"):outputType;
     html+='<div class="pin-row output-row"><span class="output-info"><span class="output-name">Output</span><span class="pin-type-badge output-type-badge">'+esc(outputLabel)+'</span></span><button class="pin out" data-direction="output" data-kind="data" data-type="'+esc(outputType)+'" data-pin="value" title="Drag to connect output"></button></div>';
@@ -322,10 +326,10 @@ function findSnapTarget(x,y,requireNear=true){
    let source,target,input;
    if(wireDrag.direction==="output"){
     source=getNode(wireDrag.node);target=getNode(nodeId);
-    input=(getDef(target?.type)?.dataIn||[]).find(p=>p.id===pin.dataset.pin);
+    input=nodeInputs(target).find(p=>p.id===pin.dataset.pin);
    }else{
     source=getNode(nodeId);target=getNode(wireDrag.node);
-    input=(getDef(target?.type)?.dataIn||[]).find(p=>p.id===wireDrag.pin);
+    input=nodeInputs(target).find(p=>p.id===wireDrag.pin);
    }
    if(!source||!target||!input||!typesCompatible(actualOutputType(source),expectedInputType(target,input)))return;
   }
@@ -364,7 +368,7 @@ function pinClick(n,kind,isOut,pin){
  if(kind!==a.kind||isOut){status(isOut?"Connections must go from an output to an input":"Pin types do not match");renderNodes();return}
  const from=getNode(a.node),to=n,fd=getDef(from.type),td=getDef(to.type);
  if(kind==="data"){
-  const outType=actualOutputType(from), input=(td.dataIn||[]).find(p=>p.id===pin);
+  const outType=actualOutputType(from), input=nodeInputs(to).find(p=>p.id===pin);
   if(!input||!typesCompatible(outType,expectedInputType(to,input))){status("Incompatible data types");renderNodes();return}
  }
  links=links.filter(l=>!(l.to===n.id&&l.toPin===pin&&l.kind===kind));
@@ -430,7 +434,7 @@ function pruneIncompatibleLinks(){
  links=links.filter(l=>{
   if(l.kind!=="data")return true;
   const source=getNode(l.from),target=getNode(l.to),td=getDef(target?.type);
-  const input=(td?.dataIn||[]).find(p=>p.id===l.toPin);
+  const input=nodeInputs(target).find(p=>p.id===l.toPin);
   return !!source&&!!input&&inputActive(target,input)&&typesCompatible(actualOutputType(source),expectedInputType(target,input));
  }
  );
