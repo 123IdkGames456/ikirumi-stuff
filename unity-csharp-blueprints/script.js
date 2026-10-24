@@ -153,7 +153,8 @@ function renderCategories(){ $("categories").innerHTML=allCategories.map(c=>'<bu
 function renderBlocks(){
  const q=$("blockSearch").value.toLowerCase().trim();
  const filtered=defs.filter(d=>(activeCategory==="All"||d.category===activeCategory)&&(!q||[d.name,d.category,d.desc,...(d.aliases||[]),...(d.fields||[]).flatMap(f=>[f.label,...(f.options||[]).map(o=>o[1])])].join(" ").toLowerCase().includes(q)));
- $("blockList").innerHTML=filtered.map(d=>'<button class="block-item" data-type="'+d.id+'" style="--accent:'+d.color+'"><span class="block-dot"></span><span class="block-text"><strong>'+esc(d.name)+'</strong><small>'+esc(d.desc)+'</small></span></button>').join("")||'<div class="subtle">No blocks found. Try a synonym, symbol, or operation name.</div>';
+ const groups=[...new Set(filtered.map(d=>d.category))];
+ $("blockList").innerHTML=groups.map(category=>'<section class="block-category-section"><div class="block-category-heading"><span>'+esc(category)+'</span><small>'+filtered.filter(d=>d.category===category).length+' blocks</small></div>'+filtered.filter(d=>d.category===category).map(d=>'<button class="block-item" data-type="'+d.id+'" style="--accent:'+d.color+'"><span class="block-dot"></span><span class="block-text"><strong>'+esc(d.name)+'</strong><small>'+esc(d.desc)+'</small></span></button>').join("")+'</section>').join("")||'<div class="subtle">No blocks found. Try a synonym, symbol, or operation name.</div>';
  $("blockList").querySelectorAll("[data-type]").forEach(b=>b.onclick=()=>addNode(b.dataset.type));
  $("blockTotal").textContent=filtered.length;
 }
@@ -209,7 +210,7 @@ function fieldHtml(n,f){
  if(f.type==="checkbox")return '<label class="node-field checkbox-field"><span>'+esc(f.label)+'</span><input data-field="'+f.id+'" type="checkbox" '+(val==="true"||val===true?"checked":"")+'></label>';
  if(f.type==="variable"){
   const expected=n.type==="setcomponent"&&f.id==="componentVariable"?(n.values.componentType||"Component"):(f.expected||null);
-  const list=variables.filter(v=>f.allowAll&&n.type!=="setcomponent"||!expected||v.type===expected||v.type==="Component");
+  const list=variables.filter(v=>f.allowAll&&n.type!=="setcomponent"||!expected||v.type===expected||v.type==="Component"||v.type==="MonoBehaviour"||v.type==="object"||(n.type==="setcomponent"&&BlueprintTypes.unity.includes(v.type)));
   return '<label class="node-field"><span>'+esc(f.label)+'</span><select data-field="'+f.id+'"><option value="">Choose variable…</option>'+list.map(v=>'<option value="'+v.id+'" '+(val===v.id?"selected":"")+'>'+esc(v.name)+' · '+esc(v.type)+'</option>').join("")+'</select></label>';
  }
  if(f.type==="select")return '<label class="node-field"><span>'+esc(f.label)+'</span><select data-field="'+f.id+'">'+f.options.map(o=>'<option value="'+esc(o[0])+'" '+(String(val)===String(o[0])?"selected":"")+'>'+esc(o[1])+'</option>').join("")+'</select></label>';
