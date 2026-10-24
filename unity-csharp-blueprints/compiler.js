@@ -172,7 +172,7 @@ function compile(inputNodes,inputLinks,inputVars,className){
   report("Type mismatch: "+from+" cannot be used as "+to+(n?" on "+n.type:"")+".");
   return typedDefault(to);
  }
- function valueExpr(nodeId,seen=new Set(),expectedType=null){
+ function valueExpr(nodeId,seen=new Set(),expectedType=null,outputPin="value"){
   const n=findNode(nodeId);
   if(!n){report("A value input points to a missing node.");return typedDefault(expectedType||"int")}
   if(seen.has(nodeId)){report("A data connection loop was detected at "+n.type+".");return typedDefault(expectedType||nodeType(n))}
@@ -200,8 +200,9 @@ function compile(inputNodes,inputLinks,inputVars,className){
    const target=valueForInput(n,"target",path,"GameObject");
    expression="((GameObject)("+target+"))?.GetComponent<"+ct+">()";
   }else if(n.type==="getcomponentvalue"){
-    const ct=n.values?.componentType||"Rigidbody",prop=n.values?.property||"mass",target=valueForInput(n,"component",path,"Component");
-    expression="(("+ct+")("+target+"))."+prop;
+    const prop=outputPin==="value"?"mass":outputPin,target=valueForInput(n,"component",path,"Component");
+    const inputLink=dataLink(n.id,"component"),source=inputLink?findNode(inputLink.from):null,ct=source?.type==="getcomponent"?(source.values?.componentType||"Rigidbody"):"Component";
+    expression=ct==="Component"?"((dynamic)("+target+"))."+prop:"(("+ct+")("+target+"))."+prop;
    }else if(n.type==="fromto"){
    expression=fromToExpression(n,path);
   }else if(n.type==="vector"){
@@ -252,7 +253,7 @@ function compile(inputNodes,inputLinks,inputVars,className){
  }
  function valueForInput(n,pin,seen=new Set(),expectedType=null){
   const link=dataLink(n.id,pin);
-  if(link)return valueExpr(link.from,seen,expectedType);
+  if(link)return valueExpr(link.from,seen,expectedType,link.fromPin);
   if((n.type==="vector"||n.type==="literal")&&["x","y","z","w"].includes(pin)&&["Vector2","Vector3","Vector4","Quaternion","Color","Color32"].includes(n.values?.vectorType||n.values?.type))return typedFallback(n.values?.[pin]??(pin==="w"?"1":"0"),expectedType||"float");
   if(pin==="minimumValue")return typedFallback(n.values?.minimum??"-45","float");
   if(pin==="maximumValue")return typedFallback(n.values?.maximum??"45","float");
