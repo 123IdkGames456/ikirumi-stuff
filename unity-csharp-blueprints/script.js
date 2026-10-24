@@ -141,22 +141,39 @@ function renderBlocks(){
  $("blockTotal").textContent=filtered.length;
 }
 const componentProperties={
-HingeJoint:[["limits","Limits (Minimum / Maximum)"],["useLimits","Use Limits"],["motor","Motor"],["spring","Spring"],["breakForce","Break Force"],["breakTorque","Break Torque"],["enableCollision","Enable Collision"],["enablePreprocessing","Enable Preprocessing"]],
-HingeJoint2D:[["limits","Limits (Minimum / Maximum)"],["useLimits","Use Limits"],["motor","Motor"],["breakForce","Break Force"],["breakTorque","Break Torque"],["enableCollision","Enable Collision"]],
+Joint:[["connectedBody","Connected Body"],["anchor","Anchor"],["connectedAnchor","Connected Anchor"],["autoConfigureConnectedAnchor","Auto Configure Connected Anchor"],["breakForce","Break Force"],["breakTorque","Break Torque"],["enableCollision","Enable Collision"],["enablePreprocessing","Enable Preprocessing"],["massScale","Mass Scale"],["connectedMassScale","Connected Mass Scale"]],
+FixedJoint:[["connectedBody","Connected Body"],["anchor","Anchor"],["connectedAnchor","Connected Anchor"],["autoConfigureConnectedAnchor","Auto Configure Connected Anchor"],["breakForce","Break Force"],["breakTorque","Break Torque"],["enableCollision","Enable Collision"],["enablePreprocessing","Enable Preprocessing"],["massScale","Mass Scale"],["connectedMassScale","Connected Mass Scale"]],
+SpringJoint:[["connectedBody","Connected Body"],["anchor","Anchor"],["connectedAnchor","Connected Anchor"],["autoConfigureConnectedAnchor","Auto Configure Connected Anchor"],["spring","Spring"],["damper","Damper"],["minDistance","Minimum Distance"],["maxDistance","Maximum Distance"],["tolerance","Tolerance"],["breakForce","Break Force"],["breakTorque","Break Torque"],["enableCollision","Enable Collision"],["enablePreprocessing","Enable Preprocessing"]],
+HingeJoint:[["limits","Limits (Minimum / Maximum)"],["useLimits","Use Limits"],["motor","Motor"],["spring","Spring"],["breakForce","Break Force"],["breakTorque","Break Torque"],["enableCollision","Enable Collision"],["enablePreprocessing","Enable Preprocessing"],["connectedBody","Connected Body"]],
+HingeJoint2D:[["limits","Limits (Minimum / Maximum)"],["useLimits","Use Limits"],["useMotor","Use Motor"],["useSpring","Use Spring"],["motor","Motor"],["breakForce","Break Force"],["breakTorque","Break Torque"],["enableCollision","Enable Collision"],["connectedBody","Connected Body"]],
+CharacterJoint:[["connectedBody","Connected Body"],["swingAxis","Swing Axis"],["lowTwistLimit","Low Twist Limit"],["highTwistLimit","High Twist Limit"],["swing1Limit","Swing 1 Limit"],["swing2Limit","Swing 2 Limit"],["breakForce","Break Force"],["breakTorque","Break Torque"],["enableCollision","Enable Collision"],["enablePreprocessing","Enable Preprocessing"]],
+ConfigurableJoint:[["connectedBody","Connected Body"],["xMotion","X Motion"],["yMotion","Y Motion"],["zMotion","Z Motion"],["angularXMotion","Angular X Motion"],["angularYMotion","Angular Y Motion"],["angularZMotion","Angular Z Motion"],["targetPosition","Target Position"],["targetVelocity","Target Velocity"],["targetRotation","Target Rotation"],["targetAngularVelocity","Target Angular Velocity"],["linearLimit","Linear Limit"],["lowAngularXLimit","Low Angular X Limit"],["highAngularXLimit","High Angular X Limit"],["angularYLimit","Angular Y Limit"],["angularZLimit","Angular Z Limit"],["configuredInWorldSpace","Configured In World Space"],["swapBodies","Swap Bodies"],["projectionDistance","Projection Distance"],["projectionAngle","Projection Angle"]],
+Joint2D:[["connectedBody","Connected Body"],["anchor","Anchor"],["connectedAnchor","Connected Anchor"],["autoConfigureConnectedAnchor","Auto Configure Connected Anchor"],["breakForce","Break Force"],["breakTorque","Break Torque"],["enableCollision","Enable Collision"]],
 Rigidbody:[["mass","Mass"],["drag","Drag"],["angularDrag","Angular Drag"],["useGravity","Use Gravity"],["isKinematic","Is Kinematic"],["detectCollisions","Detect Collisions"],["constraints","Constraints"]],
 Rigidbody2D:[["mass","Mass"],["gravityScale","Gravity Scale"],["linearDamping","Linear Damping"],["angularDamping","Angular Damping"],["simulated","Simulated"],["bodyType","Body Type"],["constraints","Constraints"]],
 Transform:[["position","Position"],["localPosition","Local Position"],["rotation","Rotation"],["localRotation","Local Rotation"],["localScale","Local Scale"]],
 Collider:[["enabled","Enabled"],["isTrigger","Is Trigger"]],
 Collider2D:[["enabled","Enabled"],["isTrigger","Is Trigger"]],
 BoxCollider:[["enabled","Enabled"],["isTrigger","Is Trigger"],["center","Center"],["size","Size"]],
+SphereCollider:[["enabled","Enabled"],["isTrigger","Is Trigger"],["center","Center"],["radius","Radius"]],
+CapsuleCollider:[["enabled","Enabled"],["isTrigger","Is Trigger"],["center","Center"],["radius","Radius"],["height","Height"],["direction","Direction"]],
+MeshCollider:[["enabled","Enabled"],["isTrigger","Is Trigger"],["sharedMesh","Shared Mesh"],["convex","Convex"]],
 BoxCollider2D:[["enabled","Enabled"],["isTrigger","Is Trigger"],["offset","Offset"],["size","Size"]],
+CircleCollider2D:[["enabled","Enabled"],["isTrigger","Is Trigger"],["offset","Offset"],["radius","Radius"]],
+CapsuleCollider2D:[["enabled","Enabled"],["isTrigger","Is Trigger"],["offset","Offset"],["size","Size"],["direction","Direction"]],
+CharacterController:[["enabled","Enabled"],["height","Height"],["radius","Radius"],["center","Center"],["slopeLimit","Slope Limit"],["stepOffset","Step Offset"],["skinWidth","Skin Width"],["minMoveDistance","Minimum Move Distance"],["detectCollisions","Detect Collisions"],["enableOverlapRecovery","Enable Overlap Recovery"]],
+ConstantForce:[["force","Force"],["relativeForce","Relative Force"],["torque","Torque"],["relativeTorque","Relative Torque"]],
+Animator:[["enabled","Enabled"],["applyRootMotion","Apply Root Motion"],["speed","Speed"],["updateMode","Update Mode"],["cullingMode","Culling Mode"]],
 AudioSource:[["volume","Volume"],["pitch","Pitch"],["loop","Loop"],["playOnAwake","Play On Awake"],["mute","Mute"]],
 Camera:[["fieldOfView","Field Of View"],["orthographic","Orthographic"],["orthographicSize","Orthographic Size"],["nearClipPlane","Near Clip Plane"],["farClipPlane","Far Clip Plane"]],
 Light:[["intensity","Intensity"],["range","Range"],["color","Color"],["enabled","Enabled"]],
 NavMeshAgent:[["speed","Speed"],["angularSpeed","Angular Speed"],["acceleration","Acceleration"],["stoppingDistance","Stopping Distance"],["isStopped","Is Stopped"]],
-WheelCollider:[["motorTorque","Motor Torque"],["brakeTorque","Brake Torque"],["steerAngle","Steer Angle"]]
+WheelCollider:[["motorTorque","Motor Torque"],["brakeTorque","Brake Torque"],["steerAngle","Steer Angle"]],
+SpriteRenderer:[["enabled","Enabled"],["color","Color"],["flipX","Flip X"],["flipY","Flip Y"],["sortingOrder","Sorting Order"],["sprite","Sprite"]],
+MeshRenderer:[["enabled","Enabled"],["receiveShadows","Receive Shadows"],["shadowCastingMode","Shadow Casting Mode"],["sortingOrder","Sorting Order"]],
+ParticleSystem:[["loop","Loop"],["playOnAwake","Play On Awake"],["simulationSpeed","Simulation Speed"]]
 };
-const boolProperties=new Set(["useLimits","enableCollision","enablePreprocessing","useGravity","isKinematic","detectCollisions","simulated","isTrigger","enabled","loop","playOnAwake","mute","orthographic","isStopped"]);
+const boolProperties=new Set(["useLimits","useMotor","useSpring","autoConfigureConnectedAnchor","configuredInWorldSpace","swapBodies","enableCollision","enablePreprocessing","useGravity","isKinematic","detectCollisions","enableOverlapRecovery","simulated","isTrigger","enabled","loop","playOnAwake","mute","orthographic","isStopped","convex","applyRootMotion","flipX","flipY","receiveShadows"]);
 function fieldHtml(n,f){
  let val=n.values[f.id]??f.default??"";
  if(n.type==="vector"&&f.id==="z"&&n.values.vectorType==="Vector2")return "";
@@ -168,7 +185,7 @@ function fieldHtml(n,f){
   if(f.id==="componentVariable"&&n.values.source==="connected")return "";
   if(f.id==="propertyValue"&&boolProperties.has(prop))return "";
   if(f.id==="property"){
-   const options=componentProperties[ct]||[["enabled","Enabled"]];
+   const options=componentProperties[ct]||[];
    return '<label class="node-field"><span>'+esc(f.label)+'</span><select data-field="property">'+options.map(o=>'<option value="'+o[0]+'" '+(prop===o[0]?"selected":"")+'>'+esc(o[1])+'</option>').join("")+'</select></label>';
   }
  }
@@ -213,7 +230,7 @@ function renderNodes(){
     n.values[field]=input.type==="checkbox"?String(input.checked):input.value;
     let rebuildNode=false;
     if(n.type==="setcomponent"&&field==="componentType"){
-     n.values.property=(componentProperties[input.value]||[["enabled","Enabled"]])[0][0];
+     n.values.property=(componentProperties[input.value]||[])[0]?.[0]||"";
      rebuildNode=true;
     }
     if(n.type==="setcomponent"&&["property","source","setMinimum","setMaximum"].includes(field))rebuildNode=true;
