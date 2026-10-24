@@ -143,3 +143,10 @@ button:active{transform:translateY(1px)}
 .sidebar .block-text strong,.sidebar .block-text small{overflow-wrap:anywhere}
 .sidebar .sidebar-help{font-size:10px;line-height:1.35;padding:7px 2px;max-height:48px;overflow:auto}
 @media(max-height:760px){.sidebar .sidebar-help{display:none}.sidebar .categories{max-height:76px}.sidebar .panel-title{margin-bottom:7px}.sidebar .search{margin-bottom:6px}.sidebar .block-category-heading{padding:6px 7px}}
+
+.node-field.component-toggle{grid-template-columns:minmax(0,1fr) 34px;gap:10px}
+.node-field.component-toggle input[type="checkbox"]{appearance:none;-webkit-appearance:none;position:relative;width:32px;height:18px;padding:0;margin:0;border:1px solid #4a5368;border-radius:999px;background:#2a3040;cursor:pointer;transition:background .15s,border-color .15s}
+.node-field.component-toggle input[type="checkbox"]::before{content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#b8c1d4;transition:transform .15s,background .15s}
+.node-field.component-toggle input[type="checkbox"]:checked{background:#6c87e8;border-color:#8ba2ff}
+.node-field.component-toggle input[type="checkbox"]:checked::before{transform:translateX(14px);background:#fff}
+.node-field.component-toggle input[type="checkbox"]:focus-visible{outline:2px solid #a7b8ff;outline-offset:2px}
