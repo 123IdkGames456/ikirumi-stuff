@@ -22,3 +22,7 @@
 .pin[data-type="Collider"],.pin[data-type="Collider2D"]{--pin-color:#85c86b;background:#85c86b}
 .pin[data-type^="List<"],.pin[data-type^="Dictionary<"],.pin[data-type$="[]"]{clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);border:0;border-radius:0;transform:none;width:15px;height:14px;--pin-color:#efbd70;background:#efbd70}
 .pin[data-type="dynamic"]{border-radius:2px;--pin-color:#d7dce5;background:#d7dce535}
+
+.pin.snap-target{outline:3px solid #fff;outline-offset:4px;filter:brightness(1.55);box-shadow:0 0 0 7px #efbd7040;transform:scale(1.2);z-index:5}
+.pin[data-type^="Vector"].snap-target,.pin[data-type="Color"].snap-target,.pin[data-type="Rect"].snap-target{transform:scale(1.2)}
+.wire-preview{stroke-dasharray:7 5;opacity:1}
