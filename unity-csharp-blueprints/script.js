@@ -124,7 +124,7 @@ function moveWireDrag(e){
  const p=canvasPoint(e.clientX,e.clientY),a=wireDrag.start,dx=Math.max(45,Math.abs(p.x-a.x)*.45);
  wireDrag.path.setAttribute("d","M "+a.x+" "+a.y+" C "+(a.x+dx)+" "+a.y+" "+(p.x-dx)+" "+p.y+" "+p.x+" "+p.y);
  document.querySelectorAll(".pin[data-direction='input']").forEach(pin=>pin.classList.remove("snap-target"));
- const target=findSnapInput(e.clientX,e.clientY,false);if(target)target.pin.classList.add("snap-target");
+ const target=findSnapInput(e.clientX,e.clientY,true);if(target)target.pin.classList.add("snap-target");
 }
 function findSnapInput(x,y,requireNear=true){
  if(!wireDrag)return null;
