@@ -1,5 +1,5 @@
 {
-  "version": 7,
+  "version": 8,
   "files": [
     ".github/workflows/check-device-ai.yml",
     "app.js",
@@ -17,8 +17,14 @@
     "evergreen/site.json",
     "THE TORCHES WIND - Book/index.html",
     "THE TORCHES WIND - Book/site.json",
-    "Unity C# Blocks/index.html",
-    "Unity C# Blocks/site.json"
+    "unity-csharp-blueprints/index.html",
+    "unity-csharp-blueprints/style.css",
+    "unity-csharp-blueprints/script.js",
+    "unity-csharp-blueprints/blocks.js",
+    "unity-csharp-blueprints/types.js",
+    "unity-csharp-blueprints/compiler.js",
+    "unity-csharp-blueprints/storage.js",
+    "unity-csharp-blueprints/site.json"
   ],
   "sites": [
     "cookie-clicker",
@@ -28,6 +34,6 @@
     "Text to 3D",
     "evergreen",
     "THE TORCHES WIND - Book",
-    "Unity C# Blocks"
+    "unity-csharp-blueprints"
   ]
 }
