@@ -212,7 +212,7 @@ function compile(inputNodes,inputLinks,inputVars,className){
    const type=n.values?.vectorType||"Vector3";
    const x=valueForInput(n,"x",path,"float"),y=valueForInput(n,"y",path,"float");
    const z=valueForInput(n,"z",path,"float"),w=valueForInput(n,"w",path,"float");
-   const args=type==="Vector2"?[x,y]:type==="Vector3"?[x,y,z]:type==="Vector4"||type==="Quaternion"||type==="Color"?[x,y,z,w]:null;
+   const args=type==="Vector2"?[x,y]:type==="Vector3"?[x,y,z]:type==="Vector4"||type==="Quaternion"||type==="Color"?[x,y,z,w]:type==="Color32"?["(byte)("+x+")","(byte)("+y+")","(byte)("+z+")","(byte)("+w+")"]:null;
    if(args)expression="new "+type+"("+args.join(", ")+")";
    else {report("Choose a supported vector output type.");expression="Vector3.zero"}
   }else if(n.type==="math"){
