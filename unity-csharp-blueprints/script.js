@@ -14,6 +14,7 @@ function actualOutputType(n){
  if(n.type==="getvar")return getVar(n.values.variable)?.type||"dynamic";
  if(n.type==="getcomponent")return n.values.componentType||"Rigidbody";
  if(n.type==="math")return n.values.outputType||"float";
+ if(n.type==="fromto")return n.values.toType||"string";
  return d?.valueOut||"dynamic";
 }
 function typesCompatible(from,to){
@@ -141,7 +142,7 @@ function renderNodes(){
      rebuildNode=true;
     }
     if(n.type==="setcomponent"&&["property","source","setMinimum","setMaximum"].includes(field))rebuildNode=true;
-    if(["type","variable","componentType"].includes(field))removeIncompatibleLinksForOutput(n.id);
+    if(["type","variable","componentType","toType"].includes(field))removeIncompatibleLinksForOutput(n.id);
     removeIncompatibleLinksForInput(n.id);
     if(rebuildNode){renderNodes();renderInspector()}else if(["type","variable","componentType"].includes(field))renderNodes();
     renderCode();
