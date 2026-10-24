@@ -444,7 +444,7 @@ function importCSharp(source,fileName){
     const a=addNode("literal",390+i*280,y+185,{type:numericType,value:mathMatch[1].replace(/f$/i,"")});
     const b=addNode("literal",390+i*280,y+355,{type:numericType,value:mathMatch[3].replace(/f$/i,"")});
     const calc=addNode("math",650+i*280,y+245,{operation:op,outputType:numericType});
-    links.push({from:a.id,fromPin:"value",to:calc.id,toPin:"a",kind:"data"},{from:b.id,fromPin:"value",to:calc.id,toPin:"b",kind:"data"},{from:calc.id,fromPin:"output",to:dbg.id,toPin:"value",kind:"data"});
+    links.push({from:a.id,fromPin:"value",to:calc.id,toPin:"a",kind:"data"},{from:b.id,fromPin:"value",to:calc.id,toPin:"b",kind:"data"},{from:calc.id,fromPin:"value",to:dbg.id,toPin:"value",kind:"data"});
     dbg.values.message="";
    }else if(/^["']/.test(expr)){
     dbg.values.message=expr.slice(1,-1);
