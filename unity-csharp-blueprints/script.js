@@ -7,6 +7,24 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt
 const getDef = id => defs.find(d => d.id === id);
 const getNode = id => nodes.find(n => n.id === id);
 const getVar = id => variables.find(v => v.id === id);
+function componentPropertyType(component,property){
+ const map={
+  HingeJoint:{limits:"JointLimits",useLimits:"bool",motor:"JointMotor",spring:"JointSpring",breakForce:"float",breakTorque:"float",enableCollision:"bool",enablePreprocessing:"bool"},
+  HingeJoint2D:{limits:"JointAngleLimits2D",useLimits:"bool",motor:"JointMotor2D",breakForce:"float",breakTorque:"float",enableCollision:"bool"},
+  Rigidbody:{mass:"float",drag:"float",angularDrag:"float",useGravity:"bool",isKinematic:"bool",detectCollisions:"bool",constraints:"RigidbodyConstraints"},
+  Rigidbody2D:{mass:"float",gravityScale:"float",linearDamping:"float",angularDamping:"float",simulated:"bool",bodyType:"RigidbodyType2D",constraints:"RigidbodyConstraints2D"},
+  Transform:{position:"Vector3",localPosition:"Vector3",rotation:"Quaternion",localRotation:"Quaternion",localScale:"Vector3"},
+  Collider:{enabled:"bool",isTrigger:"bool"},Collider2D:{enabled:"bool",isTrigger:"bool"},
+  BoxCollider:{enabled:"bool",isTrigger:"bool",center:"Vector3",size:"Vector3"},
+  BoxCollider2D:{enabled:"bool",isTrigger:"bool",offset:"Vector2",size:"Vector2"},
+  AudioSource:{volume:"float",pitch:"float",loop:"bool",playOnAwake:"bool",mute:"bool"},
+  Camera:{fieldOfView:"float",orthographic:"bool",orthographicSize:"float",nearClipPlane:"float",farClipPlane:"float"},
+  Light:{intensity:"float",range:"float",color:"Color",enabled:"bool"},
+  NavMeshAgent:{speed:"float",angularSpeed:"float",acceleration:"float",stoppingDistance:"float",isStopped:"bool"},
+  WheelCollider:{motorTorque:"float",brakeTorque:"float",steerAngle:"float"}
+ };
+ return map[component]?.[property]||"object";
+}
 function actualOutputType(n){
  if(!n)return "dynamic";
  const d=getDef(n.type);
@@ -15,41 +33,64 @@ function actualOutputType(n){
  if(n.type==="getcomponent")return n.values.componentType||"Rigidbody";
  if(n.type==="math")return n.values.outputType||"float";
  if(n.type==="fromto")return n.values.toType||"string";
+ if(n.type==="transform"){
+  const op=n.values.operation||"setPosition";
+  return op==="getPosition"||op==="getScale"?"Vector3":op==="getRotation"?"Quaternion":"none";
+ }
+ if(n.type==="gameobject")return (n.values.operation||"setActive")==="instantiate"?"GameObject":"none";
  return d?.valueOut||"dynamic";
 }
 function expectedInputType(n,p){
  if(!n||!p)return "dynamic";
  if(n.type==="fromto"&&p.id==="value")return n.values.fromType||"float";
- if(n.type==="math"&&(p.id==="a"||p.id==="b"))return "number";
+ if(n.type==="math"&&(p.id==="a"||p.id==="b"))return n.values.outputType||"float";
+ if(n.type==="compare"&&(p.id==="a"||p.id==="b"))return n.values.operandType||"float";
+ if(n.type==="setvar"&&p.id==="value")return getVar(n.values.variable)?.type||"dynamic";
+ if(n.type==="setcomponent"){
+  if(p.id==="component")return n.values.componentType||"Component";
+  if(p.id==="minimumValue"||p.id==="maximumValue")return "float";
+  if(p.id==="propertyValueInput")return componentPropertyType(n.values.componentType||"HingeJoint",n.values.property||"limits");
+ }
+ if(n.type==="transform"&&p.id==="vector")return "Vector3";
  return p.type||"dynamic";
 }
 function displayInputType(n,p){
  if(!n||!p)return "any";
- if(n.type==="fromto"&&p.id==="value")return n.values.fromType||"float";
- if(n.type==="math"&&(p.id==="a"||p.id==="b"))return n.values.outputType||"float";
  const connection=links.find(l=>l.kind==="data"&&l.to===n.id&&l.toPin===p.id);
  if(connection){
   const source=getNode(connection.from);
   if(source)return actualOutputType(source);
  }
- if(p.type==="dynamic"){
-  if(n.type==="setvar")return getVar(n.values.variable)?.type||"any";
-  return "any";
- }
- return p.type||"any";
+ const expected=expectedInputType(n,p);
+ return expected==="dynamic"?"any":expected;
 }
 function typesCompatible(from,to){
- if(!from||!to||from==="dynamic"||from==="any"||to==="dynamic"||to==="any")return true;
- if(from==="number")return ["number","int","float","double","decimal","long","short","byte"].includes(to);
- if(to==="number")return ["number","int","float","double","decimal","long","short","byte"].includes(from);
+ if(!from||!to||to==="dynamic"||to==="any")return true;
+ if(from==="dynamic"||from==="any")return to==="dynamic"||to==="any";
+ const numeric=["byte","sbyte","short","ushort","int","uint","long","ulong","float","double","decimal","number"];
+ if(numeric.includes(from)&&numeric.includes(to))return true;
+ if(from==="null")return !BlueprintTypes.isValue(to);
  return BlueprintTypes.compatible(from,to);
+}
+function inputActive(n,p){
+ if(!n||!p)return false;
+ if(n.type==="transform"&&p.id==="vector"&&["getPosition","getRotation","getScale"].includes(n.values.operation))return false;
+ if(n.type==="setcomponent"){
+  const prop=n.values.property||"limits";
+  const bools=["useLimits","enableCollision","enablePreprocessing","useGravity","isKinematic","detectCollisions","simulated","isTrigger","enabled","loop","playOnAwake","mute","orthographic","isStopped"];
+  if(p.id==="component"&&n.values.source!=="connected")return false;
+  if(p.id==="minimumValue"&&(prop!=="limits"||n.values.setMinimum!=="true"))return false;
+  if(p.id==="maximumValue"&&(prop!=="limits"||n.values.setMaximum!=="true"))return false;
+  if(p.id==="propertyValueInput"&&(prop==="limits"||bools.includes(prop)))return false;
+ }
+ return true;
 }
 function removeIncompatibleLinksForOutput(nodeId){
  const n=getNode(nodeId),fromType=actualOutputType(n);
  links=links.filter(l=>{
   if(l.kind!=="data"||l.from!==nodeId)return true;
   const target=getNode(l.to),td=getDef(target?.type),input=(td?.dataIn||[]).find(p=>p.id===l.toPin);
-  return !!input&&typesCompatible(fromType,expectedInputType(target,input));
+  return !!input&&inputActive(target,input)&&typesCompatible(fromType,expectedInputType(target,input));
  });
 }
 function removeIncompatibleLinksForInput(nodeId){
@@ -57,7 +98,7 @@ function removeIncompatibleLinksForInput(nodeId){
  links=links.filter(l=>{
   if(l.kind!=="data"||l.to!==nodeId)return true;
   const source=getNode(l.from),input=(td?.dataIn||[]).find(p=>p.id===l.toPin);
-  return !!input&&typesCompatible(actualOutputType(source),expectedInputType(n,input));
+  return !!input&&inputActive(n,input)&&typesCompatible(actualOutputType(source),expectedInputType(n,input));
  });
 }
 const allCategories = ["All", ...BlueprintBlocks.categories];
@@ -145,11 +186,11 @@ function renderNodes(){
   html+='<div class="node-body">';
   html+='<div class="node-description">'+esc(d.desc)+'</div>';
   (d.fields||[]).forEach(f=>html+=fieldHtml(n,f));
-  (d.dataIn||[]).filter(p=>!(n.type==="setcomponent"&&p.id==="component"&&n.values.source!=="connected")&&!(n.type==="setcomponent"&&((p.id==="minimumValue"&&(n.values.property!=="limits"||n.values.setMinimum!=="true"))||(p.id==="maximumValue"&&(n.values.property!=="limits"||n.values.setMaximum!=="true"))))).forEach(p=>{
+  (d.dataIn||[]).filter(p=>inputActive(n,p)).forEach(p=>{
     const inputType=displayInputType(n,p),pinType=inputType==="any"?"dynamic":inputType;
     html+='<div class="pin-row input-row"><span class="pin-label"><button class="pin in" data-direction="input" data-kind="data" data-type="'+esc(pinType)+'" data-pin="'+p.id+'" title="Drag to connect input"></button><span class="pin-name">'+esc(p.label)+'</span><span class="pin-type-badge input-type-badge">'+esc(inputType)+'</span></span></div>';
    });
-   if(d.valueOut){
+   if(d.valueOut&&actualOutputType(n)!=="none"){
     const outputType=actualOutputType(n);
     const outputLabel=outputType==="dynamic"?(n.type==="getvar"?"Choose variable":"Select type"):outputType;
     html+='<div class="pin-row output-row"><span class="output-info"><span class="output-name">Output</span><span class="pin-type-badge output-type-badge">'+esc(outputLabel)+'</span></span><button class="pin out" data-direction="output" data-kind="data" data-type="'+esc(outputType)+'" data-pin="value" title="Drag to connect output"></button></div>';
@@ -170,8 +211,9 @@ function renderNodes(){
      rebuildNode=true;
     }
     if(n.type==="setcomponent"&&["property","source","setMinimum","setMaximum"].includes(field))rebuildNode=true;
-    const pinTypeChange=["type","variable","componentType","fromType","toType","outputType"].includes(field);
-    if(pinTypeChange){
+    const operationChangesOutput=field==="operation"&&["transform","gameobject"].includes(n.type);
+    const pinTypeChange=["type","variable","componentType","fromType","toType","outputType","operandType"].includes(field)||operationChangesOutput;
+    if(pinTypeChange||rebuildNode){
      removeIncompatibleLinksForOutput(n.id);
      removeIncompatibleLinksForInput(n.id);
     }
@@ -313,7 +355,7 @@ function renderInspector(){
  (d.fields||[]).forEach(f=>{let val=n.values[f.id]??"";if(f.type==="select")html+='<label>'+esc(f.label)+'</label><select data-inspect="'+f.id+'">'+f.options.map(o=>'<option value="'+esc(o[0])+'" '+(String(val)===String(o[0])?"selected":"")+'>'+esc(o[1])+'</option>').join("")+'</select>';else if(f.type==="variable")html+='<label>'+esc(f.label)+'</label><select data-inspect="'+f.id+'"><option value="">Choose variable…</option>'+variables.map(v=>'<option value="'+v.id+'" '+(v.id===val?"selected":"")+'>'+esc(v.name)+' · '+esc(v.type)+'</option>').join("")+'</select>';else html+='<label>'+esc(f.label)+'</label><input data-inspect="'+f.id+'" value="'+esc(val)+'">'});
  html+='<div style="margin-top:15px"><button id="deleteNode" style="width:100%">Delete node</button></div>';
  $("nodeInspector").innerHTML=html;
- $("nodeInspector").querySelectorAll("[data-inspect]").forEach(el=>el.onchange=()=>{const field=el.dataset.inspect;n.values[field]=el.value;if(["type","variable","componentType","toType","outputType"].includes(field))removeIncompatibleLinksForOutput(n.id);removeIncompatibleLinksForInput(n.id);renderAll()});
+ $("nodeInspector").querySelectorAll("[data-inspect]").forEach(el=>el.onchange=()=>{const field=el.dataset.inspect;n.values[field]=el.value;if(["type","variable","componentType","toType","outputType","operandType"].includes(field)||(field==="operation"&&["transform","gameobject"].includes(n.type)))removeIncompatibleLinksForOutput(n.id);removeIncompatibleLinksForInput(n.id);renderAll()});
  $("deleteNode").onclick=()=>{nodes=nodes.filter(x=>x.id!==n.id);links=links.filter(l=>l.from!==n.id&&l.to!==n.id);selectedNode=null;renderAll()};
 }
 function setView(view){
@@ -343,7 +385,7 @@ function pruneIncompatibleLinks(){
   if(l.kind!=="data")return true;
   const source=getNode(l.from),target=getNode(l.to),td=getDef(target?.type);
   const input=(td?.dataIn||[]).find(p=>p.id===l.toPin);
-  return !!source&&!!input&&typesCompatible(actualOutputType(source),expectedInputType(target,input));
+  return !!source&&!!input&&inputActive(target,input)&&typesCompatible(actualOutputType(source),expectedInputType(target,input));
  }
  );
 }
