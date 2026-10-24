@@ -201,7 +201,8 @@ function compile(inputNodes,inputLinks,inputVars,className){
    expression="((GameObject)("+target+"))?.GetComponent<"+ct+">()";
   }else if(n.type==="getcomponentvalue"){
     const prop=outputPin==="value"?"mass":outputPin,target=valueForInput(n,"component",path,"Component");
-    const inputLink=dataLink(n.id,"component"),source=inputLink?findNode(inputLink.from):null,ct=source?.type==="getcomponent"?(source.values?.componentType||"Rigidbody"):"Component";
+    const inputLink=dataLink(n.id,"component"),source=inputLink?findNode(inputLink.from):null,ct=source?.type==="getcomponent"?(source.values?.componentType||"Rigidbody"):source?.type==="getvar"?(findVar(source.values?.variable)?.type||"Component"):"Component";
+    sourceType=propertyType(ct,prop);
     expression=ct==="Component"?"((dynamic)("+target+"))."+prop:"(("+ct+")("+target+"))."+prop;
    }else if(n.type==="fromto"){
    expression=fromToExpression(n,path);
@@ -301,50 +302,26 @@ function compile(inputNodes,inputLinks,inputVars,className){
     if(!v)report("Choose a variable in Set Variable.");
     else out.push(p+v.codeName+" = "+valueForInput(n,"value",new Set(),v.type)+";");
    }else if(n.type==="setcomponent"){
-    if(n.values?.enabledProperty==="true"){
-    const ct=n.values?.componentType||"HingeJoint",prop=n.values?.property||"limits";
-    const sourceLink=dataLink(n.id,"component"),selected=findVar(n.values?.componentVariable);
-    let target;
-    if(sourceLink)target=valueExpr(sourceLink.from,new Set(),ct);
-    else {report("Connect a component to Set Component Info.");target="null"}
-    if(prop==="limits"&&ct==="HingeJoint"){
-     const min=n.values?.setMinimum==="true"?valueForInput(n,"minimumValue",new Set(),"float"):null;
-     const max=n.values?.setMaximum==="true"?valueForInput(n,"maximumValue",new Set(),"float"):null;
-     out.push(p+"{",p+"    var __joint_"+n.id+" = "+target+";",p+"    if (__joint_"+n.id+" != null)",p+"    {",p+"        var __limits_"+n.id+" = __joint_"+n.id+".limits;");
-     if(min!==null)out.push(p+"        __limits_"+n.id+".min = "+min+";");
-     if(max!==null)out.push(p+"        __limits_"+n.id+".max = "+max+";");
-     out.push(p+"        __joint_"+n.id+".limits = __limits_"+n.id+";",p+"        __joint_"+n.id+".useLimits = true;",p+"    }",p+"}");
-    }else if(prop==="limits"&&ct==="HingeJoint2D"){
-     const min=n.values?.setMinimum==="true"?valueForInput(n,"minimumValue",new Set(),"float"):null;
-     const max=n.values?.setMaximum==="true"?valueForInput(n,"maximumValue",new Set(),"float"):null;
-     out.push(p+"{",p+"    var __joint_"+n.id+" = "+target+";",p+"    if (__joint_"+n.id+" != null)",p+"    {",p+"        var __limits_"+n.id+" = __joint_"+n.id+".limits;");
-     if(min!==null)out.push(p+"        __limits_"+n.id+".min = "+min+";");
-     if(max!==null)out.push(p+"        __limits_"+n.id+".max = "+max+";");
-     out.push(p+"        __joint_"+n.id+".limits = __limits_"+n.id+";",p+"        __joint_"+n.id+".useLimits = true;",p+"    }",p+"}");
-    }else if(prop==="limits"){
-     report("Limits are only implemented for HingeJoint and HingeJoint2D.");
-    }else if(ct==="ParticleSystem"&&["loop","playOnAwake","simulationSpeed"].includes(prop)){
-     const link=dataLink(n.id,"propertyValueInput"),raw=prop==="simulationSpeed"?(link?valueForInput(n,"propertyValueInput",new Set(),"float"):typedFallback(n.values?.propertyValue??"1","float")):(n.values?.boolValue==="false"?"false":"true");
-     const targetName="__particle_"+n.id;
-     out.push(p+"{",p+"    var "+targetName+" = "+target+";",p+"    if ("+targetName+" != null)",p+"    {",p+"        var __main_"+n.id+" = "+targetName+".main;",p+"        __main_"+n.id+"."+prop+" = "+raw+";",p+"    }",p+"}");
-    }else if(boolProperties.has(prop)){
-     out.push(p+"{",p+"    var __component_"+n.id+" = "+target+";",p+"    if (__component_"+n.id+" != null)",p+"    {",p+"        __component_"+n.id+"."+prop+" = "+(n.values?.boolValue==="false"?"false":"true")+";",p+"    }",p+"}");
+    const sourceLink=dataLink(n.id,"component");
+    if(!sourceLink){
+     report("Connect a component to Set Component Info.");
     }else{
-     const type=propertyType(ct,prop),link=dataLink(n.id,"propertyValueInput");
-     const val=link?valueForInput(n,"propertyValueInput",new Set(),type):propertyFallback(n);
-     out.push(p+"{",p+"    var __component_"+n.id+" = "+target+";",p+"    if (__component_"+n.id+" != null)",p+"    {",p+"        __component_"+n.id+"."+prop+" = "+val+";",p+"    }",p+"}");
+     const source=findNode(sourceLink.from);
+     const ct=source?.type==="getcomponent"?(source.values?.componentType||"Rigidbody"):source?.type==="getvar"?(findVar(source.values?.variable)?.type||"Component"):"Component";
+     const target=valueExpr(sourceLink.from,new Set(),"Component");
+     const available=properties[ct]||{};
+     const componentProps=Object.keys(available).filter(prop=>n.values?.["use_"+prop]==="true");
+     if(!componentProps.length)report("Enable at least one property supported by the connected component.");
+     componentProps.forEach(prop=>{
+      const type=available[prop];
+      const input=nodeInputs(n).find(x=>x.id===prop);
+      if(!input){report("The "+prop+" input is unavailable for "+ct+".");return}
+      const val=valueForInput(n,prop,new Set(),type);
+      const accessType=ct==="Component"?"dynamic":ct;
+      out.push(p+"{",p+"    var __component_"+n.id+"_"+prop+" = "+(accessType==="dynamic"?"("+target+")":"(("+accessType+")("+target+"))")+";",p+"    if (__component_"+n.id+"_"+prop+" != null)",p+"    {",p+"        __component_"+n.id+"_"+prop+"."+prop+" = "+val+";",p+"    }",p+"}");
+     });
     }
-   
-    }}else if(n.type==="debug"){
-    const level=n.values?.level||"log",link=dataLink(n.id,"value");
-    let msg;
-    if(link){
-     msg=valueExpr(link.from,new Set());
-     const source=findNode(link.from);
-     if(source?.type==="math"&&msg.startsWith("(")&&msg.endsWith(")"))msg=msg.slice(1,-1);
-    }else msg=escString(n.values?.message||"");
-    out.push(p+"Debug.Log"+(level==="warning"?"Warning":level==="error"?"Error":"")+"("+msg+");");
-   }else if(n.type==="transform"){
+   }}else if(n.type==="transform"){
     const op=n.values?.operation||"setPosition",v=valueForInput(n,"vector",new Set(),"Vector3");
     const code={setPosition:"transform.position = "+v+";",translate:"transform.Translate("+v+");",setRotation:"transform.rotation = Quaternion.Euler("+v+");",setScale:"transform.localScale = "+v+";"};
     if(code[op])out.push(p+code[op]);
