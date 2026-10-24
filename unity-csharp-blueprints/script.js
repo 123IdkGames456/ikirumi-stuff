@@ -130,6 +130,7 @@ function inputActive(n,p){
  if((n.type==="vector"||n.type==="literal")&&p.id==="w"&&["Vector2","Vector3"].includes(n.values.vectorType||n.values.type))return false;
  if(n.type==="transform"&&p.id==="vector"&&["getPosition","getRotation","getScale"].includes(n.values.operation))return false;
  if(n.type==="setcomponent"){
+  if(p.id!=="component"&&p.id!=="propertyValueInput"&&p.id!=="minimumValue"&&p.id!=="maximumValue"&&(componentProperties[connectedComponentType(n)]||[]).some(([id])=>id===p.id))return true;
   if(p.id==="propertyValueInput"&&n.values.enabledProperty!=="true")return false;
   const prop=n.values.property||"mass";
   const bools=["useLimits","enableCollision","enablePreprocessing","useGravity","isKinematic","detectCollisions","simulated","isTrigger","enabled","loop","playOnAwake","mute","orthographic","isStopped"];
@@ -263,7 +264,7 @@ function renderNodes(){
     html+='<label class="node-field checkbox-field component-toggle"><span>'+esc(label)+'</span><input data-field="use_'+id+'" type="checkbox" '+(checked?"checked":"")+'></label>';
    });
   }
-  nodeInputs(n).filter(p=>inputActive(n,p)).forEach(p=>{
+  nodeInputs(n).filter(p=>n.type==="setcomponent"&&p.id!=="component"?true:inputActive(n,p)).forEach(p=>{
     const inputType=displayInputType(n,p),pinType=inputType==="any"?"dynamic":inputType;
     html+='<div class="pin-row input-row"><span class="pin-label"><button class="pin in" data-direction="input" data-kind="data" data-type="'+esc(pinType)+'" data-pin="'+p.id+'" title="Drag to connect input"></button><span class="pin-name">'+esc(p.label)+'</span><span class="pin-type-badge input-type-badge">'+esc(inputType)+'</span></span></div>';
    });
@@ -426,7 +427,7 @@ function renderInspector(){
  const n=getNode(selectedNode);if(!n){$("nodeInspector").innerHTML='<p class="subtle">Select a node to edit its settings.</p>';return}
  const d=getDef(n.type);
  let html='<div class="subtle">'+esc(d.name)+' · '+esc(d.category)+'</div>';
- (d.fields||[]).forEach(f=>{let val=n.values[f.id]??f.default??(f.options?f.options[0][0]:"");if(f.type==="select")html+='<label>'+esc(f.label)+'</label><select data-inspect="'+f.id+'">'+f.options.map(o=>'<option value="'+esc(o[0])+'" '+(String(val)===String(o[0])?"selected":"")+'>'+esc(o[1])+'</option>').join("")+'</select>';else if(f.type==="variable")html+='<label>'+esc(f.label)+'</label><select data-inspect="'+f.id+'"><option value="">Choose variable…</option>'+variables.map(v=>'<option value="'+v.id+'" '+(v.id===val?"selected":"")+'>'+esc(v.name)+' · '+esc(v.type)+'</option>').join("")+'</select>';else html+='<label>'+esc(f.label)+'</label><input data-inspect="'+f.id+'" value="'+esc(val)+'">'});
+ (d.fields||[]).forEach(f=>{if(n.type==="setcomponent"&&f.type==="checkbox")return;let val=n.values[f.id]??f.default??(f.options?f.options[0][0]:"");if(f.type==="select")html+='<label>'+esc(f.label)+'</label><select data-inspect="'+f.id+'">'+f.options.map(o=>'<option value="'+esc(o[0])+'" '+(String(val)===String(o[0])?"selected":"")+'>'+esc(o[1])+'</option>').join("")+'</select>';else if(f.type==="variable")html+='<label>'+esc(f.label)+'</label><select data-inspect="'+f.id+'"><option value="">Choose variable…</option>'+variables.map(v=>'<option value="'+v.id+'" '+(v.id===val?"selected":"")+'>'+esc(v.name)+' · '+esc(v.type)+'</option>').join("")+'</select>';else html+='<label>'+esc(f.label)+'</label><input data-inspect="'+f.id+'" value="'+esc(val)+'">'});
  if(n.type==="setcomponent"){
   const ct=connectedComponentType(n);
   html+='<div class="inspector-section"><strong>Component properties</strong></div>';
