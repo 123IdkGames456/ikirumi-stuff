@@ -7,8 +7,35 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt
 const getDef = id => defs.find(d => d.id === id);
 const getNode = id => nodes.find(n => n.id === id);
 const getVar = id => variables.find(v => v.id === id);
-function nodeInputs(n){const d=getDef(n?.type);return [...(d?.dataIn||[]),...((n?.type==="setcomponent"?(d?.propertyInputs||[]).filter(p=>n.values?.["use_"+p.id]==="true"):[]))]}
-function nodeOutputs(n){const d=getDef(n?.type);return d?.dataOut||[]}
+function connectedComponentType(n){
+ if(!n||!["getcomponentvalue","setcomponent"].includes(n.type))return null;
+ const link=links.find(l=>l.kind==="data"&&l.to===n.id&&l.toPin==="component");
+ if(!link)return null;
+ const source=getNode(link.from);
+ if(!source)return null;
+ if(source.type==="getcomponent")return source.values?.componentType||"Rigidbody";
+ if(source.type==="getvar"){
+  const v=getVar(source.values?.variable);
+  return v&&BlueprintTypes.unity.includes(v.type)?v.type:null;
+ }
+ return null;
+}
+function nodeInputs(n){
+ const d=getDef(n?.type);
+ if(n?.type!=="setcomponent")return d?.dataIn||[];
+ const ct=connectedComponentType(n);
+ if(!ct)return d?.dataIn||[];
+ const allowed=componentProperties[ct]||[];
+ const props=allowed.filter(([id])=>n.values?.["use_"+id]==="true").map(([id,label])=>({id,label,type:componentPropertyType(ct,id)}));
+ return [...(d?.dataIn||[]),...props];
+}
+function nodeOutputs(n){
+ const d=getDef(n?.type);
+ if(n?.type!=="getcomponentvalue")return d?.dataOut||[];
+ const ct=connectedComponentType(n);
+ if(!ct)return [];
+ return (componentProperties[ct]||[]).map(([id,label])=>({id,label,type:componentPropertyType(ct,id)}));
+}
 
 function componentPropertyType(component,property){
  const map={
@@ -203,18 +230,7 @@ function fieldHtml(n,f){
  let val=n.values[f.id]??f.default??"";
  if(n.type==="vector"&&f.id==="z"&&n.values.vectorType==="Vector2")return "";
  if(n.type==="vector"&&f.id==="w"&&["Vector2","Vector3"].includes(n.values.vectorType))return "";
- if(n.type==="setcomponent"){
-  const ct=n.values.componentType||"Rigidbody",prop=n.values.property||"mass";
-  if(f.id!=="componentType"&&f.id!=="enabledProperty"&&n.values.enabledProperty!=="true")return "";
-  if(["minimum","maximum","setMinimum","setMaximum"].includes(f.id)&&prop!=="limits")return "";
-  if(f.id==="boolValue"&&!boolProperties.has(prop))return "";
-  if(f.id==="componentVariable"&&n.values.source==="connected")return "";
-  if(f.id==="propertyValue"&&boolProperties.has(prop))return "";
-  if(f.id==="property"){
-   const options=componentProperties[ct]||[];
-   return '<label class="node-field"><span>'+esc(f.label)+'</span><select data-field="property">'+options.map(o=>'<option value="'+o[0]+'" '+(prop===o[0]?"selected":"")+'>'+esc(o[1])+'</option>').join("")+'</select></label>';
-  }
- }
+ if(n.type==="setcomponent"&&f.type==="checkbox")return "";
  if(f.type==="checkbox")return '<label class="node-field checkbox-field"><span>'+esc(f.label)+'</span><input data-field="'+f.id+'" type="checkbox" '+(val==="true"||val===true?"checked":"")+'></label>';
  if(f.type==="variable"){
   const expected=n.type==="setcomponent"&&f.id==="componentVariable"?(n.values.componentType||"Component"):(f.expected||null);
@@ -235,11 +251,22 @@ function renderNodes(){
   html+='<div class="node-body">';
   html+='<div class="node-description">'+esc(d.desc)+'</div>';
   (d.fields||[]).forEach(f=>html+=fieldHtml(n,f));
+  if(n.type==="setcomponent"){
+   const ct=connectedComponentType(n);
+   if(ct)(componentProperties[ct]||[]).forEach(([id,label])=>{
+    const checked=n.values["use_"+id]==="true";
+    html+='<label class="node-field checkbox-field component-toggle"><span>'+esc(label)+'</span><input data-field="use_'+id+'" type="checkbox" '+(checked?"checked":"")+'></label>';
+   });
+  }
   nodeInputs(n).filter(p=>inputActive(n,p)).forEach(p=>{
     const inputType=displayInputType(n,p),pinType=inputType==="any"?"dynamic":inputType;
     html+='<div class="pin-row input-row"><span class="pin-label"><button class="pin in" data-direction="input" data-kind="data" data-type="'+esc(pinType)+'" data-pin="'+p.id+'" title="Drag to connect input"></button><span class="pin-name">'+esc(p.label)+'</span><span class="pin-type-badge input-type-badge">'+esc(inputType)+'</span></span></div>';
    });
-   if(n.type==="getcomponentvalue"){nodeOutputs(n).forEach(p=>{html+='<div class="pin-row output-row"><span class="output-info"><span class="output-name">'+esc(p.label)+'</span><span class="pin-type-badge output-type-badge">'+esc(p.type)+'</span></span><button class="pin out" data-direction="output" data-kind="data" data-type="'+esc(p.type)+'" data-pin="'+p.id+'" title="Drag to connect '+esc(p.label)+'"></button></div>'})}
+   if(n.type==="getcomponentvalue"){
+    const outs=nodeOutputs(n);
+    if(!connectedComponentType(n))html+='<div class="node-description">Connect a typed component to show its properties.</div>';
+    outs.forEach(p=>{html+='<div class="pin-row output-row"><span class="output-info"><span class="output-name">'+esc(p.label)+'</span><span class="pin-type-badge output-type-badge">'+esc(p.type)+'</span></span><button class="pin out" data-direction="output" data-kind="data" data-type="'+esc(p.type)+'" data-pin="'+p.id+'" title="Drag to connect '+esc(p.label)+'"></button></div>'})
+   }
    if(d.valueOut&&actualOutputType(n)!=="none"&&n.type!=="getcomponentvalue"){
     const outputType=actualOutputType(n);
     const outputLabel=outputType==="dynamic"?(n.type==="getvar"?"Choose variable":"Select type"):outputType;
@@ -256,22 +283,15 @@ function renderNodes(){
     const field=input.dataset.field;
     n.values[field]=input.type==="checkbox"?String(input.checked):input.value;
     let rebuildNode=false;
-    if(n.type==="setcomponent"&&field==="componentType"){
-     n.values.property=(componentProperties[input.value]||[])[0]?.[0]||"";
-     rebuildNode=true;
-    }
-    if(n.type==="setcomponent"&&["property","source","setMinimum","setMaximum"].includes(field))rebuildNode=true;
+    const componentField=field.startsWith("use_")&&n.type==="setcomponent";
+    const rebuildNode=componentField||field==="component";
     const operationChangesOutput=field==="operation"&&["transform","gameobject"].includes(n.type);
     const pinTypeChange=["type","variable","componentType","fromType","toType","outputType","operandType","vectorType"].includes(field)||operationChangesOutput;
     if(pinTypeChange||rebuildNode){
      removeIncompatibleLinksForOutput(n.id);
      removeIncompatibleLinksForInput(n.id);
     }
-    if(rebuildNode||pinTypeChange){
-     renderNodes();
-     if(selectedNode===n.id)renderInspector();
-    }
-    renderCode();
+    renderAll();
    });
   });
   el.querySelectorAll(".pin").forEach(pin=>{
