@@ -323,7 +323,7 @@ function compile(inputNodes,inputLinks,inputVars,className){
       out.push(p+"{",p+"    var __component_"+n.id+"_"+prop+" = "+(accessType==="dynamic"?"("+target+")":"(("+accessType+")("+target+"))")+";",p+"    if (__component_"+n.id+"_"+prop+" != null)",p+"    {",p+"        __component_"+n.id+"_"+prop+"."+prop+" = "+val+";",p+"    }",p+"}");
      });
     }
-   }}else if(n.type==="transform"){
+   }else if(n.type==="transform"){
     const op=n.values?.operation||"setPosition",v=valueForInput(n,"vector",new Set(),"Vector3");
     const code={setPosition:"transform.position = "+v+";",translate:"transform.Translate("+v+");",setRotation:"transform.rotation = Quaternion.Euler("+v+");",setScale:"transform.localScale = "+v+";"};
     if(code[op])out.push(p+code[op]);
