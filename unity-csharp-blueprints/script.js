@@ -412,6 +412,63 @@ function pruneIncompatibleLinks(){
  }
  );
 }
+function importCSharp(source,fileName){
+ const clean=String(source||"").replace(/\/\*[\s\S]*?\*\//g,"").replace(/(^|[^:])\/\/.*$/gm,"$1");
+ const classMatch=clean.match(/\bclass\s+([A-Za-z_]\w*)/);
+ const className=classMatch?.[1]||String(fileName||"ImportedScript").replace(/\.cs$/i,"").replace(/[^A-Za-z0-9_]/g,"")||"ImportedScript";
+ const hasStart=/\bvoid\s+Start\s*\(/.test(clean),hasUpdate=/\bvoid\s+Update\s*\(/.test(clean);
+ const logMatches=[...clean.matchAll(/Debug\.(LogWarning|LogError|Log)\s*\((.*?)\)\s*;/gs)];
+ const recognized=logMatches.length>0||hasStart||hasUpdate;
+ if(!recognized){alert("This importer currently recognizes Unity Start()/Update() methods and Debug.Log/LogWarning/LogError statements. This file did not contain a supported pattern, so the current graph was kept.");return}
+ nodes=[];links=[];variables=[];nextNode=1;nextVariable=1;
+ $("projectName").value=className;
+ const eventTypes=[];
+ if(hasStart||(!hasStart&&!hasUpdate&&logMatches.length))eventTypes.push({type:"start",label:"Start"});
+ if(hasUpdate)eventTypes.push({type:"update",label:"Update"});
+ let y=70, warnings=[];
+ eventTypes.forEach((event,index)=>{
+  const ev=addNode(event.type,70,y);ev.x=70;ev.y=y;
+  let previous=ev;
+  const methodMatch=clean.match(new RegExp("\\bvoid\\s+"+event.label+"\\s*\\([^)]*\\)\\s*\\{([\\s\\S]*?)\\n\\s*\\}"));
+  const body=methodMatch?.[1]||"";
+  const logs=[...body.matchAll(/Debug\.(LogWarning|LogError|Log)\s*\((.*?)\)\s*;/gs)];
+  logs.forEach((m,i)=>{
+   const expr=m[2].trim(), level=m[1]==="LogWarning"?"warning":m[1]==="LogError"?"error":"log";
+   const dbg=addNode("debug",390+i*280,y,{level,message:expr.replace(/^["']|["']$/g,"")});
+   links.push({from:previous.id,fromPin:"Then",to:dbg.id,toPin:"Exec",kind:"flow"});
+   previous=dbg;
+   const mathMatch=expr.match(/^\(?\s*(-?\d+(?:\.\d+)?f?)\s*\)?\s*([+*/%-])\s*\(?\s*(-?\d+(?:\.\d+)?f?)\s*\)?$/);
+   if(mathMatch){
+    const op={"+":"add","-":"subtract","*":"multiply","/":"divide","%":"modulo"}[mathMatch[2]];
+    const numericType= /[.f]/i.test(mathMatch[1]+mathMatch[3])?"float":"int";
+    const a=addNode("literal",390+i*280,y+185,{type:numericType,value:mathMatch[1].replace(/f$/i,"")});
+    const b=addNode("literal",390+i*280,y+355,{type:numericType,value:mathMatch[3].replace(/f$/i,"")});
+    const calc=addNode("math",650+i*280,y+245,{operation:op,outputType:numericType});
+    links.push({from:a.id,fromPin:"value",to:calc.id,toPin:"a",kind:"data"},{from:b.id,fromPin:"value",to:calc.id,toPin:"b",kind:"data"},{from:calc.id,fromPin:"output",to:dbg.id,toPin:"value",kind:"data"});
+    dbg.values.message="";
+   }else if(/^["']/.test(expr)){
+    dbg.values.message=expr.slice(1,-1);
+   }else{
+    warnings.push("Could not convert expression: "+expr);
+   }
+  });
+  y+=Math.max(360,logs.length*440);
+ });
+ if(!hasStart&&!hasUpdate&&logMatches.length){
+  const ev=addNode("start",70,70);
+  let previous=ev;
+  logMatches.forEach((m,i)=>{
+   const expr=m[2].trim(),level=m[1]==="LogWarning"?"warning":m[1]==="LogError"?"error":"log";
+   const dbg=addNode("debug",390+i*280,70,{level,message:/^["']/.test(expr)?expr.slice(1,-1):expr});
+   links.push({from:previous.id,fromPin:"Then",to:dbg.id,toPin:"Exec",kind:"flow"});previous=dbg;
+   if(!/^["']/.test(expr))warnings.push("Imported expression as text because it was outside the supported expression subset: "+expr);
+  });
+ }
+ selectedNode=nodes[0]?.id??null;
+ renderAll();
+ status("Imported C# · "+nodes.length+" nodes");
+ if(warnings.length)alert("Import completed with some expressions left as text:\n\n"+[...new Set(warnings)].slice(0,8).join("\n"));
+}
 function renderAll(){pruneIncompatibleLinks();renderCategories();renderBlocks();renderVariables();renderNodes();renderInspector();renderCode()}
 function snapshot(){return {projectName:$("projectName").value,nodes,links,variables,nextNode,nextVariable}}
 function loadState(s){if(!s||!Array.isArray(s.nodes))return;variables=s.variables||[];nodes=s.nodes.map(n=>{const d=getDef(n.type),defaults={};(d?.fields||[]).forEach(f=>defaults[f.id]=f.default??(f.options?f.options[0][0]:""));return {...n,values:{...defaults,...(n.values||{})}}});links=s.links||[];nextNode=s.nextNode||Math.max(0,...nodes.map(n=>Number(n.id)||0))+1;nextVariable=s.nextVariable||variables.length+1;$("projectName").value=s.projectName||"My Blueprint Project";selectedNode=nodes[0]?.id??null;renderAll()}
@@ -432,6 +489,8 @@ $("newProject").onclick=()=>{if(confirm("Create a new project? Unsaved changes i
 $("saveProject").onclick=()=>{try{BlueprintStorage.save(snapshot());status("Saved locally")}catch(e){alert("Could not save locally: "+e.message)}};
 $("loadProject").onclick=()=>{const s=BlueprintStorage.load();if(s)loadState(s);else $("fileInput").click()};
 $("fileInput").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{loadState(JSON.parse(await f.text()));status("Project loaded")}catch(err){alert("Invalid project JSON.")}e.target.value=""};
+$("importCSharp").onclick=()=>$("csharpInput").click();
+$("csharpInput").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{importCSharp(await f.text(),f.name)}catch(err){alert("Could not import this C# file: "+err.message)}e.target.value=""};
 $("downloadProject").onclick=()=>BlueprintStorage.download(BlueprintStorage.safeName($("projectName").value)+".json",BlueprintStorage.snapshot(snapshot()),"application/json");
 $("exportProject").onclick=()=>BlueprintStorage.download(BlueprintStorage.safeName($("projectName").value)+".cs",$("codeOutput").textContent,"text/plain");
 $("copyCode").onclick=async()=>{try{await navigator.clipboard.writeText($("codeOutput").textContent);status("C# copied")}catch(e){const r=document.createRange();r.selectNodeContents($("codeOutput"));const s=getSelection();s.removeAllRanges();s.addRange(r);status("Select and copy the code")}};
