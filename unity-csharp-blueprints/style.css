@@ -132,3 +132,14 @@ button:active{transform:translateY(1px)}
 .sidebar{display:flex;flex-direction:column;min-height:0;overflow:hidden}.sidebar .panel-title,.sidebar .search,.sidebar .categories,.sidebar .sidebar-help{flex:none}.categories{max-height:105px;overflow-y:auto;align-content:flex-start;padding:2px 2px 8px;border-bottom:1px solid var(--line)}.block-list{display:block;flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:0 3px 12px 0;scrollbar-width:thin;scrollbar-color:#4b5670 #171a23}.block-category-section{padding:0 0 12px;margin:0 0 12px;border-bottom:2px solid #394153}.block-category-heading{position:sticky;top:0;z-index:1;display:flex;justify-content:space-between;align-items:center;padding:9px 8px;margin:0 0 7px;background:#171a23;border-bottom:1px solid #3b4355;color:#dfe5f4;font-size:10px;font-weight:900;letter-spacing:1.1px;text-transform:uppercase}.block-category-heading small{font-size:9px;font-weight:600;letter-spacing:0;color:#8e9ab2}.block-category-section .block-item{margin-bottom:6px}.sidebar-help{border-top:1px solid var(--line);padding-top:9px}
 
 .main:not(.code-mode) .code-panel{display:none}.main.code-mode .code-panel{display:flex;flex:1;height:auto;min-height:0}.main.code-mode #codeOutput{min-height:0}
+
+
+/* Keep every block category, including Unity, reachable in the library. */
+.sidebar{height:100%;min-height:0}
+.sidebar .block-list{flex:1 1 0;height:0;min-height:0;overflow-y:auto;overflow-x:hidden}
+.sidebar .block-category-section{display:flow-root}
+.sidebar .block-item{max-width:100%;white-space:normal}
+.sidebar .block-text{flex:1;min-width:0}
+.sidebar .block-text strong,.sidebar .block-text small{overflow-wrap:anywhere}
+.sidebar .sidebar-help{font-size:10px;line-height:1.35;padding:7px 2px;max-height:48px;overflow:auto}
+@media(max-height:760px){.sidebar .sidebar-help{display:none}.sidebar .categories{max-height:76px}.sidebar .panel-title{margin-bottom:7px}.sidebar .search{margin-bottom:6px}.sidebar .block-category-heading{padding:6px 7px}}
