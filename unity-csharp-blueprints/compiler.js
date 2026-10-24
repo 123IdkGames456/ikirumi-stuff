@@ -59,6 +59,14 @@ function compile(inputNodes,inputLinks,inputVars,className){
  const connected=(id,pin)=>links.find(l=>l.kind==="flow"&&l.from===id&&l.fromPin===pin)?.to;
  const dataLink=(id,pin)=>dataLinks.find(l=>l.to===id&&l.toPin===pin);
  const outputConnected=id=>dataLinks.some(l=>l.from===id&&l.fromPin==="value");
+ const spawnedNames=new Map(),waitFlagNames=new Map(),waitMethodNames=new Map();
+ for(const n of nodes){
+  if(n.type==="gameobject"&&(n.values?.operation||"setActive")==="instantiate"&&outputConnected(n.id))spawnedNames.set(n.id,safeIdentifier("__blueprintSpawned_"+n.id,"__blueprintSpawned",usedNames));
+  if(n.type==="wait"){
+   waitFlagNames.set(n.id,safeIdentifier("__blueprintWaitRunning_"+n.id,"__blueprintWaitRunning",usedNames));
+   waitMethodNames.set(n.id,safeIdentifier("__blueprintWait_"+n.id,"__blueprintWait",usedNames));
+  }
+ }
  const propertyType=(component,property)=>properties[component]?.[property]||"object";
  function nodeType(n){
   if(!n)return "dynamic";
@@ -202,7 +210,7 @@ function compile(inputNodes,inputLinks,inputVars,className){
    expression=op==="getPosition"?"transform.position":op==="getRotation"?"transform.rotation":op==="getScale"?"transform.localScale":typedDefault("Vector3");
    if(!["getPosition","getRotation","getScale"].includes(op))report("A Transform setter cannot be used as a value output.");
   }else if(n.type==="gameobject"&&(n.values?.operation||"setActive")==="instantiate"){
-   expression="__blueprintSpawned_"+n.id;
+   expression=spawnedNames.get(n.id)||("__blueprintSpawned_"+n.id);
   }else{
    report("The "+(n.type||"unknown")+" block does not provide a usable value output.");
    expression=typedDefault(expectedType||"int");
@@ -305,11 +313,11 @@ function compile(inputNodes,inputLinks,inputVars,className){
     const target=valueForInput(n,"target",new Set(),"GameObject"),op=n.values?.operation||"setActive";
     if(op==="destroy")out.push(p+"if ("+target+" != null) Destroy("+target+");");
     else if(op==="instantiate"){
-     if(outputConnected(n.id))out.push(p+"__blueprintSpawned_"+n.id+" = Instantiate("+target+");");
+     if(outputConnected(n.id))out.push(p+(spawnedNames.get(n.id)||("__blueprintSpawned_"+n.id))+" = Instantiate("+target+");");
      else out.push(p+"Instantiate("+target+");");
     }else out.push(p+"if ("+target+" != null) "+target+".SetActive("+(n.values?.active==="false"?"false":"true")+");");
    }else if(n.type==="wait"){
-    const flag="__blueprintWaitRunning_"+n.id,method="__blueprintWait_"+n.id;
+    const flag=waitFlagNames.get(n.id)||("__blueprintWaitRunning_"+n.id),method=waitMethodNames.get(n.id)||("__blueprintWait_"+n.id);
     if(!generatedWaits.has(n.id)){
      generatedWaits.add(n.id);
      classFields.push("    private bool "+flag+";");
@@ -334,7 +342,7 @@ function compile(inputNodes,inputLinks,inputVars,className){
   return out;
  }
  for(const n of nodes){
-  if(n.type==="gameobject"&&(n.values?.operation||"setActive")==="instantiate"&&outputConnected(n.id))classFields.push("    private GameObject __blueprintSpawned_"+n.id+";");
+  if(n.type==="gameobject"&&(n.values?.operation||"setActive")==="instantiate"&&outputConnected(n.id))classFields.push("    private GameObject "+(spawnedNames.get(n.id)||("__blueprintSpawned_"+n.id))+";");
   if(n.type==="getvar"&&!findVar(n.values?.variable))report("Choose an existing variable in Get Variable.");
   if(n.type==="setvar"&&!findVar(n.values?.variable))report("Choose an existing variable in Set Variable.");
   if(n.type==="wait"&&(!Number.isFinite(Number(n.values?.seconds??1))||Number(n.values?.seconds??1)<0))report("Wait seconds should be a non-negative number.");
