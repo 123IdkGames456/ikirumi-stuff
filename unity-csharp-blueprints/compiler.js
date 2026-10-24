@@ -314,8 +314,7 @@ function compile(inputNodes,inputLinks,inputVars,className){
      if(!componentProps.length)report("Enable at least one property supported by the connected component.");
      componentProps.forEach(prop=>{
       const type=available[prop];
-      const input=nodeInputs(n).find(x=>x.id===prop);
-      if(!input){report("The "+prop+" input is unavailable for "+ct+".");return}
+      if(!Object.prototype.hasOwnProperty.call(available,prop)){report("The "+prop+" property is unavailable for "+ct+".");return}
       const val=valueForInput(n,prop,new Set(),type);
       const accessType=ct==="Component"?"dynamic":ct;
       out.push(p+"{",p+"    var __component_"+n.id+"_"+prop+" = "+(accessType==="dynamic"?"("+target+")":"(("+accessType+")("+target+"))")+";",p+"    if (__component_"+n.id+"_"+prop+" != null)",p+"    {",p+"        __component_"+n.id+"_"+prop+"."+prop+" = "+val+";",p+"    }",p+"}");
