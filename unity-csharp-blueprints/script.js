@@ -87,19 +87,20 @@ function renderNodes(){
  nodes.forEach(n=>{
   const d=getDef(n.type);if(!d)return;
   const el=document.createElement("div");el.className="node"+(selectedNode===n.id?" selected":"");el.dataset.id=n.id;el.style.left=n.x+"px";el.style.top=n.y+"px";el.style.setProperty("--accent",n.color||d.color);
-  let html='<div class="node-head"><span class="node-accent"></span>'+esc(d.name)+'</div><div class="node-body"><div class="node-description">'+esc(d.desc)+'</div>';
+  let html='<div class="node-head"><span class="node-accent"></span>'+esc(d.name)+'</div><div class="node-body">';
+  if(d.flowIn)d.flowIn.forEach(p=>html+='<div class="pin-row flow-input-row"><span class="pin-label"><button class="pin in exec-pin" data-direction="input" data-kind="flow" data-type="exec" data-pin="'+p+'" title="Execution input"></button>'+esc(p)+'</span></div>');
+  html+='<div class="node-description">'+esc(d.desc)+'</div>';
   (d.fields||[]).forEach(f=>html+=fieldHtml(n,f));
-  (d.dataIn||[]).filter(p=>!(n.type==="setcomponent"&&p.id==="component"&&n.values.source!=="connected")&&!(n.type==="setcomponent"&&((p.id==="minimumValue"&&(n.values.property!=="limits"||n.values.setMinimum!=="true"))||(p.id==="maximumValue"&&(n.values.property!=="limits"||n.values.setMaximum!=="true"))))).forEach(p=>html+='<div class="pin-row"><span class="pin-label"><button class="pin in" data-kind="data" data-type="'+esc(p.type||"dynamic")+'" data-pin="'+p.id+'" title="Connect value input"></button>'+esc(p.label)+(p.type!=="dynamic"?" · "+esc(p.type):"")+'</span><span></span></div>');
-  if(d.flowIn) d.flowIn.forEach(p=>html+='<div class="pin-row"><span class="pin-label"><button class="pin in exec-pin" data-kind="flow" data-type="exec" data-pin="'+p+'" title="Connect execution input"></button>'+esc(p)+'</span><span></span></div>');
-  if(d.valueOut)html+='<div class="pin-row"><span>Value · '+esc(d.valueOut==="dynamic"?"any":d.valueOut)+'</span><button class="pin out" data-kind="data" data-type="'+esc(d.valueOut||"dynamic")+'" data-pin="value" title="Connect value output"></button></div>';
-  if(d.flowOut)d.flowOut.forEach(p=>html+='<div class="pin-row"><span>'+esc(p)+'</span><button class="pin out exec-pin" data-kind="flow" data-type="exec" data-pin="'+p+'" title="Connect execution output"></button></div>');
+  (d.dataIn||[]).filter(p=>!(n.type==="setcomponent"&&p.id==="component"&&n.values.source!=="connected")&&!(n.type==="setcomponent"&&((p.id==="minimumValue"&&(n.values.property!=="limits"||n.values.setMinimum!=="true"))||(p.id==="maximumValue"&&(n.values.property!=="limits"||n.values.setMaximum!=="true"))))).forEach(p=>html+='<div class="pin-row"><span class="pin-label"><button class="pin in" data-direction="input" data-kind="data" data-type="'+esc(p.type||"dynamic")+'" data-pin="'+p.id+'" title="Connect value input"></button>'+esc(p.label)+(p.type!=="dynamic"?" · "+esc(p.type):"")+'</span><span></span></div>');
+  if(d.valueOut)html+='<div class="pin-row"><span>Value · '+esc(d.valueOut==="dynamic"?"any":d.valueOut)+'</span><button class="pin out" data-direction="output" data-kind="data" data-type="'+esc(d.valueOut||"dynamic")+'" data-pin="value" title="Connect value output"></button></div>';
+  if(d.flowOut)d.flowOut.forEach(p=>html+='<div class="pin-row"><span>'+esc(p)+'</span><button class="pin out exec-pin" data-direction="output" data-kind="flow" data-type="exec" data-pin="'+p+'" title="Execution output"></button></div>');
   html+='</div>';el.innerHTML=html;
   el.addEventListener("click",e=>{if(e.target.classList.contains("pin"))return;selectedNode=n.id;renderNodes();renderInspector()});
   el.addEventListener("contextmenu",e=>{e.preventDefault();e.stopPropagation();selectedNode=n.id;showContextMenu(e.clientX,e.clientY,[{label:"Delete node",action:()=>{nodes=nodes.filter(x=>x.id!==n.id);links=links.filter(l=>l.from!==n.id&&l.to!==n.id);if(selectedNode===n.id)selectedNode=null;renderAll();status("Node deleted")}},{label:"Node color",submenu:[{label:"Default",color:"",action:()=>setNodeColor(n,"")},{label:"Blue",color:"#648cff",action:()=>setNodeColor(n,"#648cff")},{label:"Green",color:"#43b581",action:()=>setNodeColor(n,"#43b581")},{label:"Yellow",color:"#e0b64f",action:()=>setNodeColor(n,"#e0b64f")},{label:"Orange",color:"#e98b45",action:()=>setNodeColor(n,"#e98b45")},{label:"Red",color:"#df626c",action:()=>setNodeColor(n,"#df626c")},{label:"Purple",color:"#ad7ce8",action:()=>setNodeColor(n,"#ad7ce8")},{label:"Pink",color:"#e783b6",action:()=>setNodeColor(n,"#e783b6")},{label:"Gray",color:"#8e99aa",action:()=>setNodeColor(n,"#8e99aa")}]}]);});
   const head=el.querySelector(".node-head");
   head.addEventListener("pointerdown",e=>{if(e.target.closest("button,input,select"))return;selectedNode=n.id;const sx=e.clientX,sy=e.clientY,ox=n.x,oy=n.y;head.setPointerCapture?.(e.pointerId);function move(ev){n.x=Math.max(0,ox+ev.clientX-sx);n.y=Math.max(0,oy+ev.clientY-sy);el.style.left=n.x+"px";el.style.top=n.y+"px";drawWires()}function end(){window.removeEventListener("pointermove",move);window.removeEventListener("pointerup",end);renderInspector()}window.addEventListener("pointermove",move);window.addEventListener("pointerup",end);e.preventDefault()});
   el.querySelectorAll("[data-field]").forEach(input=>input.addEventListener("change",()=>{n.values[input.dataset.field]=input.type==="checkbox"?String(input.checked):input.value;if(n.type==="setcomponent"&&input.dataset.field==="componentType"){n.values.property=(componentProperties[input.value]||[["enabled","Enabled"]])[0][0]}renderAll()}));
-  el.querySelectorAll(".pin").forEach(pin=>pin.onclick=e=>{e.stopPropagation();pinClick(n,pin.dataset.kind,pin.classList.contains("out"),pin.dataset.pin)});
+  el.querySelectorAll(".pin").forEach(pin=>pin.onclick=e=>{e.stopPropagation();pinClick(n,pin.dataset.kind,pin.dataset.direction==="output",pin.dataset.pin)});
   $("canvas").appendChild(el);
  });
  $("emptyState").style.display=nodes.length?"none":"flex";
@@ -107,10 +108,10 @@ function renderNodes(){
  drawWires();
 }
 function pinClick(n,kind,isOut,pin){
- if(!pendingPin){if(!isOut){status("Choose an output pin first");return}pendingPin={node:n.id,kind,pin};renderNodes();document.querySelectorAll(".pin.out").forEach(p=>p.classList.add("pending"));status("Now choose a compatible input");return}
+ if(!pendingPin){if(!isOut){status("Start at an output pin on the right side of a node");return}pendingPin={node:n.id,kind,pin};renderNodes();document.querySelectorAll('.pin[data-direction="output"]').forEach(p=>p.classList.add("pending"));status("Now click a matching input pin on the left side of another node");return}
  const a=pendingPin;pendingPin=null;
  if(a.node===n.id){status("Choose a different node");renderNodes();return}
- if(kind!==a.kind||isOut){status("Pin types do not match");renderNodes();return}
+ if(kind!==a.kind||isOut){status(isOut?"Connections must go from an output to an input":"Pin types do not match");renderNodes();return}
  const from=getNode(a.node),to=n,fd=getDef(from.type),td=getDef(to.type);
  if(kind==="data"){
   const outType=fd.valueOut||"exec", input=(td.dataIn||[]).find(p=>p.id===pin);
