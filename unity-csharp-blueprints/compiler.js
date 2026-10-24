@@ -12,6 +12,7 @@ function valueExpr(nodeId,seen=new Set()){
  if(seen.has(nodeId))return "default";
  seen.add(nodeId);
  const n=nodes.find(x=>x.id===nodeId);if(!n)return "0";
+ if(n.type==="getcomponent"){const ct=n.values.componentType||"Rigidbody";return valueForInput(n,"target",new Set(seen))+".GetComponent<"+ct+">()"}
  if(n.type==="literal"){const t=n.values.type||"int",v=n.values.value??"0";if(t==="string")return '"'+esc(v)+'"';if(t==="bool")return String(v==="true"||v===true);if(t==="null")return "null";if(t==="float"&&!String(v).endsWith("f"))return v+"f";return String(v)}
  if(n.type==="getvar"){const v=vars.find(x=>x.id===n.values.variable);return v?v.name:"default"}
  if(n.type==="input"){const key=n.values.key||"Space",mode=n.values.mode||"down";return "Input.GetKey"+(mode==="held"?"":mode==="up"?"Up":"Down")+"(KeyCode."+key+")"}
@@ -42,6 +43,31 @@ function emitFlow(id,indent,visited=new Set()){
   const p="    ".repeat(indent);
   if(n.type==="start"||n.type==="update"||n.type==="fixed"||n.type==="comment"){}
   else if(n.type==="setvar"){const v=vars.find(x=>x.id===n.values.variable);if(v)out.push(p+v.name+" = "+valueForInput(n,"value")+";")}
+  else if(n.type==="setcomponent"){
+   const ct=n.values.componentType||"HingeJoint",prop=n.values.property||"limits";
+   const sourceLink=dataLinks.find(l=>l.to===n.id&&l.toPin==="component");
+   const selectedVar=vars.find(v=>v.id===n.values.componentVariable);
+   const target=sourceLink?valueExpr(sourceLink.from):selectedVar?selectedVar.name:"GetComponent<"+ct+">()";
+   if(prop==="limits"&&ct==="HingeJoint"){
+    const min=n.values.setMinimum==="true"?Number(n.values.minimum??-45):null;
+    const max=n.values.setMaximum==="true"?Number(n.values.maximum??45):null;
+    out.push(p+"{",p+"    var __joint = "+target+";",p+"    var __limits = __joint.limits;");
+    if(min!==null)out.push(p+"    __limits.min = "+min+"f;");
+    if(max!==null)out.push(p+"    __limits.max = "+max+"f;");
+    out.push(p+"    __joint.limits = __limits;",p+"}");
+   }else if(prop==="limits"&&ct==="HingeJoint2D"){
+    out.push(p+"{",p+"    var __joint = "+target+";",p+"    var __limits = __joint.limits;");
+    if(n.values.setMinimum==="true")out.push(p+"    __limits.min = "+Number(n.values.minimum??-45)+"f;");
+    if(n.values.setMaximum==="true")out.push(p+"    __limits.max = "+Number(n.values.maximum??45)+"f;");
+    out.push(p+"    __joint.limits = __limits;",p+"}");
+   }else if(["useLimits","enableCollision","enablePreprocessing","useGravity","isKinematic","detectCollisions","simulated","isTrigger","enabled","loop","playOnAwake","mute","orthographic","isStopped"].includes(prop)){
+    out.push(p+target+"."+prop+" = "+(n.values.boolValue||"true")+";");
+   }else{
+    const raw=n.values.propertyValue||"0";
+    const value=["position","localPosition","rotation","localRotation","localScale","center","size","offset","color","constraints","bodyType","motor","spring"].includes(prop)?raw:raw+(["mass","drag","angularDrag","gravityScale","linearDamping","angularDamping","volume","pitch","fieldOfView","orthographicSize","nearClipPlane","farClipPlane","intensity","range","speed","angularSpeed","acceleration","stoppingDistance","motorTorque","brakeTorque","steerAngle","breakForce","breakTorque"].includes(prop)&&!String(raw).endsWith("f")?"f":"");
+    out.push(p+target+"."+prop+" = "+value+";");
+   }
+  }
   else if(n.type==="debug"){
    const level=n.values.level||"log",link=dataLinks.find(l=>l.to===n.id&&l.toPin==="value");
    const msg=link?valueExpr(link.from):'"'+esc(n.values.message||"")+'"';
@@ -90,7 +116,7 @@ if(extraMethods.length)lines.push(...extraMethods);
 lines.push("}");
 for(const n of nodes){
  if(["getvar","setvar"].includes(n.type)&&!vars.some(v=>v.id===n.values.variable))diagnostics.push("Choose an existing variable in "+getName(n.type)+".");
- if(n.type==="wait"&&!events.length)diagnostics.push("Wait needs an event block to run.");
+ if(n.type==="setcomponent"&&!n.values.componentVariable&&!dataLinks.some(l=>l.to===n.id&&l.toPin==="component")&&n.values.source!=="connected")diagnostics.push("Choose a component variable or connect a Get Component From Object block.");\n if(n.type==="wait"&&!events.length)diagnostics.push("Wait needs an event block to run.");
  if(n.type==="wait"&&links.some(l=>l.to===n.id&&["update","fixed"].includes(nodes.find(x=>x.id===l.from)?.type)))diagnostics.push("A Wait block connected directly to Update or Fixed Update may start a new coroutine every frame.");
 }
 function getName(id){return id==="getvar"?"Get Variable":"Set Variable"}
