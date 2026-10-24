@@ -75,6 +75,7 @@ function compile(inputNodes,inputLinks,inputVars,className){
   if(n.type==="getcomponent")return n.values?.componentType||"Rigidbody";
   if(n.type==="math")return n.values?.outputType||"float";
   if(n.type==="fromto")return n.values?.toType||"string";
+  if(n.type==="vector")return n.values?.vectorType||"Vector3";
   if(n.type==="compare"||n.type==="logic"||n.type==="input")return "bool";
   if(n.type==="transform"){
    const op=n.values?.operation||"setPosition";
@@ -181,6 +182,13 @@ function compile(inputNodes,inputLinks,inputVars,className){
    expression="((GameObject)("+target+"))?.GetComponent<"+ct+">()";
   }else if(n.type==="fromto"){
    expression=fromToExpression(n,path);
+  }else if(n.type==="vector"){
+   const type=n.values?.vectorType||"Vector3";
+   const x=valueForInput(n,"x",path,"float"),y=valueForInput(n,"y",path,"float");
+   const z=valueForInput(n,"z",path,"float"),w=valueForInput(n,"w",path,"float");
+   const args=type==="Vector2"?[x,y]:type==="Vector3"?[x,y,z]:type==="Vector4"||type==="Quaternion"||type==="Color"?[x,y,z,w]:null;
+   if(args)expression="new "+type+"("+args.join(", ")+")";
+   else {report("Choose a supported vector output type.");expression="Vector3.zero"}
   }else if(n.type==="math"){
    const type=n.values?.outputType||"float",op=n.values?.operation||"add";
    const a=valueForInput(n,"a",path,type),b=valueForInput(n,"b",path,type);
@@ -223,6 +231,7 @@ function compile(inputNodes,inputLinks,inputVars,className){
  function valueForInput(n,pin,seen=new Set(),expectedType=null){
   const link=dataLink(n.id,pin);
   if(link)return valueExpr(link.from,seen,expectedType);
+  if(n.type==="vector"&&["x","y","z","w"].includes(pin))return typedFallback(n.values?.[pin]??(pin==="w"?"1":"0"),expectedType||"float");
   if(pin==="minimumValue")return typedFallback(n.values?.minimum??"-45","float");
   if(pin==="maximumValue")return typedFallback(n.values?.maximum??"45","float");
   if(pin==="propertyValueInput")return propertyFallback(n);
