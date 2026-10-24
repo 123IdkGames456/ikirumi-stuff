@@ -100,6 +100,7 @@ function inputActive(n,p){
  if((n.type==="vector"||n.type==="literal")&&p.id==="w"&&["Vector2","Vector3"].includes(n.values.vectorType||n.values.type))return false;
  if(n.type==="transform"&&p.id==="vector"&&["getPosition","getRotation","getScale"].includes(n.values.operation))return false;
  if(n.type==="setcomponent"){
+  if(p.id==="propertyValueInput"&&n.values.enabledProperty!=="true")return false;
   const prop=n.values.property||"mass";
   const bools=["useLimits","enableCollision","enablePreprocessing","useGravity","isKinematic","detectCollisions","simulated","isTrigger","enabled","loop","playOnAwake","mute","orthographic","isStopped"];
   
@@ -200,7 +201,8 @@ function fieldHtml(n,f){
  if(n.type==="vector"&&f.id==="z"&&n.values.vectorType==="Vector2")return "";
  if(n.type==="vector"&&f.id==="w"&&["Vector2","Vector3"].includes(n.values.vectorType))return "";
  if(n.type==="setcomponent"){
-  const ct=n.values.componentType||"HingeJoint",prop=n.values.property||"limits";
+  const ct=n.values.componentType||"Rigidbody",prop=n.values.property||"mass";
+  if(f.id!=="componentType"&&f.id!=="enabledProperty"&&n.values.enabledProperty!=="true")return "";
   if(["minimum","maximum","setMinimum","setMaximum"].includes(f.id)&&prop!=="limits")return "";
   if(f.id==="boolValue"&&!boolProperties.has(prop))return "";
   if(f.id==="componentVariable"&&n.values.source==="connected")return "";
