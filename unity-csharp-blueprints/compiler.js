@@ -254,18 +254,18 @@ function compile(inputNodes,inputLinks,inputVars,className){
    else if(n.type==="setvar"){
     const v=findVar(n.values?.variable);
     if(!v)report("Choose a variable in Set Variable.");
-    else out.push(p+v.codeName+" = "+valueForInput(n,"value",new Set(visited),v.type)+";");
+    else out.push(p+v.codeName+" = "+valueForInput(n,"value",new Set(),v.type)+";");
    }else if(n.type==="setcomponent"){
     const ct=n.values?.componentType||"HingeJoint",prop=n.values?.property||"limits";
     const sourceLink=dataLink(n.id,"component"),selected=findVar(n.values?.componentVariable);
     let target;
-    if(sourceLink)target=valueExpr(sourceLink.from,new Set(visited),ct);
+    if(sourceLink)target=valueExpr(sourceLink.from,new Set(),ct);
     else if(n.values?.source==="connected"){report("Connect a component to Set Component Property.");target="GetComponent<"+ct+">()"}
     else if(selected)target=selected.codeName;
     else {report("Choose a component variable or connect a component input.");target="GetComponent<"+ct+">()"}
     if(prop==="limits"&&ct==="HingeJoint"){
-     const min=n.values?.setMinimum==="true"?valueForInput(n,"minimumValue",new Set(visited),"float"):null;
-     const max=n.values?.setMaximum==="true"?valueForInput(n,"maximumValue",new Set(visited),"float"):null;
+     const min=n.values?.setMinimum==="true"?valueForInput(n,"minimumValue",new Set(),"float"):null;
+     const max=n.values?.setMaximum==="true"?valueForInput(n,"maximumValue",new Set(),"float"):null;
      out.push(p+"{",p+"    var __joint_"+n.id+" = "+target+";",p+"    if (__joint_"+n.id+" != null)",p+"    {",p+"        var __limits_"+n.id+" = __joint_"+n.id+".limits;");
      if(min!==null)out.push(p+"        __limits_"+n.id+".min = "+min+";");
      if(max!==null)out.push(p+"        __limits_"+n.id+".max = "+max+";");
@@ -283,24 +283,24 @@ function compile(inputNodes,inputLinks,inputVars,className){
      out.push(p+"if ("+target+" != null) "+target+"."+prop+" = "+(n.values?.boolValue==="false"?"false":"true")+";");
     }else{
      const type=propertyType(ct,prop),link=dataLink(n.id,"propertyValueInput");
-     const val=link?valueForInput(n,"propertyValueInput",new Set(visited),type):propertyFallback(n);
-     out.push(p+"if ("+target+" != null) "+target+"."+prop+" = "+val+";");
+     const val=link?valueForInput(n,"propertyValueInput",new Set(),type):propertyFallback(n);
+     out.push(p+"{",p+"    var __component_"+n.id+" = "+target+";",p+"    if (__component_"+n.id+" != null)",p+"    {",p+"        __component_"+n.id+"."+prop+" = "+val+";",p+"    }",p+"}");
     }
    }else if(n.type==="debug"){
     const level=n.values?.level||"log",link=dataLink(n.id,"value");
     let msg;
     if(link){
-     msg=valueExpr(link.from,new Set(visited));
+     msg=valueExpr(link.from,new Set());
      const source=findNode(link.from);
      if(source?.type==="math"&&msg.startsWith("(")&&msg.endsWith(")"))msg=msg.slice(1,-1);
     }else msg=escString(n.values?.message||"");
     out.push(p+"Debug.Log"+(level==="warning"?"Warning":level==="error"?"Error":"")+"("+msg+");");
    }else if(n.type==="transform"){
-    const op=n.values?.operation||"setPosition",v=valueForInput(n,"vector",new Set(visited),"Vector3");
+    const op=n.values?.operation||"setPosition",v=valueForInput(n,"vector",new Set(),"Vector3");
     const code={setPosition:"transform.position = "+v+";",translate:"transform.Translate("+v+");",setRotation:"transform.rotation = Quaternion.Euler("+v+");",setScale:"transform.localScale = "+v+";"};
     if(code[op])out.push(p+code[op]);
    }else if(n.type==="gameobject"){
-    const target=valueForInput(n,"target",new Set(visited),"GameObject"),op=n.values?.operation||"setActive";
+    const target=valueForInput(n,"target",new Set(),"GameObject"),op=n.values?.operation||"setActive";
     if(op==="destroy")out.push(p+"if ("+target+" != null) Destroy("+target+");");
     else if(op==="instantiate"){
      if(outputConnected(n.id))out.push(p+"__blueprintSpawned_"+n.id+" = Instantiate("+target+");");
@@ -319,7 +319,7 @@ function compile(inputNodes,inputLinks,inputVars,className){
     out.push(p+"if (!"+flag+") StartCoroutine("+method+"());");
     break;
    }else if(n.type==="if"){
-    const cond=valueForInput(n,"condition",new Set(visited),"bool");
+    const cond=valueForInput(n,"condition",new Set(),"bool");
     out.push(p+"if ("+cond+")",p+"{");
     const t=connected(n.id,"True");if(t)out.push(...emitFlow(t,indent+1,new Set(visited)));
     out.push(p+"}",p+"else",p+"{");
