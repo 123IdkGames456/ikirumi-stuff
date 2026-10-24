@@ -32,7 +32,7 @@ const properties={
  NavMeshAgent:{speed:"float",angularSpeed:"float",acceleration:"float",stoppingDistance:"float",isStopped:"bool"},
  WheelCollider:{motorTorque:"float",brakeTorque:"float",steerAngle:"float"},
  SpriteRenderer:{enabled:"bool",color:"Color",flipX:"bool",flipY:"bool",sortingOrder:"int",sprite:"Sprite"},
- MeshRenderer:{enabled:"bool",receiveShadows:"bool",shadowCastingMode:"UnityEngine.Rendering.ShadowCastingMode",sortingOrder:"int"},
+ MeshRenderer:{enabled:"bool",receiveShadows:"bool",shadowCastingMode:"ShadowCastingMode",sortingOrder:"int"},
  ParticleSystem:{loop:"bool",playOnAwake:"bool",simulationSpeed:"float"}
 };
 function escString(value){return JSON.stringify(String(value??""))}
@@ -102,7 +102,7 @@ function compile(inputNodes,inputLinks,inputVars,className){
   return "dynamic";
  }
  function typedDefault(type){
-  const defaults={bool:"false",byte:"0",sbyte:"0",short:"0",ushort:"0",int:"0",uint:"0U",long:"0L",ulong:"0UL",float:"0f",double:"0d",decimal:"0m",string:'""',char:"'\\0'",Vector2:"Vector2.zero",Vector2Int:"Vector2Int.zero",Vector3:"Vector3.zero",Vector3Int:"Vector3Int.zero",Vector4:"Vector4.zero",Quaternion:"Quaternion.identity",Color:"Color.white",Color32:"new Color32(255,255,255,255)",Rect:"new Rect()",Bounds:"new Bounds()",LayerMask:"0",GameObject:"null",Transform:"null",Rigidbody:"null",Rigidbody2D:"null",Collider:"null",Collider2D:"null",JointMotor:"new JointMotor()",JointMotor2D:"new JointMotor2D()",JointSpring:"new JointSpring()",JointLimits:"new JointLimits()",JointAngleLimits2D:"new JointAngleLimits2D()",RigidbodyConstraints:"RigidbodyConstraints.None",RigidbodyConstraints2D:"RigidbodyConstraints2D.None",RigidbodyType2D:"RigidbodyType2D.Dynamic",object:"null"};
+  const defaults={bool:"false",byte:"0",sbyte:"0",short:"0",ushort:"0",int:"0",uint:"0U",long:"0L",ulong:"0UL",float:"0f",double:"0d",decimal:"0m",string:'""',char:"'\\0'",Vector2:"Vector2.zero",Vector2Int:"Vector2Int.zero",Vector3:"Vector3.zero",Vector3Int:"Vector3Int.zero",Vector4:"Vector4.zero",Quaternion:"Quaternion.identity",Color:"Color.white",Color32:"new Color32(255,255,255,255)",Rect:"new Rect()",Bounds:"new Bounds()",LayerMask:"0",GameObject:"null",Transform:"null",Rigidbody:"null",Rigidbody2D:"null",Collider:"null",Collider2D:"null",JointMotor:"new JointMotor()",JointMotor2D:"new JointMotor2D()",JointSpring:"new JointSpring()",JointLimits:"new JointLimits()",JointAngleLimits2D:"new JointAngleLimits2D()",SoftJointLimit:"new SoftJointLimit()",SoftJointLimitSpring:"new SoftJointLimitSpring()",ConfigurableJointMotion:"ConfigurableJointMotion.Free",CapsuleDirection2D:"CapsuleDirection2D.Vertical",AnimatorUpdateMode:"AnimatorUpdateMode.Normal",AnimatorCullingMode:"AnimatorCullingMode.AlwaysAnimate",ShadowCastingMode:"ShadowCastingMode.On",MeshColliderCookingOptions:"MeshColliderCookingOptions.None",RigidbodyConstraints:"RigidbodyConstraints.None",RigidbodyConstraints2D:"RigidbodyConstraints2D.None",RigidbodyType2D:"RigidbodyType2D.Dynamic",DateTime:"default(DateTime)",TimeSpan:"default(TimeSpan)",Guid:"default(Guid)",object:"null"};
   return defaults[type]??"default("+type+")";
  }
  function typedFallback(raw,type){
@@ -119,7 +119,7 @@ function compile(inputNodes,inputLinks,inputVars,className){
   if(type==="Vector4"&&value==="0")return "Vector4.zero";
   if(type==="Quaternion"&&value==="0")return "Quaternion.identity";
   if(type==="Color"&&value==="0")return "Color.white";
-  const enumDefaults={RigidbodyConstraints:"RigidbodyConstraints.None",RigidbodyConstraints2D:"RigidbodyConstraints2D.None",RigidbodyType2D:"RigidbodyType2D.Dynamic"};
+  const enumDefaults={RigidbodyConstraints:"RigidbodyConstraints.None",RigidbodyConstraints2D:"RigidbodyConstraints2D.None",RigidbodyType2D:"RigidbodyType2D.Dynamic",ConfigurableJointMotion:"ConfigurableJointMotion.Free",CapsuleDirection2D:"CapsuleDirection2D.Vertical",AnimatorUpdateMode:"AnimatorUpdateMode.Normal",AnimatorCullingMode:"AnimatorCullingMode.AlwaysAnimate",ShadowCastingMode:"ShadowCastingMode.On",MeshColliderCookingOptions:"MeshColliderCookingOptions.None"};
   if(enumDefaults[type]&&value==="0")return enumDefaults[type];
   if(Object.prototype.hasOwnProperty.call(enumDefaults,type)&&/^-?\d+$/.test(value))return "("+type+")"+value;
   return value;
@@ -310,8 +310,8 @@ function compile(inputNodes,inputLinks,inputVars,className){
      if(max!==null)out.push(p+"        __limits_"+n.id+".max = "+max+";");
      out.push(p+"        __joint_"+n.id+".limits = __limits_"+n.id+";",p+"        __joint_"+n.id+".useLimits = true;",p+"    }",p+"}");
     }else if(prop==="limits"&&ct==="HingeJoint2D"){
-     const min=n.values?.setMinimum==="true"?valueForInput(n,"minimumValue",new Set(visited),"float"):null;
-     const max=n.values?.setMaximum==="true"?valueForInput(n,"maximumValue",new Set(visited),"float"):null;
+     const min=n.values?.setMinimum==="true"?valueForInput(n,"minimumValue",new Set(),"float"):null;
+     const max=n.values?.setMaximum==="true"?valueForInput(n,"maximumValue",new Set(),"float"):null;
      out.push(p+"{",p+"    var __joint_"+n.id+" = "+target+";",p+"    if (__joint_"+n.id+" != null)",p+"    {",p+"        var __limits_"+n.id+" = __joint_"+n.id+".limits;");
      if(min!==null)out.push(p+"        __limits_"+n.id+".min = "+min+";");
      if(max!==null)out.push(p+"        __limits_"+n.id+".max = "+max+";");
@@ -405,7 +405,7 @@ function compile(inputNodes,inputLinks,inputVars,className){
   methods.push("    private void Start()","    {","    }","");
  }
  if(extraMethods.length)methods.push(...extraMethods);
- const referencedTypes=[...vars.map(v=>String(v.type||"")), ...nodes.map(n=>String(n.values?.componentType||"")), ...nodes.map(n=>String(n.values?.property||""))];
+ const referencedTypes=[...vars.map(v=>String(v.type||"")), ...nodes.map(n=>String(n.values?.componentType||"")), ...nodes.map(n=>String(n.values?.property||"")), ...nodes.filter(n=>n.type==="setcomponent").map(n=>propertyType(n.values?.componentType||"HingeJoint",n.values?.property||"limits"))];
  const hasType=(...types)=>referencedTypes.some(t=>types.includes(t));
  const imports=["using UnityEngine;","using System;","using System.Collections;","using System.Collections.Generic;"];
  if(hasType("Button","Toggle","Slider","Scrollbar","Dropdown","TMP_Dropdown","TMP_InputField","InputField","Image","RawImage","Text","GridLayoutGroup","VerticalLayoutGroup","HorizontalLayoutGroup","ContentSizeFitter","LayoutElement","ScrollRect","RectMask2D","Mask","AspectRatioFitter","GraphicRaycaster"))imports.push("using UnityEngine.UI;");
@@ -420,7 +420,8 @@ function compile(inputNodes,inputLinks,inputVars,className){
  const dependencyDiagnostics=[
   {types:["TMP_Text","TMP_InputField","TMP_Dropdown","TextMeshPro","TextMeshProUGUI"],message:"This script uses TextMeshPro types. Install the TextMeshPro package in the Unity project."},
   {types:["NavMeshSurface"],message:"This script uses NavMeshSurface. Install the AI Navigation package in the Unity project."},
-  {types:["PostProcessVolume","PostProcessProfile","PostProcessLayer"],message:"This script uses Post Processing types. Install the matching Post Processing package in the Unity project."}
+  {types:["PostProcessVolume","PostProcessProfile","PostProcessLayer"],message:"This script uses Post Processing types. Install the matching Post Processing package in the Unity project."},
+  {types:["NetworkBehaviour"],message:"NetworkBehaviour needs a networking package and its correct namespace; that cannot be inferred safely from the node alone."}
  ];
  for(const dependency of dependencyDiagnostics)if(hasType(...dependency.types))report(dependency.message);
  const declaration=imports.concat(["","public class "+safeClass+" : MonoBehaviour","{"]);
