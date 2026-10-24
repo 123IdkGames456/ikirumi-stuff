@@ -100,7 +100,22 @@ function renderNodes(){
   el.addEventListener("contextmenu",e=>{e.preventDefault();e.stopPropagation();selectedNode=n.id;showContextMenu(e.clientX,e.clientY,[{label:"Delete node",action:()=>{nodes=nodes.filter(x=>x.id!==n.id);links=links.filter(l=>l.from!==n.id&&l.to!==n.id);if(selectedNode===n.id)selectedNode=null;renderAll();status("Node deleted")}},{label:"Node color",submenu:[{label:"Default",color:"",action:()=>setNodeColor(n,"")},{label:"Blue",color:"#648cff",action:()=>setNodeColor(n,"#648cff")},{label:"Green",color:"#43b581",action:()=>setNodeColor(n,"#43b581")},{label:"Yellow",color:"#e0b64f",action:()=>setNodeColor(n,"#e0b64f")},{label:"Orange",color:"#e98b45",action:()=>setNodeColor(n,"#e98b45")},{label:"Red",color:"#df626c",action:()=>setNodeColor(n,"#df626c")},{label:"Purple",color:"#ad7ce8",action:()=>setNodeColor(n,"#ad7ce8")},{label:"Pink",color:"#e783b6",action:()=>setNodeColor(n,"#e783b6")},{label:"Gray",color:"#8e99aa",action:()=>setNodeColor(n,"#8e99aa")}]}]);});
   const head=el.querySelector(".node-head");
   head.addEventListener("pointerdown",e=>{if(e.target.closest("button,input,select"))return;selectedNode=n.id;const sx=e.clientX,sy=e.clientY,ox=n.x,oy=n.y;head.setPointerCapture?.(e.pointerId);function move(ev){n.x=Math.max(0,ox+ev.clientX-sx);n.y=Math.max(0,oy+ev.clientY-sy);el.style.left=n.x+"px";el.style.top=n.y+"px";drawWires()}function end(){window.removeEventListener("pointermove",move);window.removeEventListener("pointerup",end);renderInspector()}window.addEventListener("pointermove",move);window.addEventListener("pointerup",end);e.preventDefault()});
-  el.querySelectorAll("[data-field]").forEach(input=>input.addEventListener("change",()=>{n.values[input.dataset.field]=input.type==="checkbox"?String(input.checked):input.value;if(n.type==="setcomponent"&&input.dataset.field==="componentType"){n.values.property=(componentProperties[input.value]||[["enabled","Enabled"]])[0][0]}renderAll()}));
+  el.querySelectorAll("[data-field]").forEach(input=>{
+   input.addEventListener("pointerdown",e=>e.stopPropagation());
+   input.addEventListener("click",e=>e.stopPropagation());
+   input.addEventListener("change",()=>{
+    const field=input.dataset.field;
+    n.values[field]=input.type==="checkbox"?String(input.checked):input.value;
+    let rebuildNode=false;
+    if(n.type==="setcomponent"&&field==="componentType"){
+     n.values.property=(componentProperties[input.value]||[["enabled","Enabled"]])[0][0];
+     rebuildNode=true;
+    }
+    if(n.type==="setcomponent"&&["property","source","setMinimum","setMaximum"].includes(field))rebuildNode=true;
+    if(rebuildNode){renderNodes();renderInspector()}
+    renderCode();
+   });
+  });
   el.querySelectorAll(".pin").forEach(pin=>{pin.addEventListener("pointerdown",e=>{e.stopPropagation();if(pin.dataset.direction==="output"){e.preventDefault();beginWireDrag(e,n,pin)}});pin.addEventListener("click",e=>{e.preventDefault();e.stopPropagation()})});
   $("canvas").appendChild(el);
  });
