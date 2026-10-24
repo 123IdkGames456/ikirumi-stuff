@@ -127,3 +127,6 @@ button:active{transform:translateY(1px)}
  .pin.out{margin-right:-17px}
  .pin.in{margin-left:-17px}
 }
+
+/* Block library: scroll independently and visibly separate categories. */
+.sidebar{display:flex;flex-direction:column;min-height:0;overflow:hidden}.sidebar .panel-title,.sidebar .search,.sidebar .categories,.sidebar .sidebar-help{flex:none}.categories{max-height:105px;overflow-y:auto;align-content:flex-start;padding:2px 2px 8px;border-bottom:1px solid var(--line)}.block-list{display:block;flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:0 3px 12px 0;scrollbar-width:thin;scrollbar-color:#4b5670 #171a23}.block-category-section{padding:0 0 12px;margin:0 0 12px;border-bottom:2px solid #394153}.block-category-heading{position:sticky;top:0;z-index:1;display:flex;justify-content:space-between;align-items:center;padding:9px 8px;margin:0 0 7px;background:#171a23;border-bottom:1px solid #3b4355;color:#dfe5f4;font-size:10px;font-weight:900;letter-spacing:1.1px;text-transform:uppercase}.block-category-heading small{font-size:9px;font-weight:600;letter-spacing:0;color:#8e9ab2}.block-category-section .block-item{margin-bottom:6px}.sidebar-help{border-top:1px solid var(--line);padding-top:9px}
