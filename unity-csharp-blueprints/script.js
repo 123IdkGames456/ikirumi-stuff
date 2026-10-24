@@ -42,10 +42,40 @@ function renderBlocks(){
  $("blockList").querySelectorAll("[data-type]").forEach(b=>b.onclick=()=>addNode(b.dataset.type));
  $("blockTotal").textContent=filtered.length;
 }
+const componentProperties={
+HingeJoint:[["limits","Limits (Minimum / Maximum)"],["useLimits","Use Limits"],["motor","Motor"],["spring","Spring"],["breakForce","Break Force"],["breakTorque","Break Torque"],["enableCollision","Enable Collision"],["enablePreprocessing","Enable Preprocessing"]],
+HingeJoint2D:[["limits","Limits (Minimum / Maximum)"],["useLimits","Use Limits"],["motor","Motor"],["breakForce","Break Force"],["breakTorque","Break Torque"],["enableCollision","Enable Collision"]],
+Rigidbody:[["mass","Mass"],["drag","Drag"],["angularDrag","Angular Drag"],["useGravity","Use Gravity"],["isKinematic","Is Kinematic"],["detectCollisions","Detect Collisions"],["constraints","Constraints"]],
+Rigidbody2D:[["mass","Mass"],["gravityScale","Gravity Scale"],["linearDamping","Linear Damping"],["angularDamping","Angular Damping"],["simulated","Simulated"],["bodyType","Body Type"],["constraints","Constraints"]],
+Transform:[["position","Position"],["localPosition","Local Position"],["rotation","Rotation"],["localRotation","Local Rotation"],["localScale","Local Scale"]],
+Collider:[["enabled","Enabled"],["isTrigger","Is Trigger"]],
+Collider2D:[["enabled","Enabled"],["isTrigger","Is Trigger"]],
+BoxCollider:[["enabled","Enabled"],["isTrigger","Is Trigger"],["center","Center"],["size","Size"]],
+BoxCollider2D:[["enabled","Enabled"],["isTrigger","Is Trigger"],["offset","Offset"],["size","Size"]],
+AudioSource:[["volume","Volume"],["pitch","Pitch"],["loop","Loop"],["playOnAwake","Play On Awake"],["mute","Mute"]],
+Camera:[["fieldOfView","Field Of View"],["orthographic","Orthographic"],["orthographicSize","Orthographic Size"],["nearClipPlane","Near Clip Plane"],["farClipPlane","Far Clip Plane"]],
+Light:[["intensity","Intensity"],["range","Range"],["color","Color"],["enabled","Enabled"]],
+NavMeshAgent:[["speed","Speed"],["angularSpeed","Angular Speed"],["acceleration","Acceleration"],["stoppingDistance","Stopping Distance"],["isStopped","Is Stopped"]],
+WheelCollider:[["motorTorque","Motor Torque"],["brakeTorque","Brake Torque"],["steerAngle","Steer Angle"]]
+};
+const boolProperties=new Set(["useLimits","enableCollision","enablePreprocessing","useGravity","isKinematic","detectCollisions","simulated","isTrigger","enabled","loop","playOnAwake","mute","orthographic","isStopped"]);
 function fieldHtml(n,f){
  let val=n.values[f.id]??f.default??"";
+ if(n.type==="setcomponent"){
+  const ct=n.values.componentType||"HingeJoint",prop=n.values.property||"limits";
+  if(["minimum","maximum","setMinimum","setMaximum"].includes(f.id)&&prop!=="limits")return "";
+  if(f.id==="boolValue"&&!boolProperties.has(prop))return "";
+  if(f.id==="componentVariable"&&n.values.source==="connected")return "";
+  if(f.id==="propertyValue"&&boolProperties.has(prop))return "";
+  if(f.id==="property"){
+   const options=componentProperties[ct]||[["enabled","Enabled"]];
+   return '<label class="node-field"><span>'+esc(f.label)+'</span><select data-field="property">'+options.map(o=>'<option value="'+o[0]+'" '+(prop===o[0]?"selected":"")+'>'+esc(o[1])+'</option>').join("")+'</select></label>';
+  }
+ }
+ if(f.type==="checkbox")return '<label class="node-field checkbox-field"><span>'+esc(f.label)+'</span><input data-field="'+f.id+'" type="checkbox" '+(val==="true"||val===true?"checked":"")+'></label>';
  if(f.type==="variable"){
-  const list=variables.filter(v=>f.allowAll||!f.expected||BlueprintTypes.compatible(v.type,f.expected));
+  const expected=n.type==="setcomponent"&&f.id==="componentVariable"?(n.values.componentType||"Component"):(f.expected||null);
+  const list=variables.filter(v=>f.allowAll&&n.type!=="setcomponent"||!expected||v.type===expected||v.type==="Component");
   return '<label class="node-field"><span>'+esc(f.label)+'</span><select data-field="'+f.id+'"><option value="">Choose variable…</option>'+list.map(v=>'<option value="'+v.id+'" '+(val===v.id?"selected":"")+'>'+esc(v.name)+' · '+esc(v.type)+'</option>').join("")+'</select></label>';
  }
  if(f.type==="select")return '<label class="node-field"><span>'+esc(f.label)+'</span><select data-field="'+f.id+'">'+f.options.map(o=>'<option value="'+esc(o[0])+'" '+(String(val)===String(o[0])?"selected":"")+'>'+esc(o[1])+'</option>').join("")+'</select></label>';
@@ -67,7 +97,7 @@ function renderNodes(){
   el.addEventListener("click",e=>{if(e.target.classList.contains("pin"))return;selectedNode=n.id;renderNodes();renderInspector()});
   const head=el.querySelector(".node-head");
   head.addEventListener("pointerdown",e=>{if(e.target.closest("button,input,select"))return;selectedNode=n.id;const sx=e.clientX,sy=e.clientY,ox=n.x,oy=n.y;head.setPointerCapture?.(e.pointerId);function move(ev){n.x=Math.max(0,ox+ev.clientX-sx);n.y=Math.max(0,oy+ev.clientY-sy);el.style.left=n.x+"px";el.style.top=n.y+"px";drawWires()}function end(){window.removeEventListener("pointermove",move);window.removeEventListener("pointerup",end);renderInspector()}window.addEventListener("pointermove",move);window.addEventListener("pointerup",end);e.preventDefault()});
-  el.querySelectorAll("[data-field]").forEach(input=>input.addEventListener("change",()=>{n.values[input.dataset.field]=input.value;renderAll()}));
+  el.querySelectorAll("[data-field]").forEach(input=>input.addEventListener("change",()=>{n.values[input.dataset.field]=input.type==="checkbox"?String(input.checked):input.value;if(n.type==="setcomponent"&&input.dataset.field==="componentType"){n.values.property=(componentProperties[input.value]||[["enabled","Enabled"]])[0][0]}renderAll()}));
   el.querySelectorAll(".pin").forEach(pin=>pin.onclick=e=>{e.stopPropagation();pinClick(n,pin.dataset.kind,pin.classList.contains("out"),pin.dataset.pin)});
   $("canvas").appendChild(el);
  });
