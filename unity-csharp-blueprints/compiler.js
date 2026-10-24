@@ -2,21 +2,38 @@ window.BlueprintCompiler = (() => {
 const keywords=new Set(("abstract as base bool break byte case catch char checked class const continue decimal default delegate do double else enum event explicit extern false finally fixed float for foreach goto if implicit in int interface internal is lock long namespace new null object operator out override params private protected public readonly ref return sbyte sealed short sizeof stackalloc static string struct switch this throw true try typeof uint ulong unchecked unsafe ushort using virtual void volatile while").split(" "));
 const numericTypes=new Set(["byte","sbyte","short","ushort","int","uint","long","ulong","float","double","decimal"]);
 const allNumeric=["byte","sbyte","short","ushort","int","uint","long","ulong","float","double","decimal"];
-const boolProperties=new Set(["useLimits","enableCollision","enablePreprocessing","useGravity","isKinematic","detectCollisions","simulated","isTrigger","enabled","loop","playOnAwake","mute","orthographic","isStopped"]);
+const boolProperties=new Set(["useLimits","useMotor","useSpring","autoConfigureConnectedAnchor","configuredInWorldSpace","swapBodies","enableCollision","enablePreprocessing","useGravity","isKinematic","detectCollisions","enableOverlapRecovery","simulated","isTrigger","enabled","loop","playOnAwake","mute","orthographic","isStopped","convex","applyRootMotion","flipX","flipY","receiveShadows"]);
 const properties={
- HingeJoint:{limits:"JointLimits",useLimits:"bool",motor:"JointMotor",spring:"JointSpring",breakForce:"float",breakTorque:"float",enableCollision:"bool",enablePreprocessing:"bool"},
- HingeJoint2D:{limits:"JointAngleLimits2D",useLimits:"bool",motor:"JointMotor2D",breakForce:"float",breakTorque:"float",enableCollision:"bool"},
+ Joint:{connectedBody:"Rigidbody",anchor:"Vector3",connectedAnchor:"Vector3",autoConfigureConnectedAnchor:"bool",breakForce:"float",breakTorque:"float",enableCollision:"bool",enablePreprocessing:"bool",massScale:"float",connectedMassScale:"float"},
+ FixedJoint:{connectedBody:"Rigidbody",anchor:"Vector3",connectedAnchor:"Vector3",autoConfigureConnectedAnchor:"bool",breakForce:"float",breakTorque:"float",enableCollision:"bool",enablePreprocessing:"bool",massScale:"float",connectedMassScale:"float"},
+ SpringJoint:{connectedBody:"Rigidbody",anchor:"Vector3",connectedAnchor:"Vector3",autoConfigureConnectedAnchor:"bool",spring:"float",damper:"float",minDistance:"float",maxDistance:"float",tolerance:"float",breakForce:"float",breakTorque:"float",enableCollision:"bool",enablePreprocessing:"bool"},
+ HingeJoint:{limits:"JointLimits",useLimits:"bool",motor:"JointMotor",spring:"JointSpring",breakForce:"float",breakTorque:"float",enableCollision:"bool",enablePreprocessing:"bool",connectedBody:"Rigidbody"},
+ HingeJoint2D:{limits:"JointAngleLimits2D",useLimits:"bool",useMotor:"bool",useSpring:"bool",motor:"JointMotor2D",breakForce:"float",breakTorque:"float",enableCollision:"bool",connectedBody:"Rigidbody2D"},
+ CharacterJoint:{connectedBody:"Rigidbody",swingAxis:"Vector3",lowTwistLimit:"SoftJointLimit",highTwistLimit:"SoftJointLimit",swing1Limit:"SoftJointLimit",swing2Limit:"SoftJointLimit",twistLimitSpring:"SoftJointLimitSpring",breakForce:"float",breakTorque:"float",enableCollision:"bool",enablePreprocessing:"bool"},
+ ConfigurableJoint:{connectedBody:"Rigidbody",xMotion:"ConfigurableJointMotion",yMotion:"ConfigurableJointMotion",zMotion:"ConfigurableJointMotion",angularXMotion:"ConfigurableJointMotion",angularYMotion:"ConfigurableJointMotion",angularZMotion:"ConfigurableJointMotion",targetPosition:"Vector3",targetVelocity:"Vector3",targetRotation:"Quaternion",targetAngularVelocity:"Vector3",linearLimit:"SoftJointLimit",lowAngularXLimit:"SoftJointLimit",highAngularXLimit:"SoftJointLimit",angularYLimit:"SoftJointLimit",angularZLimit:"SoftJointLimit",configuredInWorldSpace:"bool",swapBodies:"bool",projectionDistance:"float",projectionAngle:"float"},
+ Joint2D:{connectedBody:"Rigidbody2D",anchor:"Vector2",connectedAnchor:"Vector2",autoConfigureConnectedAnchor:"bool",breakForce:"float",breakTorque:"float",enableCollision:"bool"},
  Rigidbody:{mass:"float",drag:"float",angularDrag:"float",useGravity:"bool",isKinematic:"bool",detectCollisions:"bool",constraints:"RigidbodyConstraints"},
  Rigidbody2D:{mass:"float",gravityScale:"float",linearDamping:"float",angularDamping:"float",simulated:"bool",bodyType:"RigidbodyType2D",constraints:"RigidbodyConstraints2D"},
  Transform:{position:"Vector3",localPosition:"Vector3",rotation:"Quaternion",localRotation:"Quaternion",localScale:"Vector3"},
  Collider:{enabled:"bool",isTrigger:"bool"},Collider2D:{enabled:"bool",isTrigger:"bool"},
  BoxCollider:{enabled:"bool",isTrigger:"bool",center:"Vector3",size:"Vector3"},
+ SphereCollider:{enabled:"bool",isTrigger:"bool",center:"Vector3",radius:"float"},
+ CapsuleCollider:{enabled:"bool",isTrigger:"bool",center:"Vector3",radius:"float",height:"float",direction:"int"},
+ MeshCollider:{enabled:"bool",isTrigger:"bool",sharedMesh:"Mesh",convex:"bool"},
  BoxCollider2D:{enabled:"bool",isTrigger:"bool",offset:"Vector2",size:"Vector2"},
+ CircleCollider2D:{enabled:"bool",isTrigger:"bool",offset:"Vector2",radius:"float"},
+ CapsuleCollider2D:{enabled:"bool",isTrigger:"bool",offset:"Vector2",size:"Vector2",direction:"CapsuleDirection2D"},
+ CharacterController:{enabled:"bool",height:"float",radius:"float",center:"Vector3",slopeLimit:"float",stepOffset:"float",skinWidth:"float",minMoveDistance:"float",detectCollisions:"bool",enableOverlapRecovery:"bool"},
+ ConstantForce:{force:"Vector3",relativeForce:"Vector3",torque:"Vector3",relativeTorque:"Vector3"},
+ Animator:{enabled:"bool",applyRootMotion:"bool",speed:"float",updateMode:"AnimatorUpdateMode",cullingMode:"AnimatorCullingMode"},
  AudioSource:{volume:"float",pitch:"float",loop:"bool",playOnAwake:"bool",mute:"bool"},
  Camera:{fieldOfView:"float",orthographic:"bool",orthographicSize:"float",nearClipPlane:"float",farClipPlane:"float"},
  Light:{intensity:"float",range:"float",color:"Color",enabled:"bool"},
  NavMeshAgent:{speed:"float",angularSpeed:"float",acceleration:"float",stoppingDistance:"float",isStopped:"bool"},
- WheelCollider:{motorTorque:"float",brakeTorque:"float",steerAngle:"float"}
+ WheelCollider:{motorTorque:"float",brakeTorque:"float",steerAngle:"float"},
+ SpriteRenderer:{enabled:"bool",color:"Color",flipX:"bool",flipY:"bool",sortingOrder:"int",sprite:"Sprite"},
+ MeshRenderer:{enabled:"bool",receiveShadows:"bool",shadowCastingMode:"UnityEngine.Rendering.ShadowCastingMode",sortingOrder:"int"},
+ ParticleSystem:{loop:"bool",playOnAwake:"bool",simulationSpeed:"float"}
 };
 function escString(value){return JSON.stringify(String(value??""))}
 function safeIdentifier(value,fallback="BlueprintScript",used=new Set()){
@@ -301,8 +318,12 @@ function compile(inputNodes,inputLinks,inputVars,className){
      out.push(p+"        __joint_"+n.id+".limits = __limits_"+n.id+";",p+"        __joint_"+n.id+".useLimits = true;",p+"    }",p+"}");
     }else if(prop==="limits"){
      report("Limits are only implemented for HingeJoint and HingeJoint2D.");
+    }else if(ct==="ParticleSystem"&&["loop","playOnAwake","simulationSpeed"].includes(prop)){
+     const link=dataLink(n.id,"propertyValueInput"),raw=prop==="simulationSpeed"?(link?valueForInput(n,"propertyValueInput",new Set(),"float"):typedFallback(n.values?.propertyValue??"1","float")):(n.values?.boolValue==="false"?"false":"true");
+     const targetName="__particle_"+n.id;
+     out.push(p+"{",p+"    var "+targetName+" = "+target+";",p+"    if ("+targetName+" != null)",p+"    {",p+"        var __main_"+n.id+" = "+targetName+".main;",p+"        __main_"+n.id+"."+prop+" = "+raw+";",p+"    }",p+"}");
     }else if(boolProperties.has(prop)){
-     out.push(p+"if ("+target+" != null) "+target+"."+prop+" = "+(n.values?.boolValue==="false"?"false":"true")+";");
+     out.push(p+"{",p+"    var __component_"+n.id+" = "+target+";",p+"    if (__component_"+n.id+" != null)",p+"    {",p+"        __component_"+n.id+"."+prop+" = "+(n.values?.boolValue==="false"?"false":"true")+";",p+"    }",p+"}");
     }else{
      const type=propertyType(ct,prop),link=dataLink(n.id,"propertyValueInput");
      const val=link?valueForInput(n,"propertyValueInput",new Set(),type):propertyFallback(n);
@@ -393,7 +414,7 @@ function compile(inputNodes,inputLinks,inputVars,className){
  if(hasType("NavMeshSurface"))imports.push("using Unity.AI.Navigation;");
  if(hasType("VideoPlayer"))imports.push("using UnityEngine.Video;");
  if(hasType("PlayableDirector"))imports.push("using UnityEngine.Playables;");
- if(hasType("Volume","VolumeProfile","RenderPipelineAsset","VolumeComponent","VolumeParameter"))imports.push("using UnityEngine.Rendering;");
+ if(hasType("Volume","VolumeProfile","RenderPipelineAsset","VolumeComponent","VolumeParameter","ShadowCastingMode"))imports.push("using UnityEngine.Rendering;");
  if(hasType("PostProcessVolume","PostProcessProfile","PostProcessLayer"))imports.push("using UnityEngine.Rendering.PostProcessing;");
  if(hasType("EventSystem","PointerEventData","BaseEventData"))imports.push("using UnityEngine.EventSystems;");
  const dependencyDiagnostics=[
