@@ -19,11 +19,14 @@ function valueExpr(nodeId,seen=new Set()){
  if(["math","compare","logic"].includes(n.type)){
   const a=valueForInput(n,"a",new Set(seen)),b=valueForInput(n,"b",new Set(seen)),op=n.values.operation||"add";
   const ops={add:"+",subtract:"-",multiply:"*",divide:"/",modulo:"%",eq:"==",ne:"!=",gt:">",lt:"<",gte:">=",lte:"<=",and:"&&",or:"||",xor:"^"};
-  if(op==="power")return "Mathf.Pow("+a+", "+b+")";
-  if(op==="min")return "Mathf.Min("+a+", "+b+")";
-  if(op==="max")return "Mathf.Max("+a+", "+b+")";
   if(op==="not")return "!("+a+")";
-  return "("+a+" "+(ops[op]||"+")+" "+b+")";
+  let expression;
+  if(op==="power")expression="Math.Pow("+a+", "+b+")";
+  else if(op==="min")expression="Math.Min("+a+", "+b+")";
+  else if(op==="max")expression="Math.Max("+a+", "+b+")";
+  else expression="("+a+" "+(ops[op]||"+")+" "+b+")";
+  const resultType=n.values.outputType||"float";
+  return "("+resultType+")("+expression+")";
  }
  return "default";
 }
