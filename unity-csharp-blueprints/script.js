@@ -22,11 +22,10 @@ function connectedComponentType(n){
 }
 function nodeInputs(n){
  const d=getDef(n?.type);
- if(n?.type==="literal"){
-  const type=n.values?.type||"int";
-  return ["Vector2","Vector3","Vector4","Quaternion","Color","Color32"].includes(type)
-   ?(d?.dataIn||[]).filter(p=>["x","y","z","w"].includes(p.id))
-   :[];
+ if(n?.type==="literal")return [];
+ if(n?.type==="vector"){
+  const type=n.values?.vectorType||"Vector3";
+  return (d?.dataIn||[]).filter(p=>p.id==="x"||p.id==="y"||(p.id==="z"&&!["Vector2"].includes(type))||(p.id==="w"&&["Vector4","Quaternion","Color","Color32"].includes(type)));
  }
  if(n?.type!=="setcomponent")return d?.dataIn||[];
  const ct=connectedComponentType(n);
@@ -237,11 +236,9 @@ ParticleSystem:[["loop","Loop"],["playOnAwake","Play On Awake"],["simulationSpee
 const boolProperties=new Set(["useLimits","useMotor","useSpring","autoConfigureConnectedAnchor","configuredInWorldSpace","swapBodies","enableCollision","enablePreprocessing","useGravity","isKinematic","detectCollisions","enableOverlapRecovery","simulated","isTrigger","enabled","loop","playOnAwake","mute","orthographic","isStopped","convex","applyRootMotion","flipX","flipY","receiveShadows"]);
 function fieldHtml(n,f){
  let val=n.values[f.id]??f.default??"";
- if(n.type==="literal"){
-  const type=n.values.type||"int";
-  const composite=["Vector2","Vector3","Vector4","Quaternion","Color","Color32"].includes(type);
-  if(f.id==="value"&&composite)return "";
-  if(["x","y","z","w"].includes(f.id)&&!composite)return "";
+ if(n.type==="literal"&&["x","y","z","w"].includes(f.id))return "";
+ if(n.type==="vector"){
+  const type=n.values.vectorType||"Vector3";
   if(f.id==="z"&&type==="Vector2")return "";
   if(f.id==="w"&&["Vector2","Vector3"].includes(type))return "";
  }
