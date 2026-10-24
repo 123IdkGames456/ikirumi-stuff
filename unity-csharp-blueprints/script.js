@@ -253,7 +253,7 @@ function renderInspector(){
  (d.fields||[]).forEach(f=>{let val=n.values[f.id]??"";if(f.type==="select")html+='<label>'+esc(f.label)+'</label><select data-inspect="'+f.id+'">'+f.options.map(o=>'<option value="'+esc(o[0])+'" '+(String(val)===String(o[0])?"selected":"")+'>'+esc(o[1])+'</option>').join("")+'</select>';else if(f.type==="variable")html+='<label>'+esc(f.label)+'</label><select data-inspect="'+f.id+'"><option value="">Choose variable…</option>'+variables.map(v=>'<option value="'+v.id+'" '+(v.id===val?"selected":"")+'>'+esc(v.name)+' · '+esc(v.type)+'</option>').join("")+'</select>';else html+='<label>'+esc(f.label)+'</label><input data-inspect="'+f.id+'" value="'+esc(val)+'">'});
  html+='<div style="margin-top:15px"><button id="deleteNode" style="width:100%">Delete node</button></div>';
  $("nodeInspector").innerHTML=html;
- $("nodeInspector").querySelectorAll("[data-inspect]").forEach(el=>el.onchange=()=>{n.values[el.dataset.inspect]=el.value;renderAll()});
+ $("nodeInspector").querySelectorAll("[data-inspect]").forEach(el=>el.onchange=()=>{const field=el.dataset.inspect;n.values[field]=el.value;if(["type","variable","componentType"].includes(field))removeIncompatibleLinksForOutput(n.id);removeIncompatibleLinksForInput(n.id);renderAll()});
  $("deleteNode").onclick=()=>{nodes=nodes.filter(x=>x.id!==n.id);links=links.filter(l=>l.from!==n.id&&l.to!==n.id);selectedNode=null;renderAll()};
 }
 function renderCode(){
