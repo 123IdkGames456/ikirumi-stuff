@@ -375,7 +375,25 @@ function compile(inputNodes,inputLinks,inputVars,className){
   methods.push("    private void Start()","    {","    }","");
  }
  if(extraMethods.length)methods.push(...extraMethods);
- const declaration=["using UnityEngine;","using System;","using System.Collections;","using System.Collections.Generic;","", "public class "+safeClass+" : MonoBehaviour","{"];
+ const referencedTypes=[...vars.map(v=>String(v.type||"")), ...nodes.map(n=>String(n.values?.componentType||"")), ...nodes.map(n=>String(n.values?.property||""))];
+ const hasType=(...types)=>referencedTypes.some(t=>types.includes(t));
+ const imports=["using UnityEngine;","using System;","using System.Collections;","using System.Collections.Generic;"];
+ if(hasType("Button","Toggle","Slider","Scrollbar","Dropdown","TMP_Dropdown","TMP_InputField","InputField","Image","RawImage","Text","GridLayoutGroup","VerticalLayoutGroup","HorizontalLayoutGroup","ContentSizeFitter","LayoutElement","ScrollRect","RectMask2D","Mask","AspectRatioFitter","GraphicRaycaster"))imports.push("using UnityEngine.UI;");
+ if(referencedTypes.some(t=>t.startsWith("TMP_")||t==="TextMeshPro"||t==="TextMeshProUGUI"))imports.push("using TMPro;");
+ if(hasType("NavMeshAgent","NavMeshObstacle"))imports.push("using UnityEngine.AI;");
+ if(hasType("NavMeshSurface"))imports.push("using Unity.AI.Navigation;");
+ if(hasType("VideoPlayer"))imports.push("using UnityEngine.Video;");
+ if(hasType("PlayableDirector"))imports.push("using UnityEngine.Playables;");
+ if(hasType("Volume","VolumeProfile","RenderPipelineAsset","VolumeComponent","VolumeParameter"))imports.push("using UnityEngine.Rendering;");
+ if(hasType("PostProcessVolume","PostProcessProfile","PostProcessLayer"))imports.push("using UnityEngine.Rendering.PostProcessing;");
+ if(hasType("EventSystem","PointerEventData","BaseEventData"))imports.push("using UnityEngine.EventSystems;");
+ const dependencyDiagnostics=[
+  {types:["TMP_Text","TMP_InputField","TMP_Dropdown","TextMeshPro","TextMeshProUGUI"],message:"This script uses TextMeshPro types. Install the TextMeshPro package in the Unity project."},
+  {types:["NavMeshSurface"],message:"This script uses NavMeshSurface. Install the AI Navigation package in the Unity project."},
+  {types:["PostProcessVolume","PostProcessProfile","PostProcessLayer"],message:"This script uses Post Processing types. Install the matching Post Processing package in the Unity project."}
+ ];
+ for(const dependency of dependencyDiagnostics)if(hasType(...dependency.types))report(dependency.message);
+ const declaration=imports.concat(["","public class "+safeClass+" : MonoBehaviour","{"]);
  const fields=classFields.length?classFields.concat([""]):[];
  const code=declaration.concat(fields,methods,["}"]).join("\n");
  return {code,diagnostics:[...new Set(diagnostics)]};
