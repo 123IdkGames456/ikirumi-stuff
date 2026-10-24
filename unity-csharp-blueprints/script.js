@@ -101,8 +101,6 @@ function renderNodes(){
   const head=el.querySelector(".node-head");
   head.addEventListener("pointerdown",e=>{if(e.target.closest("button,input,select"))return;selectedNode=n.id;const sx=e.clientX,sy=e.clientY,ox=n.x,oy=n.y;head.setPointerCapture?.(e.pointerId);function move(ev){n.x=Math.max(0,ox+ev.clientX-sx);n.y=Math.max(0,oy+ev.clientY-sy);el.style.left=n.x+"px";el.style.top=n.y+"px";drawWires()}function end(){window.removeEventListener("pointermove",move);window.removeEventListener("pointerup",end);renderInspector()}window.addEventListener("pointermove",move);window.addEventListener("pointerup",end);e.preventDefault()});
   el.querySelectorAll("[data-field]").forEach(input=>{
-   input.addEventListener("pointerdown",e=>e.stopPropagation());
-   input.addEventListener("click",e=>e.stopPropagation());
    input.addEventListener("change",()=>{
     const field=input.dataset.field;
     n.values[field]=input.type==="checkbox"?String(input.checked):input.value;
