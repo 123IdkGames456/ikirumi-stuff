@@ -277,7 +277,7 @@ function pinClick(n,kind,isOut,pin){
  const from=getNode(a.node),to=n,fd=getDef(from.type),td=getDef(to.type);
  if(kind==="data"){
   const outType=actualOutputType(from), input=(td.dataIn||[]).find(p=>p.id===pin);
-  if(!input||!typesCompatible(outType,input.type)){status("Incompatible data types");renderNodes();return}
+  if(!input||!typesCompatible(outType,expectedInputType(to,input))){status("Incompatible data types");renderNodes();return}
  }
  links=links.filter(l=>!(l.to===n.id&&l.toPin===pin&&l.kind===kind));
  links.push({from:a.node,fromPin:a.pin,to:n.id,toPin:pin,kind});
@@ -338,7 +338,16 @@ function renderCode(){
  $("diagnostics").innerHTML=result.diagnostics.length?result.diagnostics.map(x=>'<div class="warning">⚠ '+esc(x)+'</div>').join(""):'<span class="status-good">✓ No basic graph issues detected.</span>';
  $("compileStatus").textContent=result.diagnostics.length?" · "+result.diagnostics.length+" issue(s)":" · Live preview";
 }
-function renderAll(){renderCategories();renderBlocks();renderVariables();renderNodes();renderInspector();renderCode()}
+function pruneIncompatibleLinks(){
+ links=links.filter(l=>{
+  if(l.kind!=="data")return true;
+  const source=getNode(l.from),target=getNode(l.to),td=getDef(target?.type);
+  const input=(td?.dataIn||[]).find(p=>p.id===l.toPin);
+  return !!source&&!!input&&typesCompatible(actualOutputType(source),expectedInputType(target,input));
+ }
+ );
+}
+function renderAll(){pruneIncompatibleLinks();renderCategories();renderBlocks();renderVariables();renderNodes();renderInspector();renderCode()}
 function snapshot(){return {projectName:$("projectName").value,nodes,links,variables,nextNode,nextVariable}}
 function loadState(s){if(!s||!Array.isArray(s.nodes))return;nodes=s.nodes;links=s.links||[];variables=s.variables||[];nextNode=s.nextNode||Math.max(0,...nodes.map(n=>n.id))+1;nextVariable=s.nextVariable||variables.length+1;$("projectName").value=s.projectName||"My Blueprint Project";selectedNode=nodes[0]?.id??null;renderAll()}
 function example(){
