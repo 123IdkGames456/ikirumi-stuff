@@ -36,7 +36,7 @@ function cleanNumber(value,type){
   if(["byte","sbyte","short","ushort","int","uint","long","ulong"].includes(type)&&/[.eE]/.test(raw))return "("+type+")("+raw+")";
   return raw+suffix;
  }
- return raw||"0";
+ return typedDefault(type);
 }
 function compile(inputNodes,inputLinks,inputVars,className){
  const nodes=Array.isArray(inputNodes)?inputNodes:[];
@@ -95,7 +95,7 @@ function compile(inputNodes,inputLinks,inputVars,className){
    if(value==="null"||value.startsWith('"')||value.startsWith("string.")||value.startsWith("nameof("))return value;
    return escString(value);
   }
-  if(type==="bool")return value==="true"||value==="false"?value:value;
+  if(type==="bool")return value==="true"||value==="false"?value:"false";
   if(type==="Vector2"&&value==="0")return "Vector2.zero";
   if(type==="Vector3"&&value==="0")return "Vector3.zero";
   if(type==="Vector4"&&value==="0")return "Vector4.zero";
