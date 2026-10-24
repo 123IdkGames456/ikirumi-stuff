@@ -95,16 +95,70 @@ function renderNodes(){
   if(d.valueOut)html+='<div class="pin-row"><span>Value · '+esc(d.valueOut==="dynamic"?"any":d.valueOut)+'</span><button class="pin out" data-direction="output" data-kind="data" data-type="'+esc(d.valueOut||"dynamic")+'" data-pin="value" title="Connect value output"></button></div>';
   if(d.flowOut)d.flowOut.forEach(p=>html+='<div class="pin-row"><span>'+esc(p)+'</span><button class="pin out exec-pin" data-direction="output" data-kind="flow" data-type="exec" data-pin="'+p+'" title="Execution output"></button></div>');
   html+='</div>';el.innerHTML=html;
-  el.addEventListener("click",e=>{if(e.target.classList.contains("pin"))return;selectedNode=n.id;renderNodes();renderInspector()});
+  el.addEventListener("click",e=>{if(e.target.closest(".pin, input, select, textarea, button, label"))return;selectedNode=n.id;renderNodes();renderInspector()});
   el.addEventListener("contextmenu",e=>{e.preventDefault();e.stopPropagation();selectedNode=n.id;showContextMenu(e.clientX,e.clientY,[{label:"Delete node",action:()=>{nodes=nodes.filter(x=>x.id!==n.id);links=links.filter(l=>l.from!==n.id&&l.to!==n.id);if(selectedNode===n.id)selectedNode=null;renderAll();status("Node deleted")}},{label:"Node color",submenu:[{label:"Default",color:"",action:()=>setNodeColor(n,"")},{label:"Blue",color:"#648cff",action:()=>setNodeColor(n,"#648cff")},{label:"Green",color:"#43b581",action:()=>setNodeColor(n,"#43b581")},{label:"Yellow",color:"#e0b64f",action:()=>setNodeColor(n,"#e0b64f")},{label:"Orange",color:"#e98b45",action:()=>setNodeColor(n,"#e98b45")},{label:"Red",color:"#df626c",action:()=>setNodeColor(n,"#df626c")},{label:"Purple",color:"#ad7ce8",action:()=>setNodeColor(n,"#ad7ce8")},{label:"Pink",color:"#e783b6",action:()=>setNodeColor(n,"#e783b6")},{label:"Gray",color:"#8e99aa",action:()=>setNodeColor(n,"#8e99aa")}]}]);});
   const head=el.querySelector(".node-head");
   head.addEventListener("pointerdown",e=>{if(e.target.closest("button,input,select"))return;selectedNode=n.id;const sx=e.clientX,sy=e.clientY,ox=n.x,oy=n.y;head.setPointerCapture?.(e.pointerId);function move(ev){n.x=Math.max(0,ox+ev.clientX-sx);n.y=Math.max(0,oy+ev.clientY-sy);el.style.left=n.x+"px";el.style.top=n.y+"px";drawWires()}function end(){window.removeEventListener("pointermove",move);window.removeEventListener("pointerup",end);renderInspector()}window.addEventListener("pointermove",move);window.addEventListener("pointerup",end);e.preventDefault()});
   el.querySelectorAll("[data-field]").forEach(input=>input.addEventListener("change",()=>{n.values[input.dataset.field]=input.type==="checkbox"?String(input.checked):input.value;if(n.type==="setcomponent"&&input.dataset.field==="componentType"){n.values.property=(componentProperties[input.value]||[["enabled","Enabled"]])[0][0]}renderAll()}));
-  el.querySelectorAll(".pin").forEach(pin=>pin.onclick=e=>{e.stopPropagation();pinClick(n,pin.dataset.kind,pin.dataset.direction==="output",pin.dataset.pin)});
+  el.querySelectorAll(".pin").forEach(pin=>{pin.addEventListener("pointerdown",e=>{if(pin.dataset.direction!=="output")return;e.preventDefault();e.stopPropagation();beginWireDrag(e,n,pin)});pin.addEventListener("click",e=>{e.preventDefault();e.stopPropagation()})});
   $("canvas").appendChild(el);
  });
  $("emptyState").style.display=nodes.length?"none":"flex";
  $("nodeCount")?.remove();
+ drawWires();
+}
+let wireDrag=null;
+function canvasPoint(clientX,clientY){const r=$("canvas").getBoundingClientRect(),w=$("workspace");return{x:clientX-r.left+w.scrollLeft,y:clientY-r.top+w.scrollTop}}
+function beginWireDrag(e,node,pin){
+ if(wireDrag)finishWireDrag(null,true);
+ const start=pinPos(node.id,pin.dataset.kind,true,pin.dataset.pin);if(!start)return;
+ const path=document.createElementNS("http://www.w3.org/2000/svg","path");path.setAttribute("class","wire wire-preview");path.style.pointerEvents="none";path.style.stroke="#efbd70";path.style.strokeWidth="3";$("wires").appendChild(path);
+ wireDrag={node:node.id,kind:pin.dataset.kind,pin:pin.dataset.pin,type:pin.dataset.type||"dynamic",start,path,pointerId:e.pointerId};
+ window.addEventListener("pointermove",moveWireDrag);
+ window.addEventListener("pointerup",endWireDrag,{once:true});
+ window.addEventListener("pointercancel",cancelWireDrag,{once:true});
+ moveWireDrag(e);status("Drag to an input pin; it will snap to the nearest compatible input");
+}
+function moveWireDrag(e){
+ if(!wireDrag)return;
+ const p=canvasPoint(e.clientX,e.clientY),a=wireDrag.start,dx=Math.max(45,Math.abs(p.x-a.x)*.45);
+ wireDrag.path.setAttribute("d","M "+a.x+" "+a.y+" C "+(a.x+dx)+" "+a.y+" "+(p.x-dx)+" "+p.y+" "+p.x+" "+p.y);
+ document.querySelectorAll(".pin[data-direction='input']").forEach(pin=>pin.classList.remove("snap-target"));
+ const target=findSnapInput(e.clientX,e.clientY,false);if(target)target.pin.classList.add("snap-target");
+}
+function findSnapInput(x,y,requireNear=true){
+ if(!wireDrag)return null;
+ let best=null,bestDist=Infinity;
+ document.querySelectorAll(".node .pin[data-direction='input']").forEach(pin=>{
+  const nodeEl=pin.closest(".node"),nodeId=Number(nodeEl?.dataset.id);if(!nodeEl||nodeId===wireDrag.node)return;
+  if(pin.dataset.kind!==wireDrag.kind)return;
+  if(wireDrag.kind==="data"){
+   const fromDef=getDef(getNode(wireDrag.node)?.type),toDef=getDef(getNode(nodeId)?.type);
+   const outType=fromDef?.valueOut||"dynamic",input=(toDef?.dataIn||[]).find(p=>p.id===pin.dataset.pin);
+   if(!input||(!BlueprintTypes.compatible(outType,input.type)&&outType!=="dynamic"&&input.type!=="dynamic"))return;
+  }
+  const r=pin.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,d=Math.hypot(cx-x,cy-y);
+  if(d<bestDist){bestDist=d;best={pin,nodeId,distance:d}}
+ });
+ return best&&(!requireNear||bestDist<=42)?best:null;
+}
+function endWireDrag(e){
+ if(!wireDrag)return;
+ const target=e?findSnapInput(e.clientX,e.clientY,true):null;
+ finishWireDrag(target,false);
+}
+function cancelWireDrag(){finishWireDrag(null,true)}
+function finishWireDrag(target,cancelled){
+ if(!wireDrag)return;
+ const drag=wireDrag;wireDrag=null;
+ window.removeEventListener("pointermove",moveWireDrag);window.removeEventListener("pointerup",endWireDrag);window.removeEventListener("pointercancel",cancelWireDrag);
+ document.querySelectorAll(".pin.snap-target").forEach(p=>p.classList.remove("snap-target"));
+ drag.path.remove();
+ if(target&&!cancelled){
+  links=links.filter(l=>!(l.to===target.nodeId&&l.toPin===target.pin.dataset.pin&&l.kind===drag.kind));
+  links.push({from:drag.node,fromPin:drag.pin,to:target.nodeId,toPin:target.pin.dataset.pin,kind:drag.kind});
+  status("Connected to nearest input");renderAll();
+ }else if(!cancelled)status("No compatible input close enough; drag onto an input pin");
  drawWires();
 }
 function pinClick(n,kind,isOut,pin){
