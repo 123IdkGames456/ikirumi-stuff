@@ -26,3 +26,8 @@
 .pin.snap-target{outline:3px solid #fff;outline-offset:4px;filter:brightness(1.55);box-shadow:0 0 0 7px #efbd7040;transform:scale(1.2);z-index:5}
 .pin[data-type^="Vector"].snap-target,.pin[data-type="Color"].snap-target,.pin[data-type="Rect"].snap-target{transform:scale(1.2)}
 .wire-preview{stroke-dasharray:7 5;opacity:1}
+
+.exec-input-top{margin:0!important;padding:7px 10px 7px;background:#191e29;border-bottom:1px solid #ffffff18;min-height:31px;justify-content:flex-start!important}
+.exec-input-top .pin-label{font-weight:900;color:#f1f4fb;gap:8px}
+.exec-input-top .exec-pin{width:16px;height:16px;flex:none}
+.node .pin{touch-action:none;cursor:crosshair}
