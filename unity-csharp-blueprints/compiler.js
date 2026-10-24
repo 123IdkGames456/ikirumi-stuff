@@ -1,177 +1,371 @@
 window.BlueprintCompiler = (() => {
-const esc=s=>String(s??"").replace(/\\/g,"\\\\").replace(/"/g,'\\"').replace(/\n/g,"\\n");
-function compile(nodes,links,vars,className){
-const safeClass=(className||"BlueprintScript").replace(/[^A-Za-z0-9_]/g,"")||"BlueprintScript";
-const lines=["using UnityEngine;","using System;","using System.Collections;","using System.Collections.Generic;","","public class "+safeClass+" : MonoBehaviour","{"];
-for(const v of vars){const initial=v.initial||BlueprintTypes.defaultValue(v.type);if(v.access==="public-hidden"){lines.push("    public "+v.type+" "+v.name+" { get; set; } = "+initial+";")}else if(v.access==="public-inspector"){lines.push("    public "+v.type+" "+v.name+" = "+initial+";")}else{const prefix=v.access==="private-inspector"?"[SerializeField] private ":"private ";lines.push("    "+prefix+v.type+" "+v.name+" = "+initial+";")}}
-if(vars.length)lines.push("");
-const events=nodes.filter(n=>["start","update","fixed"].includes(n.type));
-const dataLinks=links.filter(l=>l.kind==="data");
-const extraMethods=[],generatedWaits=new Set(),diagnostics=[];
-function valueExpr(nodeId,seen=new Set(),expectedType=null){
- if(seen.has(nodeId))return "default";
- seen.add(nodeId);
- const n=nodes.find(x=>x.id===nodeId);if(!n)return "0";
- if(n.type==="getcomponent"){const ct=n.values.componentType||"Rigidbody";return valueForInput(n,"target",new Set(seen))+".GetComponent<"+ct+">()"}
- if(n.type==="literal"){
-  const t=n.values.type||"int",v=n.values.value??"0";
-  if(t==="string")return '"'+esc(v)+'"';
-  if(t==="bool")return String(v==="true"||v===true);
-  if(t==="null")return "null";
-  const numericType=expectedType&&["int","float","double","decimal","long"].includes(expectedType)?expectedType:t;
-  if(["int","float","double","decimal","long"].includes(numericType)){const raw=String(v).replace(/[fFdDmMlL]$/,"");const suffix={int:"",float:"f",double:"d",decimal:"m",long:"L"}[numericType];return raw+suffix}
-  return String(v);
+const keywords=new Set(("abstract as base bool break byte case catch char checked class const continue decimal default delegate do double else enum event explicit extern false finally fixed float for foreach goto if implicit in int interface internal is lock long namespace new null object operator out override params private protected public readonly ref return sbyte sealed short sizeof stackalloc static string struct switch this throw true try typeof uint ulong unchecked unsafe ushort using virtual void volatile while").split(" "));
+const numericTypes=new Set(["byte","sbyte","short","ushort","int","uint","long","ulong","float","double","decimal"]);
+const allNumeric=["byte","sbyte","short","ushort","int","uint","long","ulong","float","double","decimal"];
+const boolProperties=new Set(["useLimits","enableCollision","enablePreprocessing","useGravity","isKinematic","detectCollisions","simulated","isTrigger","enabled","loop","playOnAwake","mute","orthographic","isStopped"]);
+const properties={
+ HingeJoint:{limits:"JointLimits",useLimits:"bool",motor:"JointMotor",spring:"JointSpring",breakForce:"float",breakTorque:"float",enableCollision:"bool",enablePreprocessing:"bool"},
+ HingeJoint2D:{limits:"JointAngleLimits2D",useLimits:"bool",motor:"JointMotor2D",breakForce:"float",breakTorque:"float",enableCollision:"bool"},
+ Rigidbody:{mass:"float",drag:"float",angularDrag:"float",useGravity:"bool",isKinematic:"bool",detectCollisions:"bool",constraints:"RigidbodyConstraints"},
+ Rigidbody2D:{mass:"float",gravityScale:"float",linearDamping:"float",angularDamping:"float",simulated:"bool",bodyType:"RigidbodyType2D",constraints:"RigidbodyConstraints2D"},
+ Transform:{position:"Vector3",localPosition:"Vector3",rotation:"Quaternion",localRotation:"Quaternion",localScale:"Vector3"},
+ Collider:{enabled:"bool",isTrigger:"bool"},Collider2D:{enabled:"bool",isTrigger:"bool"},
+ BoxCollider:{enabled:"bool",isTrigger:"bool",center:"Vector3",size:"Vector3"},
+ BoxCollider2D:{enabled:"bool",isTrigger:"bool",offset:"Vector2",size:"Vector2"},
+ AudioSource:{volume:"float",pitch:"float",loop:"bool",playOnAwake:"bool",mute:"bool"},
+ Camera:{fieldOfView:"float",orthographic:"bool",orthographicSize:"float",nearClipPlane:"float",farClipPlane:"float"},
+ Light:{intensity:"float",range:"float",color:"Color",enabled:"bool"},
+ NavMeshAgent:{speed:"float",angularSpeed:"float",acceleration:"float",stoppingDistance:"float",isStopped:"bool"},
+ WheelCollider:{motorTorque:"float",brakeTorque:"float",steerAngle:"float"}
+};
+function escString(value){return JSON.stringify(String(value??""))}
+function safeIdentifier(value,fallback="BlueprintScript",used=new Set()){
+ let name=String(value||fallback).replace(/[^A-Za-z0-9_]/g,"_");
+ if(!name)name=fallback;
+ if(!/^[A-Za-z_]/.test(name))name="_"+name;
+ if(keywords.has(name)||["transform","gameObject","enabled","name","tag","Start","Update","FixedUpdate","Awake","OnEnable","OnDisable","GetComponent","Destroy","Instantiate","Debug","Time","Input"].includes(name))name="blueprint_"+name;
+ const base=name;let i=2;
+ while(used.has(name)){name=base+"_"+i++}
+ used.add(name);return name;
+}
+function cleanNumber(value,type){
+ let raw=String(value??"0").trim();
+ const suffix={float:"f",double:"d",decimal:"m",long:"L",ulong:"UL",uint:"U",int:"",byte:"",sbyte:"",short:"",ushort:""}[type]??"";
+ if(/^[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?[fFdDmMlLuU]*$/.test(raw)){
+  raw=raw.replace(/[fFdDmMlLuU]+$/,"");
+  return raw+suffix;
  }
- if(n.type==="getvar"){const v=vars.find(x=>x.id===n.values.variable);return v?v.name:"default"}
- if(n.type==="input"){const key=n.values.key||"Space",mode=n.values.mode||"down";return "Input.GetKey"+(mode==="held"?"":mode==="up"?"Up":"Down")+"(KeyCode."+key+")"}
- if(n.type==="fromto"){
-  const from=n.values.fromType||"float",to=n.values.toType||"string",raw=valueForInput(n,"value",new Set(seen),from);
+ return raw||"0";
+}
+function compile(inputNodes,inputLinks,inputVars,className){
+ const nodes=Array.isArray(inputNodes)?inputNodes:[];
+ const links=Array.isArray(inputLinks)?inputLinks:[];
+ const vars=Array.isArray(inputVars)?inputVars:[];
+ const diagnostics=[],classFields=[],methods=[],extraMethods=[],generatedWaits=new Set();
+ const report=message=>{if(!diagnostics.includes(message))diagnostics.push(message)};
+ const usedNames=new Set(["Start","Update","FixedUpdate"]);
+ const safeClass=safeIdentifier(className||"BlueprintScript","BlueprintScript",new Set());
+ const varsById=new Map();
+ for(const v of vars){
+  const entry={...v,codeName:safeIdentifier(v.name,"Variable",usedNames),type:String(v.type||"int")};
+  if(varsById.has(v.id))report("Duplicate variable id detected: "+v.name);
+  varsById.set(v.id,entry);
+ }
+ const dataLinks=links.filter(l=>l.kind==="data");
+ const findNode=id=>nodes.find(n=>n.id===id);
+ const findVar=id=>varsById.get(id);
+ const connected=(id,pin)=>links.find(l=>l.kind==="flow"&&l.from===id&&l.fromPin===pin)?.to;
+ const dataLink=(id,pin)=>dataLinks.find(l=>l.to===id&&l.toPin===pin);
+ const outputConnected=id=>dataLinks.some(l=>l.from===id&&l.fromPin==="value");
+ const propertyType=(component,property)=>properties[component]?.[property]||"object";
+ function nodeType(n){
+  if(!n)return "dynamic";
+  if(n.type==="literal")return n.values?.type==="null"?"null":(n.values?.type||"int");
+  if(n.type==="getvar")return findVar(n.values?.variable)?.type||"dynamic";
+  if(n.type==="getcomponent")return n.values?.componentType||"Rigidbody";
+  if(n.type==="math")return n.values?.outputType||"float";
+  if(n.type==="fromto")return n.values?.toType||"string";
+  if(n.type==="compare"||n.type==="logic"||n.type==="input")return "bool";
+  if(n.type==="transform"){
+   const op=n.values?.operation||"setPosition";
+   return op==="getPosition"||op==="getScale"?"Vector3":op==="getRotation"?"Quaternion":"none";
+  }
+  if(n.type==="gameobject")return (n.values?.operation||"setActive")==="instantiate"?"GameObject":"none";
+  return "dynamic";
+ }
+ function typedDefault(type){
+  const defaults={bool:"false",byte:"0",sbyte:"0",short:"0",ushort:"0",int:"0",uint:"0U",long:"0L",ulong:"0UL",float:"0f",double:"0d",decimal:"0m",string:'""',char:"'\\0'",Vector2:"Vector2.zero",Vector2Int:"Vector2Int.zero",Vector3:"Vector3.zero",Vector3Int:"Vector3Int.zero",Vector4:"Vector4.zero",Quaternion:"Quaternion.identity",Color:"Color.white",Color32:"new Color32(255,255,255,255)",Rect:"new Rect()",Bounds:"new Bounds()",LayerMask:"0",GameObject:"null",Transform:"null",Rigidbody:"null",Rigidbody2D:"null",Collider:"null",Collider2D:"null",JointMotor:"new JointMotor()",JointMotor2D:"new JointMotor2D()",JointSpring:"new JointSpring()",JointLimits:"new JointLimits()",JointAngleLimits2D:"new JointAngleLimits2D()",RigidbodyConstraints:"RigidbodyConstraints.None",RigidbodyConstraints2D:"RigidbodyConstraints2D.None",RigidbodyType2D:"RigidbodyType2D.Dynamic",object:"null"};
+  return defaults[type]??"default("+type+")";
+ }
+ function typedFallback(raw,type){
+  const value=String(raw??"").trim();
+  if(!value)return typedDefault(type);
+  if(numericTypes.has(type))return cleanNumber(value,type);
+  if(type==="string"){
+   if(value==="null"||value.startsWith('"')||value.startsWith("string.")||value.startsWith("nameof("))return value;
+   return escString(value);
+  }
+  if(type==="bool")return value==="true"||value==="false"?value:value;
+  if(type==="Vector2"&&value==="0")return "Vector2.zero";
+  if(type==="Vector3"&&value==="0")return "Vector3.zero";
+  if(type==="Vector4"&&value==="0")return "Vector4.zero";
+  if(type==="Quaternion"&&value==="0")return "Quaternion.identity";
+  if(type==="Color"&&value==="0")return "Color.white";
+  const enumDefaults={RigidbodyConstraints:"RigidbodyConstraints.None",RigidbodyConstraints2D:"RigidbodyConstraints2D.None",RigidbodyType2D:"RigidbodyType2D.Dynamic"};
+  if(enumDefaults[type]&&value==="0")return enumDefaults[type];
+  if(Object.prototype.hasOwnProperty.call(enumDefaults,type)&&/^-?\d+$/.test(value))return "("+type+")"+value;
+  return value;
+ }
+ function convertNumeric(expr,from,to){
+  if(from===to||!numericTypes.has(from)||!numericTypes.has(to))return expr;
+  return "("+to+")("+expr+")";
+ }
+ function fromToExpression(n,seen){
+  const from=n.values?.fromType||"float",to=n.values?.toType||"string";
+  const raw=valueForInput(n,"value",new Set(seen),from);
   if(from===to)return raw;
+  const numericFrom=numericTypes.has(from),numericTo=numericTypes.has(to);
   if(to==="string")return "("+raw+").ToString()";
-  if(from==="string")return to+".Parse("+raw+")";
+  if(from==="string"){
+   const parse={bool:"bool.Parse",byte:"byte.Parse",sbyte:"sbyte.Parse",short:"short.Parse",ushort:"ushort.Parse",int:"int.Parse",uint:"uint.Parse",long:"long.Parse",ulong:"ulong.Parse",float:"float.Parse",double:"double.Parse",decimal:"decimal.Parse"};
+   if(parse[to]){
+    if(to==="bool")return "bool.Parse("+raw+")";
+    return parse[to]+"("+raw+", System.Globalization.CultureInfo.InvariantCulture)";
+   }
+  }
   if(to==="bool"){
    if(from==="bool")return raw;
-   if(from==="int")return "("+raw+" != 0)";
-   if(from==="long")return "("+raw+" != 0L)";
-   if(from==="float")return "("+raw+" != 0f)";
-   if(from==="double")return "("+raw+" != 0d)";
-   if(from==="decimal")return "("+raw+" != 0m)";
+   if(numericFrom){const zero={byte:"0",sbyte:"0",short:"0",ushort:"0",int:"0",uint:"0U",long:"0L",ulong:"0UL",float:"0f",double:"0d",decimal:"0m"}[from];return "("+raw+" != "+zero+")"}
   }
-  if(from==="bool"){
-   const values={int:["1","0"],long:["1L","0L"],float:["1f","0f"],double:["1d","0d"],decimal:["1m","0m"]};
-   const pair=values[to];
-   if(pair)return "("+raw+" ? "+pair[0]+" : "+pair[1]+")";
+  if(from==="bool"&&numericTo){
+   const one={byte:"(byte)1",sbyte:"(sbyte)1",short:"(short)1",ushort:"(ushort)1",int:"1",uint:"1U",long:"1L",ulong:"1UL",float:"1f",double:"1d",decimal:"1m"}[to]||"1";
+   const zero={byte:"(byte)0",sbyte:"(sbyte)0",short:"(short)0",ushort:"(ushort)0",int:"0",uint:"0U",long:"0L",ulong:"0UL",float:"0f",double:"0d",decimal:"0m"}[to]||"0";
+   return "("+raw+" ? "+one+" : "+zero+")";
   }
-  if(to==="int"&&from==="float")return "Mathf.CeilToInt("+raw+")";
-  if(to==="int"&&["double","decimal"].includes(from))return "((int)Math.Ceiling("+raw+"))";
-  if(to==="long"&&["float","double","decimal"].includes(from))return "((long)Math.Ceiling("+raw+"))";
-  if(["int","float","double","decimal","long"].includes(to)&&["int","float","double","decimal","long"].includes(from))return "("+to+")("+raw+")";
-  return "("+to+")("+raw+")";
+  if(numericFrom&&numericTo){
+   if(to==="int"&&from==="float")return "Mathf.CeilToInt("+raw+")";
+   if(to==="int"&&from==="double")return "checked((int)Math.Ceiling("+raw+"))";
+   if(to==="int"&&from==="decimal")return "checked((int)decimal.Ceiling("+raw+"))";
+   if(to==="long"&&["float","double"].includes(from))return "checked((long)Math.Ceiling((double)("+raw+")))";
+   if(to==="long"&&from==="decimal")return "checked((long)decimal.Ceiling("+raw+"))";
+   return convertNumeric(raw,from,to);
+  }
+  report("From To cannot safely convert "+from+" to "+to+".");
+  return typedDefault(to);
  }
- if(["math","compare","logic"].includes(n.type)){
-  const op=n.values.operation||"add",resultType=n.values.outputType||"float";
-  const inputType=n.type==="math"&&["int","float","double","decimal","long"].includes(resultType)?resultType:null;
-  const a=valueForInput(n,"a",new Set(seen),inputType),b=valueForInput(n,"b",new Set(seen),inputType);
-  const ops={add:"+",subtract:"-",multiply:"*",divide:"/",modulo:"%",eq:"==",ne:"!=",gt:">",lt:"<",gte:">=",lte:"<=",and:"&&",or:"||",xor:"^"};
-  if(op==="not")return "!("+a+")";
-  let expression;
-  if(op==="power"){
-   expression=resultType==="float"?"Mathf.Pow("+a+", "+b+")":"("+resultType+")Math.Pow("+a+", "+b+")";
-  }else if(op==="min"){
-   expression=resultType==="float"?"Mathf.Min("+a+", "+b+")":"Math.Min("+a+", "+b+")";
-  }else if(op==="max"){
-   expression=resultType==="float"?"Mathf.Max("+a+", "+b+")":"Math.Max("+a+", "+b+")";
-  }else{
-   expression="("+a+" "+(ops[op]||"+")+" "+b+")";
-  }
-  return expression;
+ function coerceExpression(expr,from,to,n){
+  if(!to||to==="dynamic"||to==="any"||to==="number"||to==="object"||from===to||from==="dynamic"||from==="any")return expr;
+  if(from==="null"&&!BlueprintTypes.isValue(to))return expr;
+  if(numericTypes.has(from)&&numericTypes.has(to))return convertNumeric(expr,from,to);
+  if(BlueprintTypes.compatible(from,to))return expr;
+  if(to==="Component"&&BlueprintTypes.unity.includes(from))return expr;
+  report("Type mismatch: "+from+" cannot be used as "+to+(n?" on "+n.type:"")+".");
+  return typedDefault(to);
  }
- return "default";
-}
-function debugValueExpr(nodeId,seen=new Set()){
- if(seen.has(nodeId))return "default";
- const n=nodes.find(x=>x.id===nodeId);
- const expression=valueExpr(nodeId,new Set(seen));
- if(n?.type==="math"&&expression.startsWith("(")&&expression.endsWith(")"))return expression.slice(1,-1);
- return expression;
-}
-function valueForInput(n,pin,seen=new Set(),expectedType=null){
- const link=dataLinks.find(l=>l.to===n.id&&l.toPin===pin);
- if(link)return valueExpr(link.from,seen,expectedType);
- const typedFallbacks={int:"0",float:"0f",double:"0d",decimal:"0m",long:"0L",string:'""',bool:"false"};
- if(pin==="value"&&expectedType&&typedFallbacks[expectedType])return typedFallbacks[expectedType];
- const fallbacks={a:"0",b:"0",condition:"false",vector:"Vector3.zero",target:"gameObject",value:n.values?.value||"0"};
- return fallbacks[pin]||"0";
-}
-function connectedNext(id,pin="Then"){return links.find(x=>x.kind==="flow"&&x.from===id&&x.fromPin===pin)?.to}
-function emitFlow(id,indent,visited=new Set()){
- const out=[];let current=id,guard=0;
- while(current&&guard++<nodes.length+2){
-  if(visited.has(current)){out.push("    ".repeat(indent)+"// Flow loop detected");break}
-  visited.add(current);
-  const n=nodes.find(x=>x.id===current);if(!n)break;
-  const p="    ".repeat(indent);
-  if(n.type==="start"||n.type==="update"||n.type==="fixed"||n.type==="comment"){}
-  else if(n.type==="setvar"){const v=vars.find(x=>x.id===n.values.variable);if(v)out.push(p+v.name+" = "+valueForInput(n,"value")+";")}
-  else if(n.type==="setcomponent"){
-   const ct=n.values.componentType||"HingeJoint",prop=n.values.property||"limits";
-   const sourceLink=dataLinks.find(l=>l.to===n.id&&l.toPin==="component");
-   const selectedVar=vars.find(v=>v.id===n.values.componentVariable);
-   const target=sourceLink?valueExpr(sourceLink.from):selectedVar?selectedVar.name:"GetComponent<"+ct+">()";
-   if(prop==="limits"&&ct==="HingeJoint"){
-    const min=n.values.setMinimum==="true"?Number(n.values.minimum??-45):null;
-    const max=n.values.setMaximum==="true"?Number(n.values.maximum??45):null;
-    out.push(p+"{",p+"    var __joint = "+target+";",p+"    var __limits = __joint.limits;");
-    if(min!==null)out.push(p+"    __limits.min = "+min+"f;");
-    if(max!==null)out.push(p+"    __limits.max = "+max+"f;");
-    out.push(p+"    __joint.limits = __limits;",p+"}");
-   }else if(prop==="limits"&&ct==="HingeJoint2D"){
-    out.push(p+"{",p+"    var __joint = "+target+";",p+"    var __limits = __joint.limits;");
-    if(n.values.setMinimum==="true")out.push(p+"    __limits.min = "+Number(n.values.minimum??-45)+"f;");
-    if(n.values.setMaximum==="true")out.push(p+"    __limits.max = "+Number(n.values.maximum??45)+"f;");
-    out.push(p+"    __joint.limits = __limits;",p+"}");
-   }else if(["useLimits","enableCollision","enablePreprocessing","useGravity","isKinematic","detectCollisions","simulated","isTrigger","enabled","loop","playOnAwake","mute","orthographic","isStopped"].includes(prop)){
-    out.push(p+target+"."+prop+" = "+(n.values.boolValue||"true")+";");
+ function valueExpr(nodeId,seen=new Set(),expectedType=null){
+  const n=findNode(nodeId);
+  if(!n){report("A value input points to a missing node.");return typedDefault(expectedType||"int")}
+  if(seen.has(nodeId)){report("A data connection loop was detected at "+n.type+".");return typedDefault(expectedType||nodeType(n))}
+  const path=new Set(seen);path.add(nodeId);
+  let expression,sourceType=nodeType(n);
+  if(n.type==="literal"){
+   const type=n.values?.type||"int",raw=n.values?.value??"0";
+   if(type==="string")expression=escString(raw);
+   else if(type==="null")expression="null";
+   else if(type==="bool")expression=raw==="true"||raw===true?"true":"false";
+   else if(numericTypes.has(type))expression=cleanNumber(raw,type);
+   else expression=typedFallback(raw,type);
+  }else if(n.type==="getvar"){
+   const v=findVar(n.values?.variable);
+   if(!v){report("Choose a variable in Get Variable.");expression=typedDefault(expectedType||"int")}
+   else expression=v.codeName;
+  }else if(n.type==="input"){
+   const key=n.values?.key||"Space",mode=n.values?.mode||"down";
+   expression="Input.GetKey"+(mode==="held"?"":mode==="up"?"Up":"Down")+"(KeyCode."+key+")";
+  }else if(n.type==="getcomponent"){
+   const ct=n.values?.componentType||"Rigidbody";
+   const target=valueForInput(n,"target",path,"GameObject");
+   expression="("+target+" != null ? "+target+".GetComponent<"+ct+">() : null)";
+  }else if(n.type==="fromto"){
+   expression=fromToExpression(n,path);
+  }else if(n.type==="math"){
+   const type=n.values?.outputType||"float",op=n.values?.operation||"add";
+   const a=valueForInput(n,"a",path,type),b=valueForInput(n,"b",path,type);
+   if(op==="power"){
+    if(type==="float")expression="Mathf.Pow("+a+", "+b+")";
+    else if(type==="decimal")expression="(decimal)Math.Pow((double)("+a+"), (double)("+b+"))";
+    else expression="("+type+")Math.Pow((double)("+a+"), (double)("+b+"))";
+   }else if(op==="min"||op==="max"){
+    const method=op==="min"?"Min":"Max";
+    expression=type==="float"?"Mathf."+method+"("+a+", "+b+")":"Math."+method+"("+a+", "+b+")";
    }else{
-    const raw=n.values.propertyValue||"0";
-    const value=["position","localPosition","rotation","localRotation","localScale","center","size","offset","color","constraints","bodyType","motor","spring"].includes(prop)?raw:raw+(["mass","drag","angularDrag","gravityScale","linearDamping","angularDamping","volume","pitch","fieldOfView","orthographicSize","nearClipPlane","farClipPlane","intensity","range","speed","angularSpeed","acceleration","stoppingDistance","motorTorque","brakeTorque","steerAngle","breakForce","breakTorque"].includes(prop)&&!String(raw).endsWith("f")?"f":"");
-    out.push(p+target+"."+prop+" = "+value+";");
+    const ops={add:"+",subtract:"-",multiply:"*",divide:"/",modulo:"%"};
+    expression="("+a+" "+(ops[op]||"+")+" "+b+")";
    }
+  }else if(n.type==="compare"){
+   const type=n.values?.operandType||"float",op=n.values?.operation||"eq";
+   const a=valueForInput(n,"a",path,type),b=valueForInput(n,"b",path,type);
+   const opMap={eq:"==",ne:"!=",gt:">",lt:"<",gte:">=",lte:"<="};
+   if(type==="string"&&["gt","lt","gte","lte"].includes(op)){
+    expression="(string.CompareOrdinal("+a+", "+b+") "+opMap[op]+" 0)";
+   }else if(type==="bool"&&["gt","lt","gte","lte"].includes(op)){
+    report("Boolean comparison supports only Equal and Not equal.");
+    expression="false";
+   }else expression="("+a+" "+(opMap[op]||"==")+" "+b+")";
+  }else if(n.type==="logic"){
+   const op=n.values?.operation||"and",a=valueForInput(n,"a",path,"bool"),b=valueForInput(n,"b",path,"bool");
+   expression=op==="not"?"!("+a+")":"("+a+" "+({and:"&&",or:"||",xor:"^"}[op]||"&&")+" "+b+")";
+  }else if(n.type==="transform"){
+   const op=n.values?.operation||"setPosition";
+   expression=op==="getPosition"?"transform.position":op==="getRotation"?"transform.rotation":op==="getScale"?"transform.localScale":typedDefault("Vector3");
+   if(!["getPosition","getRotation","getScale"].includes(op))report("A Transform setter cannot be used as a value output.");
+  }else if(n.type==="gameobject"&&(n.values?.operation||"setActive")==="instantiate"){
+   expression="__blueprintSpawned_"+n.id;
+  }else{
+   report("The "+(n.type||"unknown")+" block does not provide a usable value output.");
+   expression=typedDefault(expectedType||"int");
   }
-  else if(n.type==="debug"){
-   const level=n.values.level||"log",link=dataLinks.find(l=>l.to===n.id&&l.toPin==="value");
-   const msg=link?debugValueExpr(link.from):'"'+esc(n.values.message||"")+'"';
-   out.push(p+"Debug.Log"+(level==="warning"?"Warning":level==="error"?"Error":"")+"("+msg+");");
-  }
-  else if(n.type==="transform"){
-   const op=n.values.operation||"setPosition",v=valueForInput(n,"vector");
-   const m={getPosition:"var position = transform.position;",setPosition:"transform.position = "+v+";",translate:"transform.Translate("+v+");",getRotation:"var rotation = transform.rotation;",setRotation:"transform.rotation = Quaternion.Euler("+v+");",getScale:"var scale = transform.localScale;",setScale:"transform.localScale = "+v+";"};
-   out.push(p+(m[op]||m.setPosition));
-  }
-  else if(n.type==="gameobject"){
-   const target=valueForInput(n,"target"),op=n.values.operation||"setActive";
-   out.push(p+(op==="destroy"?"Destroy("+target+");":op==="instantiate"?"Instantiate("+target+");":target+".SetActive("+(n.values.active||"true")+");"));
-  }
-  else if(n.type==="wait"){
-   out.push(p+"StartCoroutine(BlueprintWait_"+n.id+"());");
-   if(!generatedWaits.has(n.id)){
-    generatedWaits.add(n.id);
-    const next=connectedNext(n.id);
-    extraMethods.push("    private IEnumerator BlueprintWait_"+n.id+"()","    {","        yield return new WaitForSeconds("+Number(n.values.seconds||1)+"f);");
-    if(next)extraMethods.push(...emitFlow(next,2,new Set(visited)));
-    extraMethods.push("    }","");
-   }
-   break;
-  }
-  else if(n.type==="if"){
-   const cond=valueForInput(n,"condition");
-   out.push(p+"if ("+cond+")",p+"{");
-   const t=connectedNext(n.id,"True");if(t)out.push(...emitFlow(t,indent+1,new Set(visited)));
-   out.push(p+"}");
-   const f=connectedNext(n.id,"False");if(f)out.push(p+"else",p+"{",...emitFlow(f,indent+1,new Set(visited)),p+"}");
-   break;
-  }
-  current=connectedNext(current,"Then");
+  return coerceExpression(expression,sourceType,expectedType,n);
  }
- return out;
-}
-for(const ev of events){
- const method=ev.type==="start"?"Start":ev.type==="update"?"Update":"FixedUpdate";
- lines.push("    private void "+method+"()","    {");
- const next=connectedNext(ev.id);if(next)lines.push(...emitFlow(next,2,new Set([ev.id])));
- lines.push("    }","");
-}
-if(!events.length)lines.push("    private void Start()","    {","        // Add an event block and connect actions here.","    }","");
-if(extraMethods.length)lines.push(...extraMethods);
-lines.push("}");
-for(const n of nodes){
- if(["getvar","setvar"].includes(n.type)&&!vars.some(v=>v.id===n.values.variable))diagnostics.push("Choose an existing variable in "+getName(n.type)+".");
- if(n.type==="setcomponent"&&!n.values.componentVariable&&!dataLinks.some(l=>l.to===n.id&&l.toPin==="component"))diagnostics.push(n.values.source==="connected"?"Connect a Get Component From Object block to the component input.":"Choose a component variable or connect a Get Component From Object block.");
- if(n.type==="wait"&&!events.length)diagnostics.push("Wait needs an event block to run.");
- if(n.type==="wait"&&links.some(l=>l.to===n.id&&["update","fixed"].includes(nodes.find(x=>x.id===l.from)?.type)))diagnostics.push("A Wait block connected directly to Update or Fixed Update may start a new coroutine every frame.");
-}
-function getName(id){return id==="getvar"?"Get Variable":"Set Variable"}
-return {code:lines.join("\n"),diagnostics:[...new Set(diagnostics)]};
+ function valueForInput(n,pin,seen=new Set(),expectedType=null){
+  const link=dataLink(n.id,pin);
+  if(link)return valueExpr(link.from,seen,expectedType);
+  if(pin==="minimumValue")return typedFallback(n.values?.minimum??"-45","float");
+  if(pin==="maximumValue")return typedFallback(n.values?.maximum??"45","float");
+  if(pin==="propertyValueInput")return propertyFallback(n);
+  if(pin==="value"&&n.type==="setvar"){
+   const v=findVar(n.values?.variable);
+   return typedFallback(n.values?.value??"0",expectedType||v?.type||"int");
+  }
+  if(pin==="value"&&n.type==="fromto")return typedDefault(expectedType||n.values?.fromType||"float");
+  if(pin==="a"||pin==="b")return typedDefault(expectedType||"int");
+  const fallbacks={condition:"false",vector:"Vector3.zero",target:"gameObject",component:"null"};
+  if(fallbacks[pin])return fallbacks[pin];
+  if(expectedType)return typedDefault(expectedType);
+  return "0";
+ }
+ function propertyFallback(n){
+  const ct=n.values?.componentType||"HingeJoint",prop=n.values?.property||"limits",type=propertyType(ct,prop),raw=n.values?.propertyValue??"0";
+  const value=String(raw).trim();
+  if(numericTypes.has(type))return typedFallback(value,type);
+  if(type==="string")return typedFallback(value,type);
+  if(type==="bool")return value==="true"||value==="false"?value:"false";
+  const enumDefaults={RigidbodyConstraints:"RigidbodyConstraints.None",RigidbodyConstraints2D:"RigidbodyConstraints2D.None",RigidbodyType2D:"RigidbodyType2D.Dynamic"};
+  if(enumDefaults[type]){
+   if(/^-?\d+$/.test(value)&&value!=="0")return "("+type+")"+value;
+   return enumDefaults[type];
+  }
+  if(value==="0")return typedDefault(type);
+  return value;
+ }
+ function variableInitializer(v){
+  const raw=String(v.initial??"").trim();
+  if(!raw)return BlueprintTypes.defaultValue(v.type);
+  return typedFallback(raw,v.type);
+ }
+ function emitFlow(id,indent,visited=new Set()){
+  const out=[];let current=id,guard=0;
+  while(current&&guard++<nodes.length+2){
+   if(visited.has(current)){report("A flow loop was detected. The repeated action was stopped in generated code.");break}
+   visited.add(current);
+   const n=findNode(current);if(!n)break;
+   const p="    ".repeat(indent);
+   if(["start","update","fixed","comment"].includes(n.type)){}
+   else if(n.type==="setvar"){
+    const v=findVar(n.values?.variable);
+    if(!v)report("Choose a variable in Set Variable.");
+    else out.push(p+v.codeName+" = "+valueForInput(n,"value",new Set(visited),v.type)+";");
+   }else if(n.type==="setcomponent"){
+    const ct=n.values?.componentType||"HingeJoint",prop=n.values?.property||"limits";
+    const sourceLink=dataLink(n.id,"component"),selected=findVar(n.values?.componentVariable);
+    let target;
+    if(sourceLink)target=valueExpr(sourceLink.from,new Set(visited),ct);
+    else if(n.values?.source==="connected"){report("Connect a component to Set Component Property.");target="GetComponent<"+ct+">()"}
+    else if(selected)target=selected.codeName;
+    else {report("Choose a component variable or connect a component input.");target="GetComponent<"+ct+">()"}
+    if(prop==="limits"&&ct==="HingeJoint"){
+     const min=n.values?.setMinimum==="true"?valueForInput(n,"minimumValue",new Set(visited),"float"):null;
+     const max=n.values?.setMaximum==="true"?valueForInput(n,"maximumValue",new Set(visited),"float"):null;
+     out.push(p+"{",p+"    var __joint_"+n.id+" = "+target+";",p+"    if (__joint_"+n.id+" != null)",p+"    {",p+"        var __limits_"+n.id+" = __joint_"+n.id+".limits;");
+     if(min!==null)out.push(p+"        __limits_"+n.id+".min = "+min+";");
+     if(max!==null)out.push(p+"        __limits_"+n.id+".max = "+max+";");
+     out.push(p+"        __joint_"+n.id+".limits = __limits_"+n.id+";",p+"        __joint_"+n.id+".useLimits = true;",p+"    }",p+"}");
+    }else if(prop==="limits"&&ct==="HingeJoint2D"){
+     const min=n.values?.setMinimum==="true"?valueForInput(n,"minimumValue",new Set(visited),"float"):null;
+     const max=n.values?.setMaximum==="true"?valueForInput(n,"maximumValue",new Set(visited),"float"):null;
+     out.push(p+"{",p+"    var __joint_"+n.id+" = "+target+";",p+"    if (__joint_"+n.id+" != null)",p+"    {",p+"        var __limits_"+n.id+" = __joint_"+n.id+".limits;");
+     if(min!==null)out.push(p+"        __limits_"+n.id+".min = "+min+";");
+     if(max!==null)out.push(p+"        __limits_"+n.id+".max = "+max+";");
+     out.push(p+"        __joint_"+n.id+".limits = __limits_"+n.id+";",p+"        __joint_"+n.id+".useLimits = true;",p+"    }",p+"}");
+    }else if(prop==="limits"){
+     report("Limits are only implemented for HingeJoint and HingeJoint2D.");
+    }else if(boolProperties.has(prop)){
+     out.push(p+"if ("+target+" != null) "+target+"."+prop+" = "+(n.values?.boolValue==="false"?"false":"true")+";");
+    }else{
+     const type=propertyType(ct,prop),link=dataLink(n.id,"propertyValueInput");
+     const val=link?valueForInput(n,"propertyValueInput",new Set(visited),type):propertyFallback(n);
+     out.push(p+"if ("+target+" != null) "+target+"."+prop+" = "+val+";");
+    }
+   }else if(n.type==="debug"){
+    const level=n.values?.level||"log",link=dataLink(n.id,"value");
+    let msg;
+    if(link){
+     msg=valueExpr(link.from,new Set(visited));
+     const source=findNode(link.from);
+     if(source?.type==="math"&&msg.startsWith("(")&&msg.endsWith(")"))msg=msg.slice(1,-1);
+    }else msg=escString(n.values?.message||"");
+    out.push(p+"Debug.Log"+(level==="warning"?"Warning":level==="error"?"Error":"")+"("+msg+");");
+   }else if(n.type==="transform"){
+    const op=n.values?.operation||"setPosition",v=valueForInput(n,"vector",new Set(visited),"Vector3");
+    const code={setPosition:"transform.position = "+v+";",translate:"transform.Translate("+v+");",setRotation:"transform.rotation = Quaternion.Euler("+v+");",setScale:"transform.localScale = "+v+";"};
+    if(code[op])out.push(p+code[op]);
+   }else if(n.type==="gameobject"){
+    const target=valueForInput(n,"target",new Set(visited),"GameObject"),op=n.values?.operation||"setActive";
+    if(op==="destroy")out.push(p+"if ("+target+" != null) Destroy("+target+");");
+    else if(op==="instantiate"){
+     if(outputConnected(n.id))out.push(p+"__blueprintSpawned_"+n.id+" = Instantiate("+target+");");
+     else out.push(p+"Instantiate("+target+");");
+    }else out.push(p+"if ("+target+" != null) "+target+".SetActive("+(n.values?.active==="false"?"false":"true")+");");
+   }else if(n.type==="wait"){
+    const flag="__blueprintWaitRunning_"+n.id,method="__blueprintWait_"+n.id;
+    if(!generatedWaits.has(n.id)){
+     generatedWaits.add(n.id);
+     classFields.push("    private bool "+flag+";");
+     extraMethods.push("    private IEnumerator "+method+"()","    {","        "+flag+" = true;","        yield return new WaitForSeconds(Mathf.Max(0f, "+cleanNumber(n.values?.seconds??"1","float")+"));");
+     const next=connected(n.id,"Then");
+     if(next)extraMethods.push(...emitFlow(next,2,new Set(visited)));
+     extraMethods.push("        "+flag+" = false;","    }","");
+    }
+    out.push(p+"if (!"+flag+") StartCoroutine("+method+"());");
+    break;
+   }else if(n.type==="if"){
+    const cond=valueForInput(n,"condition",new Set(visited),"bool");
+    out.push(p+"if ("+cond+")",p+"{");
+    const t=connected(n.id,"True");if(t)out.push(...emitFlow(t,indent+1,new Set(visited)));
+    out.push(p+"}",p+"else",p+"{");
+    const f=connected(n.id,"False");if(f)out.push(...emitFlow(f,indent+1,new Set(visited)));
+    out.push(p+"}");
+    break;
+   }
+   current=connected(current,"Then");
+  }
+  return out;
+ }
+ for(const n of nodes){
+  if(n.type==="gameobject"&&(n.values?.operation||"setActive")==="instantiate"&&outputConnected(n.id))classFields.push("    private GameObject __blueprintSpawned_"+n.id+";");
+  if(n.type==="getvar"&&!findVar(n.values?.variable))report("Choose an existing variable in Get Variable.");
+  if(n.type==="setvar"&&!findVar(n.values?.variable))report("Choose an existing variable in Set Variable.");
+  if(n.type==="wait"&&(!Number.isFinite(Number(n.values?.seconds??1))||Number(n.values?.seconds??1)<0))report("Wait seconds should be a non-negative number.");
+  if(n.type==="input")report("Input Check uses Unity's classic Input API. Set Active Input Handling to Input Manager (Old) or Both.");
+  if(n.type==="compare"&&n.values?.operandType==="bool"&&["gt","lt","gte","lte"].includes(n.values?.operation))report("Boolean comparison supports only Equal and Not equal.");
+ }
+ for(const v of vars){
+  const name=varsById.get(v.id)?.codeName||safeIdentifier(v.name,"Variable",usedNames),type=String(v.type||"int"),initial=variableInitializer(v);
+  if(v.access==="public-hidden")classFields.push("    public "+type+" "+name+" { get; set; } = "+initial+";");
+  else if(v.access==="public-inspector")classFields.push("    public "+type+" "+name+" = "+initial+";");
+  else if(v.access==="private-inspector")classFields.push("    [SerializeField] private "+type+" "+name+" = "+initial+";");
+  else classFields.push("    private "+type+" "+name+" = "+initial+";");
+ }
+ const eventKinds=[["start","Start"],["update","Update"],["fixed","FixedUpdate"]];
+ for(const [type,method] of eventKinds){
+  const events=nodes.filter(n=>n.type===type);
+  if(!events.length)continue;
+  methods.push("    private void "+method+"()","    {");
+  for(const ev of events){
+   const next=connected(ev.id,"Then");
+   if(next)methods.push(...emitFlow(next,2,new Set([ev.id])));
+  }
+  methods.push("    }","");
+ }
+ if(!eventKinds.some(([type])=>nodes.some(n=>n.type===type))){
+  report("Add On Start, On Update, or On Fixed Update so the generated script has an entry point.");
+  methods.push("    private void Start()","    {","    }","");
+ }
+ if(extraMethods.length)methods.push(...extraMethods);
+ const declaration=["using UnityEngine;","using System;","using System.Collections;","using System.Collections.Generic;","", "public class "+safeClass+" : MonoBehaviour","{"];
+ const fields=classFields.length?classFields.concat([""]):[];
+ const code=declaration.concat(fields,methods,["}"]).join("\n");
+ return {code,diagnostics:[...new Set(diagnostics)]};
 }
 return {compile};
 })();
