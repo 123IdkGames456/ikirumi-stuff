@@ -300,13 +300,12 @@ function compile(inputNodes,inputLinks,inputVars,className){
     if(!v)report("Choose a variable in Set Variable.");
     else out.push(p+v.codeName+" = "+valueForInput(n,"value",new Set(),v.type)+";");
    }else if(n.type==="setcomponent"){
+    if(n.values?.enabledProperty==="true"){
     const ct=n.values?.componentType||"HingeJoint",prop=n.values?.property||"limits";
     const sourceLink=dataLink(n.id,"component"),selected=findVar(n.values?.componentVariable);
     let target;
     if(sourceLink)target=valueExpr(sourceLink.from,new Set(),ct);
-    else if(n.values?.source==="connected"){report("Connect a component to Set Component Property.");target="GetComponent<"+ct+">()"}
-    else if(selected)target=selected.codeName;
-    else {report("Choose a component variable or connect a component input.");target="GetComponent<"+ct+">()"}
+    else {report("Connect a component to Set Component Info.");target="null"}
     if(prop==="limits"&&ct==="HingeJoint"){
      const min=n.values?.setMinimum==="true"?valueForInput(n,"minimumValue",new Set(),"float"):null;
      const max=n.values?.setMaximum==="true"?valueForInput(n,"maximumValue",new Set(),"float"):null;
@@ -334,7 +333,8 @@ function compile(inputNodes,inputLinks,inputVars,className){
      const val=link?valueForInput(n,"propertyValueInput",new Set(),type):propertyFallback(n);
      out.push(p+"{",p+"    var __component_"+n.id+" = "+target+";",p+"    if (__component_"+n.id+" != null)",p+"    {",p+"        __component_"+n.id+"."+prop+" = "+val+";",p+"    }",p+"}");
     }
-   }else if(n.type==="debug"){
+   
+    }}else if(n.type==="debug"){
     const level=n.values?.level||"log",link=dataLink(n.id,"value");
     let msg;
     if(link){
