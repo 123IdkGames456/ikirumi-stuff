@@ -10,7 +10,7 @@ const getVar = id => variables.find(v => v.id === id);
 function connectedComponentType(n){
  if(!n||!["getcomponentvalue","setcomponent"].includes(n.type))return null;
  const link=links.find(l=>l.kind==="data"&&l.to===n.id&&l.toPin==="component");
- if(!link)return null;
+ if(!link){const v=getVar(n.values?.componentVariable);return v&&BlueprintTypes.unity.includes(v.type)?v.type:null;}
  const source=getNode(link.from);
  if(!source)return null;
  if(source.type==="getcomponent")return source.values?.componentType||"Rigidbody";
@@ -254,6 +254,9 @@ function renderNodes(){
   html+='<div class="node-description">'+esc(d.desc)+'</div>';
   (d.fields||[]).forEach(f=>html+=fieldHtml(n,f));
   if(n.type==="setcomponent"){
+   const chosen=n.values.componentVariable||"";
+   const componentVars=variables.filter(v=>BlueprintTypes.unity.includes(v.type));
+   html+='<label class="node-field"><span>Component variable</span><select data-field="componentVariable"><option value="">Use connected input…</option>'+componentVars.map(v=>'<option value="'+v.id+'" '+(chosen===v.id?"selected":"")+'">'+esc(v.name)+' · '+esc(v.type)+'</option>').join("")+'</select></label>';
    const ct=connectedComponentType(n);
    if(ct)(componentProperties[ct]||[]).forEach(([id,label])=>{
     const checked=n.values["use_"+id]==="true";
@@ -284,9 +287,8 @@ function renderNodes(){
    input.addEventListener("change",()=>{
     const field=input.dataset.field;
     n.values[field]=input.type==="checkbox"?String(input.checked):input.value;
-    let rebuildNode=false;
     const componentField=field.startsWith("use_")&&n.type==="setcomponent";
-    const rebuildNode=componentField||field==="component";
+    const rebuildNode=componentField||field==="component"||field==="componentVariable";
     const operationChangesOutput=field==="operation"&&["transform","gameobject"].includes(n.type);
     const pinTypeChange=["type","variable","componentType","fromType","toType","outputType","operandType","vectorType"].includes(field)||operationChangesOutput;
     if(pinTypeChange||rebuildNode){
@@ -425,9 +427,15 @@ function renderInspector(){
  const d=getDef(n.type);
  let html='<div class="subtle">'+esc(d.name)+' · '+esc(d.category)+'</div>';
  (d.fields||[]).forEach(f=>{let val=n.values[f.id]??f.default??(f.options?f.options[0][0]:"");if(f.type==="select")html+='<label>'+esc(f.label)+'</label><select data-inspect="'+f.id+'">'+f.options.map(o=>'<option value="'+esc(o[0])+'" '+(String(val)===String(o[0])?"selected":"")+'>'+esc(o[1])+'</option>').join("")+'</select>';else if(f.type==="variable")html+='<label>'+esc(f.label)+'</label><select data-inspect="'+f.id+'"><option value="">Choose variable…</option>'+variables.map(v=>'<option value="'+v.id+'" '+(v.id===val?"selected":"")+'>'+esc(v.name)+' · '+esc(v.type)+'</option>').join("")+'</select>';else html+='<label>'+esc(f.label)+'</label><input data-inspect="'+f.id+'" value="'+esc(val)+'">'});
+ if(n.type==="setcomponent"){
+  const ct=connectedComponentType(n);
+  html+='<div class="inspector-section"><strong>Component properties</strong></div>';
+  if(ct){(componentProperties[ct]||[]).forEach(([id,label])=>{const checked=n.values["use_"+id]==="true";html+='<label class="node-field checkbox-field component-toggle"><span>'+esc(label)+'</span><input data-inspect="use_'+id+'" type="checkbox" '+(checked?"checked":"")+'></label>';});}
+  else html+='<p class="subtle">Connect a component or choose a component variable to show its supported properties.</p>';
+ }
  html+='<div style="margin-top:15px"><button id="deleteNode" style="width:100%">Delete node</button></div>';
  $("nodeInspector").innerHTML=html;
- $("nodeInspector").querySelectorAll("[data-inspect]").forEach(el=>el.onchange=()=>{const field=el.dataset.inspect;n.values[field]=el.value;if(["type","variable","componentType","toType","outputType","operandType","vectorType","property"].includes(field)||(field==="operation"&&["transform","gameobject"].includes(n.type)))removeIncompatibleLinksForOutput(n.id);removeIncompatibleLinksForInput(n.id);renderAll()});
+ $("nodeInspector").querySelectorAll("[data-inspect]").forEach(el=>el.onchange=()=>{const field=el.dataset.inspect;n.values[field]=el.type==="checkbox"?String(el.checked):el.value;if(["type","variable","componentType","componentVariable","toType","outputType","operandType","vectorType","property"].includes(field)||field.startsWith("use_")||(field==="operation"&&["transform","gameobject"].includes(n.type)))removeIncompatibleLinksForOutput(n.id);removeIncompatibleLinksForInput(n.id);renderAll()});
  $("deleteNode").onclick=()=>{nodes=nodes.filter(x=>x.id!==n.id);links=links.filter(l=>l.from!==n.id&&l.to!==n.id);selectedNode=null;renderAll()};
 }
 function setView(view){
