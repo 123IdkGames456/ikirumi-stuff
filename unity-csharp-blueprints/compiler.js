@@ -25,9 +25,9 @@ function valueExpr(nodeId,seen=new Set(),expectedType=null){
  if(n.type==="getvar"){const v=vars.find(x=>x.id===n.values.variable);return v?v.name:"default"}
  if(n.type==="input"){const key=n.values.key||"Space",mode=n.values.mode||"down";return "Input.GetKey"+(mode==="held"?"":mode==="up"?"Up":"Down")+"(KeyCode."+key+")"}
  if(n.type==="fromto"){
-  const from=n.values.fromType||"float",to=n.values.toType||"string",raw=valueForInput(n,"value",new Set(seen),from),typed="("+from+")("+raw+")";
+  const from=n.values.fromType||"float",to=n.values.toType||"string",raw=valueForInput(n,"value",new Set(seen),from);
   const methods={int:"ToInt32",float:"ToSingle",double:"ToDouble",decimal:"ToDecimal",long:"ToInt64",bool:"ToBoolean",string:"ToString"};
-  return "Convert."+methods[to]+"("+typed+")";
+  return "Convert."+methods[to]+"("+raw+")";
  }
  if(["math","compare","logic"].includes(n.type)){
   const op=n.values.operation||"add",resultType=n.values.outputType||"float";
@@ -36,12 +36,16 @@ function valueExpr(nodeId,seen=new Set(),expectedType=null){
   const ops={add:"+",subtract:"-",multiply:"*",divide:"/",modulo:"%",eq:"==",ne:"!=",gt:">",lt:"<",gte:">=",lte:"<=",and:"&&",or:"||",xor:"^"};
   if(op==="not")return "!("+a+")";
   let expression;
-  if(op==="power")expression=resultType==="float"?"Mathf.Pow("+a+", "+b+")":"Math.Pow("+a+", "+b+")";
-  else if(op==="min")expression=resultType==="float"?"Mathf.Min("+a+", "+b+")":"Math.Min("+a+", "+b+")";
-  else if(op==="max")expression=resultType==="float"?"Mathf.Max("+a+", "+b+")":"Math.Max("+a+", "+b+")";
-  else expression="("+a+" "+(ops[op]||"+")+" "+b+")";
-  if(n.type!=="math")return expression;
-  return "("+resultType+")("+expression+")";
+  if(op==="power"){
+   expression=resultType==="float"?"Mathf.Pow("+a+", "+b+")":"("+resultType+")Math.Pow("+a+", "+b+")";
+  }else if(op==="min"){
+   expression=resultType==="float"?"Mathf.Min("+a+", "+b+")":"Math.Min("+a+", "+b+")";
+  }else if(op==="max"){
+   expression=resultType==="float"?"Mathf.Max("+a+", "+b+")":"Math.Max("+a+", "+b+")";
+  }else{
+   expression="("+a+" "+(ops[op]||"+")+" "+b+")";
+  }
+  return expression;
  }
  return "default";
 }
