@@ -116,7 +116,8 @@ if(extraMethods.length)lines.push(...extraMethods);
 lines.push("}");
 for(const n of nodes){
  if(["getvar","setvar"].includes(n.type)&&!vars.some(v=>v.id===n.values.variable))diagnostics.push("Choose an existing variable in "+getName(n.type)+".");
- if(n.type==="setcomponent"&&!n.values.componentVariable&&!dataLinks.some(l=>l.to===n.id&&l.toPin==="component")&&n.values.source!=="connected")diagnostics.push("Choose a component variable or connect a Get Component From Object block.");\n if(n.type==="wait"&&!events.length)diagnostics.push("Wait needs an event block to run.");
+ if(n.type==="setcomponent"&&!n.values.componentVariable&&!dataLinks.some(l=>l.to===n.id&&l.toPin==="component")&&n.values.source!=="connected")diagnostics.push("Choose a component variable or connect a Get Component From Object block.");
+ if(n.type==="wait"&&!events.length)diagnostics.push("Wait needs an event block to run.");
  if(n.type==="wait"&&links.some(l=>l.to===n.id&&["update","fixed"].includes(nodes.find(x=>x.id===l.from)?.type)))diagnostics.push("A Wait block connected directly to Update or Fixed Update may start a new coroutine every frame.");
 }
 function getName(id){return id==="getvar"?"Get Variable":"Set Variable"}
