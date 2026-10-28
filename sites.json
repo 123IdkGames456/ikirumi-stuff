@@ -24,7 +24,9 @@
     "unity-csharp-blueprints/types.js",
     "unity-csharp-blueprints/compiler.js",
     "unity-csharp-blueprints/storage.js",
-    "unity-csharp-blueprints/site.json"
+    "unity-csharp-blueprints/site.json",
+    "FPS Forge/index.html",
+    "FPS Forge/site.json"
   ],
   "sites": [
     "cookie-clicker",
@@ -34,6 +36,7 @@
     "Text to 3D",
     "evergreen",
     "THE TORCHES WIND - Book",
-    "unity-csharp-blueprints"
+    "unity-csharp-blueprints",
+    "FPS Forge"
   ]
 }
