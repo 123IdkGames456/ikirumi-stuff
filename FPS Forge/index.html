@@ -55,11 +55,11 @@ $('convert').onclick=async()=>{
   recorder=new MediaRecorder(stream,{mimeType:mime});recorder.ondataavailable=e=>{if(e.data&&e.data.size)chunkList.push(e.data)};
   const finished=new Promise((resolve,reject)=>{recorder.onstop=resolve;recorder.onerror=()=>reject(new Error('The browser encoder stopped unexpectedly.'))});
   recorder.start(250);await source.play();
-  let lastProgress=0,lastPresented=0,nextSample=1;
+  let lastProgress=0,lastPresented=0,nextSample=step;
   ctx.drawImage(source,0,0,canvas.width,canvas.height);sampledFrames=1;lastFrame=0;
   await new Promise((resolve)=>{
    const finish=()=>{if(source.requestVideoFrameCallback)source.cancelVideoFrameCallback(frameCallbackId);if(!stopped&&source.readyState>=2){ctx.drawImage(source,0,0,canvas.width,canvas.height);sampledFrames++;}resolve()};
-   const onFrame=(now,meta)=>{if(stopped){resolve();return}const presented=meta.presentedFrames||lastPresented+1;lastPresented=presented;if(presented>=nextSample){ctx.drawImage(source,0,0,canvas.width,canvas.height);sampledFrames++;lastFrame=presented-1;nextSample=presented+step-1}const p=Math.min(99,Math.floor(source.currentTime/source.duration*100));if(p!==lastProgress){lastProgress=p;$('progress').value=p;$('percent').textContent=p+'%'}if(source.ended||source.currentTime>=source.duration){finish();return}frameCallbackId=source.requestVideoFrameCallback(onFrame)};
+   const onFrame=(now,meta)=>{if(stopped){resolve();return}const presented=meta.presentedFrames||lastPresented+1;lastPresented=presented;if(presented>=nextSample){ctx.drawImage(source,0,0,canvas.width,canvas.height);sampledFrames++;lastFrame=presented-1;nextSample=presented+step}const p=Math.min(99,Math.floor(source.currentTime/source.duration*100));if(p!==lastProgress){lastProgress=p;$('progress').value=p;$('percent').textContent=p+'%'}if(source.ended||source.currentTime>=source.duration){finish();return}frameCallbackId=source.requestVideoFrameCallback(onFrame)};
    if(source.requestVideoFrameCallback)frameCallbackId=source.requestVideoFrameCallback(onFrame);
    else {let seen=0;const draw=()=>{if(stopped||source.ended||source.currentTime>=source.duration){finish();return}const presented=Math.floor(source.currentTime*30);if(presented>=nextSample){ctx.drawImage(source,0,0,canvas.width,canvas.height);sampledFrames++;nextSample=presented+step}seen=presented;const p=Math.min(99,Math.floor(source.currentTime/source.duration*100));$('progress').value=p;$('percent').textContent=p+'%';raf=requestAnimationFrame(draw)};raf=requestAnimationFrame(draw)}
   });
