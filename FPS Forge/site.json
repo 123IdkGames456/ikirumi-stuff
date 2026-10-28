@@ -1,0 +1,15 @@
+{
+  "name": "FPS Forge",
+  "description": "Upload a video, lower its frame rate to a chosen FPS, and export the converted result as a WebM video directly in your browser.",
+  "tags": [
+    "video",
+    "fps",
+    "frame rate",
+    "converter",
+    "webm",
+    "media",
+    "video tools"
+  ],
+  "category": "Tools",
+  "icon": "🎞️"
+}
