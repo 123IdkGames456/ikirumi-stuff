@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101114">
+<title>FPS Forge — Video FPS Converter</title>
+<style>
+:root{color-scheme:dark;--bg:#101114;--panel:#191b20;--line:#2c2f38;--muted:#a1a5b3;--text:#f4f5f8;--accent:#b5f36d;--accentText:#15190e;--red:#ff7777}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -15%,#292d36 0,transparent 55%),var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}main{max-width:1000px;margin:auto;padding:30px 18px 60px}.top{display:flex;align-items:center;gap:12px;margin-bottom:36px}.logo{width:42px;height:42px;display:grid;place-items:center;background:var(--accent);color:var(--accentText);border-radius:13px;font-size:23px;font-weight:900}.brand{font-weight:800;font-size:18px;letter-spacing:-.4px}.subbrand{color:var(--muted);font-size:12px}.pill{margin-left:auto;border:1px solid var(--line);border-radius:99px;padding:6px 10px;color:var(--muted);font-size:12px}.hero{text-align:center;margin:0 auto 30px;max-width:650px}.eyebrow{color:var(--accent);text-transform:uppercase;letter-spacing:2px;font-size:11px;font-weight:800}.hero h1{font-size:clamp(32px,6vw,54px);line-height:1.05;letter-spacing:-2px;margin:12px 0}.hero p{color:var(--muted);margin:0 auto;max-width:520px}.layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr);gap:16px}.panel{background:color-mix(in srgb,var(--panel) 94%,transparent);border:1px solid var(--line);border-radius:20px;padding:20px;min-width:0}.panel h2{font-size:16px;margin:0 0 15px}.drop{border:1px dashed #555b69;border-radius:15px;min-height:170px;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;cursor:pointer;background:#14161a;transition:.15s}.drop.drag,.drop:hover{border-color:var(--accent);background:#1b2017}.drop strong{display:block;font-size:15px;margin-bottom:5px}.drop span{font-size:12px;color:var(--muted)}input[type=file]{display:none}.preview{display:none;margin-top:14px}.preview video{display:block;width:100%;max-height:290px;background:#08090b;border-radius:12px}.fileline{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;color:var(--muted);font-size:12px;overflow-wrap:anywhere}.textbtn{border:0;background:none;color:var(--red);cursor:pointer;font:inherit}.fieldlabel{display:block;color:#d8dae1;font-size:13px;font-weight:650;margin:20px 0 9px}.fpsgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.fps{border:1px solid var(--line);background:#14161a;color:var(--text);border-radius:11px;padding:11px 5px;cursor:pointer;font-weight:750}.fps small{display:block;color:var(--muted);font-weight:400;font-size:11px}.fps.active{border-color:var(--accent);background:#222b19;color:var(--accent)}.customrow{display:flex;gap:10px;align-items:center}.customrow input{width:100%;min-width:0;background:#111216;border:1px solid var(--line);border-radius:10px;padding:11px;color:var(--text);font:inherit}.hint{font-size:12px;color:var(--muted);margin-top:9px}.info{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:10px}.info div{min-width:0}.info span{display:block;color:var(--muted);font-size:11px}.info strong{font-size:14px;overflow-wrap:anywhere}.actions{margin-top:18px;display:grid;gap:9px}.primary,.secondary{width:100%;border:0;border-radius:12px;padding:13px 15px;font:inherit;font-weight:800;cursor:pointer}.primary{background:var(--accent);color:var(--accentText)}.primary:disabled{opacity:.4;cursor:not-allowed}.secondary{background:#292c34;color:var(--text);border:1px solid #383c46}.progresswrap{display:none;margin-top:16px}.progressmeta{display:flex;justify-content:space-between;color:var(--muted);font-size:12px;margin-bottom:7px}progress{width:100%;height:7px;accent-color:var(--accent)}.status{font-size:12px;color:var(--muted);margin-top:7px;overflow-wrap:anywhere}.foot{text-align:center;color:#858997;font-size:12px;margin-top:24px}.notice{display:none;border:1px solid #5b4940;background:#241c19;color:#f1c6aa;padding:11px;border-radius:10px;font-size:12px;margin-top:12px}@media(max-width:720px){main{padding:20px 12px 35px}.top{margin-bottom:28px}.layout{grid-template-columns:1fr}.panel{padding:16px}.hero h1{letter-spacing:-1.3px}.fpsgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body><main>
+<header class="top"><div class="logo">F</div><div><div class="brand">FPS Forge</div><div class="subbrand">Video frame-rate converter</div></div><div class="pill">Runs in your browser</div></header>
+<section class="hero"><div class="eyebrow">Frame rate control</div><h1>Make every frame count.</h1><p>Drop in a video, choose a lower FPS, and export a new video. Your original file stays untouched.</p></section>
+<div class="layout">
+<section class="panel"><h2>01 / Choose your video</h2><label class="drop" id="drop" for="file"><div><strong>＋ Select or drop a video</strong><span>MP4, WebM, MOV and other formats your browser can play</span></div></label><input id="file" type="file" accept="video/*">
+<div class="preview" id="preview"><video id="source" controls playsinline></video><div class="fileline"><span id="filename"></span><button class="textbtn" id="remove" type="button">Remove</button></div></div>
+<div class="info"><div><span>Source duration</span><strong id="duration">—</strong></div><div><span>Output frame rate</span><strong id="chosen">24 FPS</strong></div><div><span>Estimated output frames</span><strong id="frames">—</strong></div><div><span>Export format</span><strong>WebM video</strong></div></div>
+<div class="notice" id="notice"></div></section>
+<section class="panel"><h2>02 / Set your FPS</h2><span class="fieldlabel">Choose a frame rate</span><div class="fpsgrid" id="fpsgrid"><button class="fps" data-fps="60">60 FPS<small>Very smooth</small></button><button class="fps" data-fps="30">30 FPS<small>Smooth</small></button><button class="fps active" data-fps="24">24 FPS<small>Cinematic</small></button><button class="fps" data-fps="15">15 FPS<small>Stylized</small></button><button class="fps" data-fps="12">12 FPS<small>Choppy</small></button><button class="fps" data-fps="8">8 FPS<small>Low frame rate</small></button></div>
+<label class="fieldlabel" for="custom">Or enter a custom FPS (1–60)</label><div class="customrow"><input id="custom" type="number" min="1" max="60" step="1" value="24"><span>FPS</span></div><p class="hint">The converter samples frames at your chosen rate. It won't create extra intermediate frames.</p>
+<div class="progresswrap" id="progresswrap"><div class="progressmeta"><span id="progresslabel">Preparing video…</span><span id="percent">0%</span></div><progress id="progress" max="100" value="0"></progress><div class="status" id="status"></div></div>
+<div class="actions"><button class="primary" id="convert" disabled>Convert &amp; export video</button><button class="secondary" id="cancel" style="display:none">Cancel conversion</button><a id="download" class="primary" style="display:none;text-align:center;text-decoration:none" download="fps-forge.webm">Download converted video</a></div></section></div>
+<div class="foot">Your video is processed locally in your browser. Nothing is uploaded to a server.</div>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const fileInput=$('file'),source=$('source'),drop=$('drop'),custom=$('custom');
+let file=null,objectUrl='',fps=24,recorder=null,stopped=false,raf=0,outputUrl='',lastFrame=-1,canvas=null,ctx=null,stream=null,chunkList=[];
+function setFPS(v){fps=Math.max(1,Math.min(60,Math.round(Number(v)||24)));custom.value=fps;$('chosen').textContent=fps+' FPS';document.querySelectorAll('.fps').forEach(b=>b.classList.toggle('active',Number(b.dataset.fps)===fps));updateEstimate()}
+function updateEstimate(){const d=source.duration;if(Number.isFinite(d)&&d>0)$('frames').textContent=Math.ceil(d*fps).toLocaleString();else $('frames').textContent='—'}
+function resetOutput(){if(outputUrl)URL.revokeObjectURL(outputUrl);outputUrl='';$('download').style.display='none';$('download').removeAttribute('href')}
+function loadFile(f){if(!f||!f.type.startsWith('video/')){showNotice('Please choose a valid video file.');return}stopConversion();resetOutput();file=f;if(objectUrl)URL.revokeObjectURL(objectUrl);objectUrl=URL.createObjectURL(f);source.src=objectUrl;$('preview').style.display='block';$('filename').textContent=f.name;$('duration').textContent='Loading…';$('convert').disabled=true;$('notice').style.display='none';source.onloadedmetadata=()=>{$('duration').textContent=formatTime(source.duration);$('convert').disabled=false;updateEstimate()};source.onerror=()=>showNotice('This video format could not be opened by your browser. Try MP4 (H.264) or WebM.') }
+function formatTime(s){if(!Number.isFinite(s))return'—';return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0')}
+function showNotice(t){$('notice').textContent=t;$('notice').style.display='block'}
+fileInput.addEventListener('change',()=>loadFile(fileInput.files[0]));
+drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('drag')});drop.addEventListener('dragleave',()=>drop.classList.remove('drag'));drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('drag');loadFile(e.dataTransfer.files[0])});
+$('remove').onclick=()=>{stopConversion();file=null;source.pause();source.removeAttribute('src');source.load();if(objectUrl)URL.revokeObjectURL(objectUrl);objectUrl='';$('preview').style.display='none';$('convert').disabled=true;$('duration').textContent='—';$('frames').textContent='—';resetOutput()};
+document.querySelectorAll('.fps').forEach(b=>b.onclick=()=>setFPS(b.dataset.fps));custom.addEventListener('change',()=>setFPS(custom.value));custom.addEventListener('input',()=>{if(custom.value!==''&&Number(custom.value)>=1&&Number(custom.value)<=60)setFPS(custom.value)});
+source.addEventListener('durationchange',updateEstimate);
+function stopConversion(){stopped=true;if(raf)cancelAnimationFrame(raf);raf=0;if(recorder&&recorder.state!=='inactive'){try{recorder.stop()}catch(e){}}if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;recorder=null;if(source.src)source.pause();$('cancel').style.display='none'}
+$('cancel').onclick=()=>{stopConversion();$('progresslabel').textContent='Conversion cancelled';$('status').textContent='Your original file has not been changed.';$('convert').disabled=false};
+$('convert').onclick=async()=>{
+ if(!file||!Number.isFinite(source.duration)||source.duration<=0)return;
+ resetOutput();stopped=false;chunkList=[];lastFrame=-1;
+ if(!HTMLCanvasElement.prototype.captureStream){showNotice('Your browser does not support video export from canvas. Try the latest Chrome or Edge.');return}
+ const mime=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'].find(m=>MediaRecorder.isTypeSupported(m));
+ if(!mime){showNotice('This browser cannot export WebM video. Try Chrome or Edge on an updated device.');return}
+ $('convert').disabled=true;$('cancel').style.display='block';$('progresswrap').style.display='block';$('progress').value=0;$('percent').textContent='0%';$('progresslabel').textContent='Converting video…';$('status').textContent='Keep this tab open while conversion runs.';
+ try{
+  source.pause();source.currentTime=0;await new Promise((resolve,reject)=>{if(source.readyState>=2)resolve();else{source.addEventListener('loadeddata',resolve,{once:true});source.addEventListener('error',reject,{once:true})}});
+  canvas=document.createElement('canvas');canvas.width=source.videoWidth||1280;canvas.height=source.videoHeight||720;ctx=canvas.getContext('2d',{alpha:false});stream=canvas.captureStream(0);
+  const track=stream.getVideoTracks()[0];if(!track.requestFrame)throw new Error('Manual frame capture is not supported in this browser. Try desktop Chrome or Edge.');
+  recorder=new MediaRecorder(stream,{mimeType:mime});recorder.ondataavailable=e=>{if(e.data&&e.data.size)chunkList.push(e.data)};
+  const finished=new Promise((resolve,reject)=>{recorder.onstop=resolve;recorder.onerror=()=>reject(new Error('The browser encoder stopped unexpectedly.'))});
+  recorder.start(250);await source.play();
+  const interval=1/fps;let next=0,lastProgress=0;
+  await new Promise((resolve,reject)=>{
+   const draw=()=>{
+    if(stopped){resolve();return}
+    if(source.currentTime>=source.duration||source.ended){resolve();return}
+    if(source.currentTime+0.0001>=next&&source.readyState>=2){
+     ctx.drawImage(source,0,0,canvas.width,canvas.height);track.requestFrame();lastFrame++;next+=interval;
+     const p=Math.min(99,Math.floor(source.currentTime/source.duration*100));if(p!==lastProgress){lastProgress=p;$('progress').value=p;$('percent').textContent=p+'%'}
+    }
+    raf=requestAnimationFrame(draw)
+   };raf=requestAnimationFrame(draw)
+  });
+  if(!stopped&&recorder&&recorder.state!=='inactive')recorder.stop();await finished;
+  if(stopped){$('convert').disabled=false;return}
+  if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;source.pause();
+  if(!chunkList.length)throw new Error('No video frames were exported. Try another video or browser.');
+  outputUrl=URL.createObjectURL(new Blob(chunkList,{type:mime}));const a=$('download');a.href=outputUrl;const base=(file.name.replace(/\.[^.]+$/,'')||'video').replace(/[\\/:*?"<>|]/g,'_');a.download=base+'-'+fps+'fps.webm';a.textContent='↓ Download converted video';a.style.display='block';$('progress').value=100;$('percent').textContent='100%';$('progresslabel').textContent='Conversion complete';$('status').textContent='Exported '+(lastFrame+1).toLocaleString()+' frames at up to '+fps+' FPS.';$('cancel').style.display='none';$('convert').disabled=false;
+ }catch(err){stopConversion();$('convert').disabled=false;showNotice(err.message||'Something went wrong during conversion.');$('progresslabel').textContent='Could not finish';$('status').textContent='Try a different browser-supported video.'}
+};
+window.addEventListener('beforeunload',()=>{if(objectUrl)URL.revokeObjectURL(objectUrl);if(outputUrl)URL.revokeObjectURL(outputUrl)});
+</script></body></html>
