@@ -148,7 +148,7 @@ document.querySelectorAll('.tool').forEach(b=>b.addEventListener('click',()=>set
 document.querySelectorAll('.swatch').forEach(b=>b.addEventListener('click',()=>{color=b.dataset.color;document.querySelectorAll('.swatch').forEach(s=>s.classList.toggle('active',s===b));ensureGhost();if(ghost)updateGhostAt(ghost.position.x,ghost.position.z)}));
 function rotate(){rotation=(rotation+Math.PI/2)%(Math.PI*2);if(ghost){ghost.rotation.y=rotation;updateGhostAt(ghost.position.x,ghost.position.z)}say('Placement rotated')}
 document.getElementById('rotateBtn').onclick=rotate;
-window.addEventListener('keydown',e=>{if(playMode){keys[e.key.toLowerCase()]=true;if(e.key.toLowerCase()==='e')interactDoor();if(e.key==='Escape')togglePlay(false);return}if(e.key.toLowerCase()==='q'||e.key.toLowerCase()==='e')rotate();if(e.key==='Escape'){}});window.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false});
+window.addEventListener('keydown',e=>{if(playMode){keys[e.key.toLowerCase()]=true;if(e.key.toLowerCase()==='e')interactDoor();if(e.key==='Escape'||e.key.toLowerCase()==='b')togglePlay(false);return}if(e.key.toLowerCase()==='q'||e.key.toLowerCase()==='e')rotate();if(e.key==='Escape'){}});window.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false});
 function save(){autoSave();say('Build saved on this device')}
 function load(){
  try{
@@ -165,7 +165,26 @@ function ensureGhost(){if(ghost){scene.remove(ghost);ghost=null}if(playMode||kin
 function updateGhostAt(x,z){if(!ghost)return;const cx=snap(x),cz=snap(z);positionPiece(ghost,cx,cz,kind,currentStory);ghost.rotation.y=rotation;const ok=supported(kind,cx,cz,currentStory)&&!pieces.some(p=>p.userData.cellX===cx&&p.userData.cellZ===cz&&p.userData.story===currentStory&&(['wall','window','door'].includes(p.userData.kind)&&['wall','window','door'].includes(kind)||p.userData.kind===kind));ghost.traverse(o=>{if(o.isMesh)o.material.color.set(ok?'#b6ef78':'#ef7777')})}
 function updateGhostPointer(e){if(!ghost||playMode)return;const p=groundPoint(e);if(p)updateGhostAt(p.x,p.z)}
 renderer.domElement.addEventListener('pointermove',updateGhostPointer);
-function togglePlay(on){playMode=on;controls.enabled=!on;document.querySelector('.tools').style.display=on?'none':'block';document.querySelector('.stats').style.display=on?'none':'block';document.querySelector('.bottom').style.display=on?'none':'flex';help.classList.toggle('show',on);prompt.classList.remove('show');playBtn.textContent=on?'✕ Build':'▶ Play';if(on){if(ghost){scene.remove(ghost);ghost=null}camera.position.set(0,1.65,6);yaw=0;pitch=0;camera.rotation.order='YXZ';renderer.domElement.requestPointerLock?.()}else{document.exitPointerLock?.();ensureGhost()}}
+let savedBuildCamera=null;
+function togglePlay(on){
+ if(on===playMode)return;
+ if(on){
+  savedBuildCamera={position:camera.position.clone(),quaternion:camera.quaternion.clone(),target:controls.target.clone()};
+  playMode=true;controls.enabled=false;
+  document.querySelector('.tools').style.display='none';document.querySelector('.stats').style.display='none';document.querySelector('.bottom').style.display='none';
+  help.classList.add('show');prompt.classList.remove('show');playBtn.textContent='↩ Build Mode';
+  if(ghost){scene.remove(ghost);ghost=null}
+  camera.position.set(0,1.65,6);yaw=0;pitch=0;camera.rotation.order='YXZ';renderer.domElement.requestPointerLock?.();
+ }else{
+  playMode=false;controls.enabled=true;document.exitPointerLock?.();
+  document.querySelector('.tools').style.display='block';document.querySelector('.stats').style.display='block';document.querySelector('.bottom').style.display='flex';
+  help.classList.remove('show');prompt.classList.remove('show');playBtn.textContent='▶ Play';
+  if(savedBuildCamera){
+   camera.position.copy(savedBuildCamera.position);camera.quaternion.copy(savedBuildCamera.quaternion);controls.target.copy(savedBuildCamera.target);controls.update();savedBuildCamera=null;
+  }
+  ensureGhost();
+ }
+}
 playBtn.onclick=()=>togglePlay(!playMode);
 document.addEventListener('pointerlockchange',()=>{if(playMode&&document.pointerLockElement!==renderer.domElement)togglePlay(false)});
 document.addEventListener('mousemove',e=>{if(!playMode||document.pointerLockElement!==renderer.domElement)return;yaw-=e.movementX*.0022;pitch-=e.movementY*.0022;pitch=Math.max(-1.35,Math.min(1.35,pitch));camera.rotation.set(pitch,yaw,0,'YXZ')});
