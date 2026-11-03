@@ -74,7 +74,7 @@ const host=document.getElementById('view');
 const scene=new THREE.Scene();scene.background=new THREE.Color('#a9c4c3');scene.fog=new THREE.Fog('#a9c4c3',38,95);
 const camera=new THREE.PerspectiveCamera(48,1,.1,180);camera.position.set(13,12,16);
 const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'low-power'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;host.appendChild(renderer.domElement);
-const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(0,1,0);controls.mouseButtons.LEFT=THREE.MOUSE.PAN;controls.mouseButtons.RIGHT=THREE.MOUSE.ROTATE;controls.enableDamping=true;controls.maxPolarAngle=Math.PI*.49;controls.minDistance=7;controls.maxDistance=48;
+const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(0,1,0);controls.mouseButtons.LEFT=null;controls.mouseButtons.RIGHT=THREE.MOUSE.ROTATE;controls.enableDamping=true;controls.maxPolarAngle=Math.PI*.49;controls.minDistance=7;controls.maxDistance=48;
 scene.add(new THREE.HemisphereLight('#e8f5ed','#68775e',2.1));const sun=new THREE.DirectionalLight('#fff0d5',2.1);sun.position.set(-9,18,11);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-24;sun.shadow.camera.right=24;sun.shadow.camera.top=24;sun.shadow.camera.bottom=-24;scene.add(sun);
 const groundMat=new THREE.MeshStandardMaterial({color:'#7c9a72',roughness:1});const ground=new THREE.Mesh(new THREE.PlaneGeometry(100,100),groundMat);ground.rotation.x=-Math.PI/2;ground.position.y=-.12;ground.receiveShadow=true;scene.add(ground);
 const grid=new THREE.GridHelper(48,48,'#526d55','#789276');grid.position.y=-.105;scene.add(grid);
@@ -174,7 +174,7 @@ let lastPointer={x:0,y:0};
 renderer.domElement.addEventListener('pointerdown',e=>{
  if(playMode||buildConfirm.classList.contains('show')||e.button!==0)return;
  lastPointer={x:e.clientX,y:e.clientY};
- if(kind!=='erase'){const p=groundPoint(e);if(p)dragStart={x:snap(p.x),z:snap(p.z)}}
+ if(kind!=='erase'){const p=groundPoint(e);if(p){dragStart={x:snap(p.x),z:snap(p.z)};if(ghost)ghost.visible=false}}
 });
 renderer.domElement.addEventListener('pointermove',e=>{
  lastPointer={x:e.clientX,y:e.clientY};
@@ -185,10 +185,10 @@ renderer.domElement.addEventListener('pointerup',e=>{
  if(kind==='erase'){const hit=pieceHit(e);if(hit){scene.remove(hit);pieces.splice(pieces.indexOf(hit),1);refresh();autoSave();say('Piece removed')}return}
  if(!dragStart)return;
  const startCell={x:dragStart.x,z:dragStart.z},end=groundPoint(e);dragStart=null;
- if(!end){clearDragPreview();return}
+ if(!end){clearDragPreview();if(ghost)ghost.visible=true;return}
  const cells=buildCells(startCell,end);
- if(cells.length<=1){clearDragPreview();addNew(kind,startCell.x,startCell.z);return}
- updateDragPreview(startCell,end);buildConfirm.classList.add('show');
+ if(cells.length<=1){clearDragPreview();if(ghost)ghost.visible=true;addNew(kind,startCell.x,startCell.z);return}
+ updateDragPreview(startCell,end);if(ghost)ghost.visible=true;buildConfirm.classList.add('show');
 });
 document.getElementById('cancelBuild').onclick=()=>{buildConfirm.classList.remove('show');clearDragPreview();pendingBuild=[]};
 document.getElementById('confirmBuild').onclick=()=>{
