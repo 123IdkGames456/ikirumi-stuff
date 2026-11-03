@@ -106,30 +106,41 @@ function cell(v){return Math.round(v)}
 function pieceAt(type,x,z,story){
  return pieces.find(p=>p.userData.kind===type&&p.userData.cellX===x&&p.userData.cellZ===z&&p.userData.story===story);
 }
-function wallAt(x,z,story){return !!pieceAt('wall',x,z,story)}
-function supported(type,x,z,story){
- if(type==='floor')return story===1||wallAt(x,z,story-1);
- if(type==='wall')return story===1||!!pieceAt('floor',x,z,story)||wallAt(x,z,story-1);
- if(type==='roof')return wallAt(x,z,story);
- if(type==='window'||type==='door')return story===1||!!pieceAt('floor',x,z,story)||wallAt(x,z,story-1);
+function wallEdgeAt(x,z,story,alongZ){return pieces.some(p=>['wall','window','door'].includes(p.userData.kind)&&p.userData.story===story&&p.userData.cellX===x&&p.userData.cellZ===z&&((Math.round((p.rotation.y%(Math.PI*2))/(Math.PI/2))+4)%2===1)===alongZ)}
+function hasWallAround(x,z,story){return wallEdgeAt(x,z,story,false)||wallEdgeAt(x,z+1,story,false)||wallEdgeAt(x,z,story,true)||wallEdgeAt(x+1,z,story,true)}
+function supported(type,x,z,story,rot=rotation){
+ const alongZ=(Math.round(rot/(Math.PI/2))+4)%2===1;
+ if(type==='floor')return story===1||hasWallAround(x,z,story-1);
+ if(type==='wall'||type==='window'||type==='door'){
+  if(story===1)return true;
+  const floorBelow=alongZ?(!!pieceAt('floor',x-1,z,story)||!!pieceAt('floor',x,z,story)):(!!pieceAt('floor',x,z-1,story)||!!pieceAt('floor',x,z,story));
+  return floorBelow||wallEdgeAt(x,z,story-1,alongZ);
+ }
+ if(type==='roof')return hasWallAround(x,z,story);
  if(type==='stairs')return story===1||!!pieceAt('floor',x,z,story);
  return false;
 }
-function snap(v){return Math.round(v)}
-function positionPiece(obj,x,z,type,story){
+function gridCell(type,x,z,rot=rotation){
+ const alongZ=(Math.round(rot/(Math.PI/2))+4)%2===1;
+ if(['wall','window','door'].includes(type))return alongZ?{x:Math.round(x),z:Math.floor(z)}:{x:Math.floor(x),z:Math.round(z)};
+ return {x:Math.floor(x),z:Math.floor(z)};
+}
+function positionPiece(obj,x,z,type,story,rot=obj.rotation.y){
  const base=(story-1)*STORY_HEIGHT;let y=base+1.25;
  if(type==='floor')y=base+.06;
  if(type==='roof')y=base+STORY_HEIGHT-.06;
- if(type==='window'||type==='door')y=base+1.25;
- if(type==='stairs')y=base+1.25;
- obj.position.set(x,y,z);obj.userData.cellX=x;obj.userData.cellZ=z;obj.userData.story=story;
+ const alongZ=(Math.round(rot/(Math.PI/2))+4)%2===1;
+ const isWall=['wall','window','door'].includes(type);
+ obj.position.set(isWall?(alongZ?x:x+.5):x+.5,y,isWall?(alongZ?z+.5:z):z+.5);
+ obj.userData.cellX=x;obj.userData.cellZ=z;obj.userData.story=story;
 }
-function autoSave(){try{const data=pieces.map(p=>({kind:p.userData.kind,color:p.userData.color,x:p.position.x,y:p.position.y,z:p.position.z,cellX:p.userData.cellX,cellZ:p.userData.cellZ,story:p.userData.story,ry:p.rotation.y}));localStorage.setItem('crowbar-builder-save',JSON.stringify({version:2,currentStory,pieces:data}));}catch(e){say('Could not save on this device')}}
+function autoSave(){try{const data=pieces.map(p=>({kind:p.userData.kind,color:p.userData.color,x:p.position.x,y:p.position.y,z:p.position.z,cellX:p.userData.cellX,cellZ:p.userData.cellZ,story:p.userData.story,ry:p.rotation.y}));localStorage.setItem('crowbar-builder-save',JSON.stringify({version:3,currentStory,pieces:data}));}catch(e){say('Could not save on this device')}}
+function occupied(type,x,z,story,rot=rotation){const wallType=['wall','window','door'].includes(type),alongZ=(Math.round(rot/(Math.PI/2))+4)%2===1;return pieces.some(p=>{if(p.userData.cellX!==x||p.userData.cellZ!==z||p.userData.story!==story)return false;const otherWall=['wall','window','door'].includes(p.userData.kind);if(wallType||otherWall)return wallType&&otherWall&&((Math.round((p.rotation.y%(Math.PI*2))/(Math.PI/2))+4)%2===1)===alongZ;return p.userData.kind===type})}
 function addNew(type,x,z){
- const cx=snap(x),cz=snap(z);
- if(!supported(type,cx,cz,currentStory)){say(type==='window'||type==='door'?'Place this on an existing wall':'No support here — build a supporting wall or ground first');return}
- if(pieces.some(p=>p.userData.cellX===cx&&p.userData.cellZ===cz&&p.userData.story===currentStory&&(['wall','window','door'].includes(p.userData.kind)&&['wall','window','door'].includes(type)||p.userData.kind===type))){say('That grid cell is already occupied');return}
- const obj=makePiece(type,color);positionPiece(obj,cx,cz,type,currentStory);obj.rotation.y=rotation;scene.add(obj);pieces.push(obj);refresh();applyVisibility(obj);autoSave();
+ const cell=gridCell(type,x,z,rotation),cx=cell.x,cz=cell.z;
+ if(!supported(type,cx,cz,currentStory,rotation)){say(type==='window'||type==='door'?'Place this on a supported grid edge':'No support here — build a supporting wall or ground first');return}
+ if(occupied(type,cx,cz,currentStory,rotation)){say('That grid position is already occupied');return}
+ const obj=makePiece(type,color);obj.rotation.y=rotation;positionPiece(obj,cx,cz,type,currentStory,rotation);scene.add(obj);pieces.push(obj);refresh();applyVisibility(obj);autoSave();
 }
 function setStory(n){currentStory=Math.max(1,Math.min(20,n));document.getElementById('storyNumber').textContent=currentStory;refresh();autoSave()}
 document.getElementById('storyDown').onclick=()=>setStory(currentStory-1);
@@ -155,14 +166,14 @@ function load(){
   const raw=JSON.parse(localStorage.getItem('crowbar-builder-save')||'null');const data=Array.isArray(raw)?{pieces:raw,currentStory:1}:raw;
   if(!data||!Array.isArray(data.pieces)){say('No saved build found');return}
   pieces.forEach(p=>scene.remove(p));pieces.length=0;
-  data.pieces.forEach(d=>{if(!defs[d.kind])return;const p=makePiece(d.kind,d.color||'#c6b99e');const st=d.story||1;positionPiece(p,d.cellX??d.x,d.cellZ??d.z,d.kind,st);p.rotation.y=d.ry||0;scene.add(p);pieces.push(p);applyVisibility(p)});
+  data.pieces.forEach(d=>{if(!defs[d.kind])return;const p=makePiece(d.kind,d.color||'#c6b99e');const st=d.story||1;p.rotation.y=d.ry||0;positionPiece(p,d.cellX??d.x,d.cellZ??d.z,d.kind,st,p.rotation.y);scene.add(p);pieces.push(p);applyVisibility(p)});
   setStory(data.currentStory||1);refresh();say('Build loaded from this device');
  }catch(e){say('Could not load saved build')}
 }
 document.getElementById('saveBtn').onclick=save;document.getElementById('loadBtn').onclick=load;window.addEventListener('beforeunload',autoSave);
 const prompt=document.getElementById('interactPrompt'),help=document.getElementById('playHelp'),playBtn=document.getElementById('playBtn');
 function ensureGhost(){if(ghost){scene.remove(ghost);ghost=null}if(playMode||kind==='erase')return;ghost=makePiece(kind,color);ghost.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.material.transparent=true;o.material.opacity=.34;o.material.depthWrite=false;o.material.color.set('#b6ef78')}});ghost.rotation.y=rotation;scene.add(ghost)}
-function updateGhostAt(x,z){if(!ghost)return;const cx=snap(x),cz=snap(z);positionPiece(ghost,cx,cz,kind,currentStory);ghost.rotation.y=rotation;const ok=supported(kind,cx,cz,currentStory)&&!pieces.some(p=>p.userData.cellX===cx&&p.userData.cellZ===cz&&p.userData.story===currentStory&&(['wall','window','door'].includes(p.userData.kind)&&['wall','window','door'].includes(kind)||p.userData.kind===kind));ghost.traverse(o=>{if(o.isMesh)o.material.color.set(ok?'#b6ef78':'#ef7777')})}
+function updateGhostAt(x,z){if(!ghost)return;const cell=gridCell(kind,x,z,rotation),cx=cell.x,cz=cell.z;ghost.rotation.y=rotation;positionPiece(ghost,cx,cz,kind,currentStory,rotation);const ok=supported(kind,cx,cz,currentStory,rotation)&&!occupied(kind,cx,cz,currentStory,rotation);ghost.traverse(o=>{if(o.isMesh)o.material.color.set(ok?'#b6ef78':'#ef7777')})}
 function updateGhostPointer(e){if(!ghost||playMode)return;const p=groundPoint(e);if(p)updateGhostAt(p.x,p.z)}
 renderer.domElement.addEventListener('pointermove',updateGhostPointer);
 let savedBuildCamera=null;
