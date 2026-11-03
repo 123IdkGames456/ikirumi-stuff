@@ -1,0 +1,20 @@
+{
+  "name": "Crowbar Builder",
+  "description": "A lightweight low-poly 3D building sandbox. Place and rotate floors, walls, roofs, windows and doors, choose colours, erase pieces, and save or load your build.",
+  "tags": [
+    "3D",
+    "building",
+    "construction",
+    "sandbox",
+    "low-poly",
+    "house",
+    "walls",
+    "floors",
+    "roof",
+    "windows",
+    "doors",
+    "creative"
+  ],
+  "category": "Games",
+  "icon": "🏗️"
+}
