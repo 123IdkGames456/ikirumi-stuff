@@ -190,6 +190,8 @@ function placeTemplate(name){
  const spec=specs[name];if(!spec)return;
  const cx=Math.round(controls.target.x),cz=Math.round(controls.target.z);
  const left=cx-Math.floor(spec.w/2),front=cz-Math.floor(spec.d/2),right=left+spec.w-1,back=front+spec.d-1;
+ // Templates replace the current build rather than stacking on top of it.
+ pieces.forEach(p=>scene.remove(p));pieces.length=0;
  let added=0;
  const put=(type,x,z,story,rot=0)=>{const p=makePiece(type,spec.color);p.rotation.y=rot;positionPiece(p,x,z,type,story,rot);scene.add(p);pieces.push(p);applyVisibility(p);added++};
  for(let story=1;story<=spec.stories;story++){
