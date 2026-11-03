@@ -25,7 +25,7 @@ hr{border:0;border-top:1px solid var(--line);margin:12px 0}
 .tools select{width:100%;background:#202b22;border:1px solid #405044;color:var(--text);border-radius:8px;padding:9px;font:inherit;font-size:12px}.actionrow{display:flex;gap:6px}.actionrow button,.topbtn{background:#263329;border:1px solid #405044;color:var(--text);border-radius:8px;padding:8px 9px;font:inherit;font-size:11px;cursor:pointer;flex:1}.actionrow button:hover,.topbtn:hover{border-color:var(--lime)}
 .swatches{display:flex;gap:7px;flex-wrap:wrap}.swatch{width:25px;height:25px;border-radius:8px;border:2px solid #ffffff40;cursor:pointer}.swatch.active{outline:2px solid var(--lime);outline-offset:2px}
 .hint{font-size:11px;color:var(--muted);line-height:1.5;margin:9px 0 0}
-#buildConfirm{display:none;position:absolute;inset:0;z-index:5;background:#07100999;align-items:center;justify-content:center}#buildConfirm.show{display:flex}.confirm-card{width:min(320px,calc(100% - 32px));padding:18px;background:#18231b;border:1px solid #71866d;border-radius:14px;box-shadow:0 18px 50px #0009}.confirm-card h3{margin:0 0 7px;font-size:16px}.confirm-card p{margin:0 0 14px;color:var(--muted);font-size:12px}.confirm-card .actionrow button{padding:10px}
+#buildConfirm{display:none;position:absolute;inset:0;z-index:5;background:#07100999;align-items:center;justify-content:center}#buildConfirm.show{display:flex}.confirm-card{width:min(320px,calc(100% - 32px));padding:18px;background:#18231b;border:1px solid #71866d;border-radius:14px;box-shadow:0 18px 50px #0009}.confirm-card h3{margin:0 0 7px;font-size:16px}.confirm-card p{margin:0 0 14px;color:var(--muted);font-size:12px}.confirm-card .actionrow button{padding:10px}#templateModal{display:none;position:absolute;inset:0;z-index:6;background:#07100999;align-items:center;justify-content:center}#templateModal.show{display:flex}.template-card{width:min(340px,calc(100% - 32px));padding:18px;background:#18231b;border:1px solid #71866d;border-radius:14px;box-shadow:0 18px 50px #0009}.template-card h3{margin:0 0 7px;font-size:16px}.template-card p{margin:0 0 14px;color:var(--muted);font-size:12px}.template-card select{width:100%;background:#202b22;border:1px solid #405044;color:var(--text);border-radius:8px;padding:11px;font:inherit;font-size:13px}.template-card .actionrow{margin-top:12px}.template-card .actionrow button{padding:10px}
 .stats{right:14px;top:14px;padding:11px 13px;min-width:145px}.stat{display:flex;justify-content:space-between;gap:18px;font-size:11px;color:var(--muted);padding:3px 0}.stat strong{color:var(--text);font-variant-numeric:tabular-nums}
 .bottom{left:50%;bottom:14px;transform:translateX(-50%);padding:9px 13px;display:flex;gap:13px;align-items:center;white-space:nowrap;font-size:11px;color:var(--muted)}
 .bottom b{color:var(--text)}.toast{position:absolute;left:50%;top:18px;transform:translate(-50%,-10px);background:#263329;border:1px solid #60745e;padding:9px 13px;border-radius:9px;opacity:0;pointer-events:none;transition:.2s;font-size:12px}.toast.show{opacity:1;transform:translate(-50%,0)}
@@ -35,7 +35,7 @@ hr{border:0;border-top:1px solid var(--line);margin:12px 0}
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
 </head>
 <body><div id="app">
-<header><div class="logo">C</div><div><div class="brand">CROWBAR BUILDER</div><div class="sub">A tiny low-poly construction sandbox</div></div><div class="spacer"></div><span class="pill">PROTOTYPE 0.1 · BROWSER DEMO</span><button class="topbtn" id="saveBtn">Save</button><button class="topbtn" id="loadBtn">Load</button><button class="topbtn" id="playBtn">▶ Play</button></header>
+<header><div class="logo">C</div><div><div class="brand">CROWBAR BUILDER</div><div class="sub">A tiny low-poly construction sandbox</div></div><div class="spacer"></div><span class="pill">PROTOTYPE 0.1 · BROWSER DEMO</span><button class="topbtn" id="saveBtn">Save</button><button class="topbtn" id="loadBtn">Load</button><button class="topbtn" id="templatesBtn">Templates</button><button class="topbtn" id="playBtn">▶ Play</button></header>
 <main><div id="view"></div>
 <section class="panel tools">
 <div class="panel-title">BUILD PIECES</div>
@@ -66,7 +66,7 @@ hr{border:0;border-top:1px solid var(--line);margin:12px 0}
 </section>
 <section class="panel stats"><div class="panel-title">YOUR BUILD</div><div class="stat"><span>Pieces</span><strong id="pieceCount">0</strong></div><div class="stat"><span>Grid</span><strong>1 m</strong></div><div class="stat"><span>Story height</span><strong>3 m</strong></div><div class="stat"><span>Mode</span><strong id="modeName">Floor</strong></div></section>
 <div class="panel bottom"><span><b>Drag</b> orbit camera</span><span><b>Scroll</b> zoom</span><span><b>Click</b> place</span><span><b>Q / E</b> rotate preview</span><span><b>Auto-save</b> on device</span></div>
-<div class="toast" id="toast"></div><div id="buildConfirm"><div class="confirm-card"><h3>Place these pieces?</h3><p id="buildConfirmText">Place the previewed pieces?</p><div class="actionrow"><button id="confirmBuildYes">Yes, build</button><button id="confirmBuildNo">No, cancel</button></div></div></div><div id="interactPrompt">E - INTERACT</div><div id="playHelp">WASD move · Mouse look · E interact · Esc exit</div>
+<div class="toast" id="toast"></div><div id="templateModal"><div class="template-card"><h3>Building templates</h3><p>Choose a ready-made building to place near the centre of your view.</p><select id="templateModalSelect" aria-label="Choose building template"><option value="house">Starter house</option><option value="mansion">Mansion</option><option value="skyscraper">Skyscraper</option><option value="cabin">Cabin</option><option value="villa">Modern villa</option><option value="shop">Shop</option></select><div class="actionrow"><button id="templateModalPlace">Place template</button><button id="templateModalClose">Close</button></div></div></div><div id="buildConfirm"><div class="confirm-card"><h3>Place these pieces?</h3><p id="buildConfirmText">Place the previewed pieces?</p><div class="actionrow"><button id="confirmBuildYes">Yes, build</button><button id="confirmBuildNo">No, cancel</button></div></div></div><div id="interactPrompt">E - INTERACT</div><div id="playHelp">WASD move · Mouse look · E interact · Esc exit</div>
 </main></div>
 <script type="module">
 import * as THREE from 'three';
@@ -214,6 +214,10 @@ function placeTemplate(name){
  refresh();autoSave();say(spec.stories+'-storey '+name+' placed ('+added+' pieces)');
 }
 document.getElementById('placeTemplateBtn').addEventListener('click',()=>placeTemplate(document.getElementById('templateSelect').value));
+const templateModal=document.getElementById('templateModal');
+document.getElementById('templatesBtn').addEventListener('click',()=>{document.getElementById('templateModalSelect').value=document.getElementById('templateSelect').value;templateModal.classList.add('show')});
+document.getElementById('templateModalClose').addEventListener('click',()=>templateModal.classList.remove('show'));
+document.getElementById('templateModalPlace').addEventListener('click',()=>{const name=document.getElementById('templateModalSelect').value;document.getElementById('templateSelect').value=name;templateModal.classList.remove('show');placeTemplate(name)});
 function setStory(n){
  const next=Math.max(1,Math.min(20,n)),delta=(next-currentStory)*STORY_HEIGHT;
  if(delta){camera.position.y+=delta;controls.target.y+=delta;grid.position.y=.123+(next-1)*STORY_HEIGHT;controls.update()}
