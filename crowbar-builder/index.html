@@ -83,12 +83,28 @@ const base=new THREE.Mesh(new THREE.BoxGeometry(12,.18,12),new THREE.MeshStandar
 const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();const pieces=[];let kind='floor',rotation=0,color='#c6b99e',ghost=null,toastTimer=null,currentStory=1;const seeThrough={walls:false,roofs:false,floors:false};
 const STORY_HEIGHT=3;const defs={floor:{label:'Floor',size:[1,.12,1]},wall:{label:'Wall',size:[1,3,.12]},roof:{label:'Roof',size:[1,.12,1]},window:{label:'Window wall',size:[1,3,.12]},door:{label:'Door wall',size:[1,3,.12]},stairs:{label:'Stairs',size:[1,3,5]}};
 let playMode=false,doorTarget=null,doorOpen=new Set(),keys={},yaw=0,pitch=0,lastFrame=performance.now();
-const mat=c=>new THREE.MeshStandardMaterial({color:c,roughness:.82});
+const textureCache=new Map();
+function surfaceTexture(kind,base){
+ const key=kind+':'+base;if(textureCache.has(key))return textureCache.get(key);
+ const canvas=document.createElement('canvas');canvas.width=canvas.height=256;const ctx=canvas.getContext('2d');ctx.fillStyle=base;ctx.fillRect(0,0,256,256);
+ const seed=[...key].reduce((a,ch)=>a+ch.charCodeAt(0),0);let n=seed;const rand=()=>{n=(n*1664525+1013904223)>>>0;return n/4294967296};
+ if(kind==='wood'||kind==='door'||kind==='floor'){
+  for(let y=0;y<256;y+=kind==='floor'?64:kind==='door'?32:22){ctx.fillStyle='rgba(45,29,17,.12)';ctx.fillRect(0,y,256,2);ctx.fillStyle='rgba(255,244,218,.10)';ctx.fillRect(0,y+3,256,1);for(let i=0;i<18;i++){const x=rand()*256;ctx.strokeStyle='rgba(54,35,20,'+(0.05+rand()*.12)+')';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,y+rand()*12);ctx.bezierCurveTo(x+8,y+8,x-7,y+16,x+rand()*12,y+22);ctx.stroke()}}
+  if(kind==='floor'){ctx.strokeStyle='rgba(55,44,30,.18)';ctx.lineWidth=2;ctx.strokeRect(2,2,252,252)}
+ }else if(kind==='roof'){
+  for(let y=0;y<256;y+=32){ctx.fillStyle='rgba(40,25,20,.16)';ctx.fillRect(0,y,256,3);for(let x=(y/32%2)*32;x<256;x+=64){ctx.strokeStyle='rgba(255,235,205,.15)';ctx.strokeRect(x+2,y+3,60,27);ctx.fillStyle='rgba(40,25,20,.08)';ctx.fillRect(x+2,y+27,60,4)}}
+ }else{
+  for(let i=0;i<1500;i++){const v=rand()>.5?255:25;ctx.fillStyle='rgba('+v+','+v+','+v+','+(rand()*.035)+')';ctx.fillRect(rand()*256,rand()*256,2,2)}
+  ctx.strokeStyle='rgba(60,55,45,.12)';ctx.lineWidth=2;for(let y=24;y<256;y+=64){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(256,y);ctx.stroke()}
+ }
+ const tex=new THREE.CanvasTexture(canvas);tex.colorSpace=THREE.SRGBColorSpace;tex.wrapS=tex.wrapT=THREE.RepeatWrapping;tex.anisotropy=4;textureCache.set(key,tex);return tex;
+}
+const mat=(c,kind='plaster')=>new THREE.MeshStandardMaterial({color:'#ffffff',map:surfaceTexture(kind,c),roughness:kind==='door'?.72:.88});
 function addBox(parent,w,h,d,material,x=0,y=0,z=0){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m}
 function makePiece(type,c){
  const group=new THREE.Group();group.userData.kind=type;group.userData.color=c;
- const trim=mat('#e8dfc9'),wood=mat(c);
- if(type==='floor'){addBox(group,1,.12,1,wood,0,0,0);addBox(group,.018,.012,.94,trim,0,.066,0)}
+ const trim=mat('#e8dfc9','plaster'),wood=mat(c,type==='floor'?'floor':type==='roof'?'roof':'plaster');
+ if(type==='floor'){addBox(group,1,.12,1,wood,0,0,0);addBox(group,.018,.012,.94,trim,0,.066,0);addBox(group,.018,.012,.94,trim,0,.066,-.46)}
  else if(type==='wall'){addBox(group,1,3,.12,wood,0,0,0);addBox(group,1,.07,.15,trim,0,1.465,0);addBox(group,1,.07,.15,trim,0,-1.465,0)}
  else if(type==='roof'){addBox(group,1,.12,1,wood,0,0,0)}
  else if(type==='window'){
@@ -98,7 +114,23 @@ function makePiece(type,c){
  }
  else if(type==='door'){
   addBox(group,.12,3,.12,wood,-.44,0,0);addBox(group,.12,3,.12,wood,.44,0,0);addBox(group,.88,.12,.12,wood,0,1.44,0);
-  const leaf=new THREE.Group();leaf.position.set(-.38,-1.44,.015);leaf.userData.isDoorLeaf=true;addBox(leaf,.76,2.80,.07,mat('#805b3e'),.38,1.40,0);addBox(leaf,.045,.045,.045,mat('#e6c56c'),.67,1.40,.055);group.add(leaf);group.userData.doorLeaf=leaf;
+  const leaf=new THREE.Group();leaf.position.set(-.38,-1.44,.015);leaf.userData.isDoorLeaf=true;
+  const doorWood=mat('#805b3e','door'),panel=mat('#68472f','wood'),gold=mat('#d6b66b','plaster'),dark=mat('#49372b','wood');
+  addBox(leaf,.76,2.80,.075,doorWood,.38,1.40,0);
+  // Raised inset panels and moulding are duplicated on both faces.
+  for(const side of [-1,1]){
+   const face=side*.043;
+   addBox(leaf,.54,.88,.025,panel,.38,2.05,face);addBox(leaf,.54,.88,.025,panel,.38,.76,face);
+   addBox(leaf,.59,.055,.035,gold,.38,2.52,side*.052);addBox(leaf,.59,.055,.035,gold,.38,1.58,side*.052);
+   addBox(leaf,.59,.055,.035,gold,.38,1.20,side*.052);addBox(leaf,.59,.055,.035,gold,.38,.31,side*.052);
+   addBox(leaf,.055,.78,.035,gold,.105,2.05,side*.052);addBox(leaf,.055,.78,.035,gold,.655,2.05,side*.052);
+   addBox(leaf,.055,.78,.035,gold,.105,.76,side*.052);addBox(leaf,.055,.78,.035,gold,.655,.76,side*.052);
+   // Matching lever handles on the inside and outside.
+   addBox(leaf,.12,.035,.035,gold,.66,1.40,side*.07);addBox(leaf,.025,.13,.025,gold,.70,1.40,side*.085);
+   addBox(leaf,.025,.10,.025,dark,.045,2.35,side*.055);addBox(leaf,.025,.10,.025,dark,.045,.48,side*.055);
+  }
+  group.add(leaf);group.userData.doorLeaf=leaf;
+  addBox(group,.94,.08,.22,mat('#b8a98b','plaster'),0,-1.48,0);
  }
  else if(type==='stairs'){for(let i=0;i<5;i++){const h=(i+1)*.6;addBox(group,1,h,1,wood,0,h/2,-2+i)}}
  group.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;o.userData.baseOpacity=o.material.opacity??1;o.userData.baseTransparent=!!o.material.transparent;o.userData.baseDepthWrite=o.material.depthWrite!==false}});return group;
