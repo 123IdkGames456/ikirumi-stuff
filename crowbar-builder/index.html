@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111713">
+<title>Crowbar Builder — Low-poly building sandbox</title>
+<style>
+:root{color-scheme:dark;--bg:#101511;--panel:#19211b;--line:#344238;--muted:#9ca99e;--text:#f1f5ee;--lime:#b6ef78;--orange:#e7a56b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,Segoe UI,sans-serif;overflow:hidden}
+#app{height:100dvh;display:grid;grid-template-rows:58px 1fr}
+header{display:flex;align-items:center;gap:12px;padding:0 18px;background:#151d17;border-bottom:1px solid var(--line);z-index:2}
+.logo{width:34px;height:34px;border-radius:10px;background:var(--lime);color:#172016;display:grid;place-items:center;font-weight:1000;font-size:19px}
+.brand{font-weight:850;letter-spacing:.2px}.sub{font-size:11px;color:var(--muted)}.spacer{flex:1}
+.pill{border:1px solid var(--line);border-radius:99px;padding:6px 10px;color:var(--muted);font-size:11px}
+main{position:relative;min-height:0}#view{position:absolute;inset:0}canvas{display:block;width:100%;height:100%;outline:none}
+.panel{position:absolute;background:#151e18ed;border:1px solid #405044;border-radius:14px;box-shadow:0 12px 35px #0005;backdrop-filter:blur(12px)}
+.tools{top:14px;left:14px;width:208px;padding:12px}
+.panel-title{font-size:10px;letter-spacing:1.4px;font-weight:850;color:var(--lime);margin:0 0 10px}
+.toolgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.tool{background:#202b22;border:1px solid #3b4b3d;color:var(--text);border-radius:9px;padding:9px 7px;text-align:left;cursor:pointer;font:inherit;font-size:12px}
+.tool:hover{border-color:var(--lime)}.tool.active{background:#2b3b27;border-color:var(--lime);color:#d7ffb1}
+.tool small{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+hr{border:0;border-top:1px solid var(--line);margin:12px 0}
+.actionrow{display:flex;gap:6px}.actionrow button,.topbtn{background:#263329;border:1px solid #405044;color:var(--text);border-radius:8px;padding:8px 9px;font:inherit;font-size:11px;cursor:pointer;flex:1}.actionrow button:hover,.topbtn:hover{border-color:var(--lime)}
+.swatches{display:flex;gap:7px;flex-wrap:wrap}.swatch{width:25px;height:25px;border-radius:8px;border:2px solid #ffffff40;cursor:pointer}.swatch.active{outline:2px solid var(--lime);outline-offset:2px}
+.hint{font-size:11px;color:var(--muted);line-height:1.5;margin:9px 0 0}
+.stats{right:14px;top:14px;padding:11px 13px;min-width:145px}.stat{display:flex;justify-content:space-between;gap:18px;font-size:11px;color:var(--muted);padding:3px 0}.stat strong{color:var(--text);font-variant-numeric:tabular-nums}
+.bottom{left:50%;bottom:14px;transform:translateX(-50%);padding:9px 13px;display:flex;gap:13px;align-items:center;white-space:nowrap;font-size:11px;color:var(--muted)}
+.bottom b{color:var(--text)}.toast{position:absolute;left:50%;top:18px;transform:translate(-50%,-10px);background:#263329;border:1px solid #60745e;padding:9px 13px;border-radius:9px;opacity:0;pointer-events:none;transition:.2s;font-size:12px}.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:650px){header{padding:0 11px}.pill{display:none}.tools{top:9px;left:9px;width:172px;padding:9px}.tool{padding:7px 5px;font-size:11px}.stats{top:9px;right:9px;min-width:112px;padding:8px}.bottom{bottom:8px;font-size:10px;gap:7px}.panel-title{margin-bottom:7px}}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
+</head>
+<body><div id="app">
+<header><div class="logo">C</div><div><div class="brand">CROWBAR BUILDER</div><div class="sub">A tiny low-poly construction sandbox</div></div><div class="spacer"></div><span class="pill">PROTOTYPE 0.1 · BROWSER DEMO</span><button class="topbtn" id="saveBtn">Save</button><button class="topbtn" id="loadBtn">Load</button></header>
+<main><div id="view"></div>
+<section class="panel tools">
+<div class="panel-title">BUILD PIECES</div>
+<div class="toolgrid" id="tools">
+<button class="tool active" data-kind="floor">▰ Floor<small>4 × 4 platform</small></button>
+<button class="tool" data-kind="wall">▥ Wall<small>4 × 3 panel</small></button>
+<button class="tool" data-kind="roof">⌂ Roof<small>4 × 4 panel</small></button>
+<button class="tool" data-kind="window">▧ Window<small>Glass + frame</small></button>
+<button class="tool" data-kind="door">▯ Door<small>Entry panel</small></button>
+<button class="tool" data-kind="erase">⌫ Erase<small>Remove a piece</small></button>
+</div>
+<hr><div class="panel-title">MATERIAL COLOUR</div>
+<div class="swatches" id="swatches">
+<button class="swatch active" data-color="#c6b99e" style="background:#c6b99e" aria-label="Sand"></button>
+<button class="swatch" data-color="#a8b6a1" style="background:#a8b6a1" aria-label="Sage"></button>
+<button class="swatch" data-color="#a6b9c8" style="background:#a6b9c8" aria-label="Blue"></button>
+<button class="swatch" data-color="#d58b65" style="background:#d58b65" aria-label="Terracotta"></button>
+<button class="swatch" data-color="#777d87" style="background:#777d87" aria-label="Stone"></button>
+<button class="swatch" data-color="#e6e0d1" style="background:#e6e0d1" aria-label="White"></button>
+<button class="swatch" data-color="#4d5a4d" style="background:#4d5a4d" aria-label="Forest"></button>
+</div>
+<hr><div class="actionrow"><button id="rotateBtn">↻ Rotate</button><button id="deleteBtn">Delete selected</button></div>
+<p class="hint">Choose a piece, then click the ground to place it. Click a placed piece to select it. Floors, walls and roofs snap to the grid.</p>
+</section>
+<section class="panel stats"><div class="panel-title">YOUR BUILD</div><div class="stat"><span>Pieces</span><strong id="pieceCount">0</strong></div><div class="stat"><span>Selected</span><strong id="selectedName">None</strong></div><div class="stat"><span>Grid</span><strong>1 m</strong></div><div class="stat"><span>Mode</span><strong id="modeName">Floor</strong></div></section>
+<div class="panel bottom"><span><b>Drag</b> orbit camera</span><span><b>Scroll</b> zoom</span><span><b>Click</b> place / select</span><span><b>Q / E</b> rotate</span></div>
+<div class="toast" id="toast"></div>
+</main></div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+
+const host=document.getElementById('view');
+const scene=new THREE.Scene();scene.background=new THREE.Color('#a9c4c3');scene.fog=new THREE.Fog('#a9c4c3',38,95);
+const camera=new THREE.PerspectiveCamera(48,1,.1,180);camera.position.set(13,12,16);
+const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'low-power'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;host.appendChild(renderer.domElement);
+const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(0,1,0);controls.enableDamping=true;controls.maxPolarAngle=Math.PI*.49;controls.minDistance=7;controls.maxDistance=48;
+scene.add(new THREE.HemisphereLight('#e8f5ed','#68775e',2.1));const sun=new THREE.DirectionalLight('#fff0d5',2.1);sun.position.set(-9,18,11);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-24;sun.shadow.camera.right=24;sun.shadow.camera.top=24;sun.shadow.camera.bottom=-24;scene.add(sun);
+const groundMat=new THREE.MeshStandardMaterial({color:'#7c9a72',roughness:1});const ground=new THREE.Mesh(new THREE.PlaneGeometry(100,100),groundMat);ground.rotation.x=-Math.PI/2;ground.position.y=-.12;ground.receiveShadow=true;scene.add(ground);
+const grid=new THREE.GridHelper(48,48,'#526d55','#789276');grid.position.y=-.105;scene.add(grid);
+const base=new THREE.Mesh(new THREE.BoxGeometry(12,.18,12),new THREE.MeshStandardMaterial({color:'#6d8762'}));base.position.set(0,-.025,0);base.receiveShadow=true;scene.add(base);
+const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();const pieces=[];let selected=null,kind='floor',rotation=0,color='#c6b99e',ghost=null,toastTimer=null;
+const defs={floor:{label:'Floor',size:[4,.18,4],y:.09},wall:{label:'Wall',size:[4,3,.18],y:1.5},roof:{label:'Roof',size:[4,.18,4],y:3.12},window:{label:'Window',size:[2,1.5,.12],y:1.65},door:{label:'Door',size:[1.2,2.4,.14],y:1.2}};
+const mat=c=>new THREE.MeshStandardMaterial({color:c,roughness:.82});
+function addBox(parent,w,h,d,material,x=0,y=0,z=0){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m}
+function makePiece(type,c){const group=new THREE.Group();group.userData.kind=type;group.userData.color=c;const main=mat(c);if(type==='floor'){addBox(group,4,.18,4,main,0,0,0);for(let i=-1;i<=1;i++)addBox(group,.035,.012,3.9,mat('#ffffff'),i, .096,0)}
+else if(type==='wall'){addBox(group,4,3,.18,main,0,0,0);addBox(group,4,.12,.22,mat('#e5d8bd'),0,1.44,0);addBox(group,4,.12,.22,mat('#e5d8bd'),0,-1.44,0)}
+else if(type==='roof'){addBox(group,4,.18,4,main,0,0,0);addBox(group,4.12,.12,.16,mat('#e4d6b8'),0,.12,0)}
+else if(type==='window'){addBox(group,2,.12,.18,mat('#e8dfc9'),0,.75,0);addBox(group,2,.12,.18,mat('#e8dfc9'),0,-.75,0);addBox(group,.12,1.5,.18,mat('#e8dfc9'),-.94,0,0);addBox(group,.12,1.5,.18,mat('#e8dfc9'),.94,0,0);const glass=new THREE.MeshStandardMaterial({color:'#8bc9d0',metalness:.15,roughness:.2,transparent:true,opacity:.58});addBox(group,1.78,1.28,.07,glass,0,0,-.015);addBox(group,.07,1.28,.2,mat('#e8dfc9'),0,0,.02)}
+else if(type==='door'){addBox(group,1.2,2.4,.14,mat('#805b3e'),0,0,0);addBox(group,1.32,.12,.2,mat('#e8dfc9'),0,1.23,0);addBox(group,.12,2.5,.2,mat('#e8dfc9'),-.66,0,0);addBox(group,.12,2.5,.2,mat('#e8dfc9'),.66,0,0);addBox(group,.08,.08,.08,mat('#e6c56c'),.43,0,.12)}
+group.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});return group}
+function snap(v){return Math.round(v/2)*2}
+function positionPiece(obj,x,z,type){const def=defs[type];obj.position.set(snap(x),def.y,snap(z));}
+function addNew(type,x,z){const obj=makePiece(type,color);positionPiece(obj,x,z,type);obj.rotation.y=rotation;scene.add(obj);pieces.push(obj);select(obj);refresh()}
+function select(obj){if(selected&&selected.userData.outline){scene.remove(selected.userData.outline);selected.userData.outline=null}selected=obj;if(selected){const b=new THREE.BoxHelper(selected,0xb6ef78);scene.add(b);selected.userData.outline=b;document.getElementById('selectedName').textContent=defs[selected.userData.kind].label}else document.getElementById('selectedName').textContent='None'}
+function refresh(){document.getElementById('pieceCount').textContent=pieces.length;document.getElementById('modeName').textContent=kind==='erase'?'Erase':defs[kind].label}
+function say(s){const t=document.getElementById('toast');t.textContent=s;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),1700)}
+function groundPoint(e){const r=renderer.domElement.getBoundingClientRect();pointer.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);raycaster.setFromCamera(pointer,camera);const hits=raycaster.intersectObject(ground);return hits[0]?.point||null}
+function pieceHit(e){const r=renderer.domElement.getBoundingClientRect();pointer.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);raycaster.setFromCamera(pointer,camera);const hits=raycaster.intersectObjects(pieces,true);if(!hits.length)return null;let o=hits[0].object;while(o.parent&&!pieces.includes(o))o=o.parent;return pieces.includes(o)?o:null}
+let downX=0,downY=0,dragged=false;renderer.domElement.addEventListener('pointerdown',e=>{downX=e.clientX;downY=e.clientY;dragged=false});renderer.domElement.addEventListener('pointermove',e=>{if(Math.hypot(e.clientX-downX,e.clientY-downY)>5)dragged=true});
+renderer.domElement.addEventListener('pointerup',e=>{if(dragged)return;const hit=pieceHit(e);if(kind==='erase'){if(hit){scene.remove(hit);pieces.splice(pieces.indexOf(hit),1);if(selected===hit)select(null);refresh();say('Piece removed')}return}if(hit){select(hit);return}const p=groundPoint(e);if(p)addNew(kind,p.x,p.z)});
+function setKind(k){kind=k;document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.kind===k));refresh()}
+document.querySelectorAll('.tool').forEach(b=>b.addEventListener('click',()=>setKind(b.dataset.kind)));
+document.querySelectorAll('.swatch').forEach(b=>b.addEventListener('click',()=>{color=b.dataset.color;document.querySelectorAll('.swatch').forEach(s=>s.classList.toggle('active',s===b));if(selected){selected.traverse(o=>{if(o.isMesh&&o.material.color&&o.material.color.getHexString()!=='8bc9d0')o.material.color.set(color)});selected.userData.color=color}}));
+function rotate(){if(selected){selected.rotation.y+=Math.PI/2;selected.updateMatrixWorld();say('Selected piece rotated')}else{rotation+=Math.PI/2;say('Next piece rotated')}}
+document.getElementById('rotateBtn').onclick=rotate;document.getElementById('deleteBtn').onclick=()=>{if(!selected)return;scene.remove(selected);pieces.splice(pieces.indexOf(selected),1);select(null);refresh();say('Piece deleted')};
+window.addEventListener('keydown',e=>{if(e.key.toLowerCase()==='q'||e.key.toLowerCase()==='e')rotate();if(e.key==='Escape')select(null)});
+function save(){const data=pieces.map(p=>({kind:p.userData.kind,color:p.userData.color,x:p.position.x,y:p.position.y,z:p.position.z,ry:p.rotation.y}));localStorage.setItem('crowbar-builder-save',JSON.stringify(data));say('Build saved in this browser')}
+function load(){try{const data=JSON.parse(localStorage.getItem('crowbar-builder-save')||'[]');pieces.forEach(p=>scene.remove(p));pieces.length=0;select(null);data.forEach(d=>{if(!defs[d.kind])return;const p=makePiece(d.kind,d.color||'#c6b99e');p.position.set(d.x,d.y,d.z);p.rotation.y=d.ry||0;scene.add(p);pieces.push(p)});refresh();say('Build loaded')}catch(e){say('No saved build found')}}
+document.getElementById('saveBtn').onclick=save;document.getElementById('loadBtn').onclick=load;
+function resize(){const w=host.clientWidth,h=host.clientHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false)}new ResizeObserver(resize).observe(host);resize();
+function animate(){requestAnimationFrame(animate);controls.update();if(selected?.userData.outline)selected.userData.outline.update();renderer.render(scene,camera)}animate();refresh();
+</script></body></html>
