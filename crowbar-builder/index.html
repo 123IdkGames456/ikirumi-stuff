@@ -15,14 +15,14 @@ header{display:flex;align-items:center;gap:12px;padding:0 18px;background:#151d1
 .pill{border:1px solid var(--line);border-radius:99px;padding:6px 10px;color:var(--muted);font-size:11px}
 main{position:relative;min-height:0}#view{position:absolute;inset:0}canvas{display:block;width:100%;height:100%;outline:none}
 .panel{position:absolute;background:#151e18ed;border:1px solid #405044;border-radius:14px;box-shadow:0 12px 35px #0005;backdrop-filter:blur(12px)}
-.tools{top:14px;left:14px;width:208px;padding:12px}
+.tools{top:14px;left:14px;width:208px;padding:12px;max-height:calc(100% - 28px);overflow-y:auto}
 .panel-title{font-size:10px;letter-spacing:1.4px;font-weight:850;color:var(--lime);margin:0 0 10px}
 .toolgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
 .tool{background:#202b22;border:1px solid #3b4b3d;color:var(--text);border-radius:9px;padding:9px 7px;text-align:left;cursor:pointer;font:inherit;font-size:12px}
 .tool:hover{border-color:var(--lime)}.tool.active{background:#2b3b27;border-color:var(--lime);color:#d7ffb1}
 .tool small{display:block;color:var(--muted);font-size:10px;margin-top:2px}
 hr{border:0;border-top:1px solid var(--line);margin:12px 0}
-.actionrow{display:flex;gap:6px}.actionrow button,.topbtn{background:#263329;border:1px solid #405044;color:var(--text);border-radius:8px;padding:8px 9px;font:inherit;font-size:11px;cursor:pointer;flex:1}.actionrow button:hover,.topbtn:hover{border-color:var(--lime)}
+.tools select{width:100%;background:#202b22;border:1px solid #405044;color:var(--text);border-radius:8px;padding:9px;font:inherit;font-size:12px}.actionrow{display:flex;gap:6px}.actionrow button,.topbtn{background:#263329;border:1px solid #405044;color:var(--text);border-radius:8px;padding:8px 9px;font:inherit;font-size:11px;cursor:pointer;flex:1}.actionrow button:hover,.topbtn:hover{border-color:var(--lime)}
 .swatches{display:flex;gap:7px;flex-wrap:wrap}.swatch{width:25px;height:25px;border-radius:8px;border:2px solid #ffffff40;cursor:pointer}.swatch.active{outline:2px solid var(--lime);outline-offset:2px}
 .hint{font-size:11px;color:var(--muted);line-height:1.5;margin:9px 0 0}
 #buildConfirm{display:none;position:absolute;inset:0;z-index:5;background:#07100999;align-items:center;justify-content:center}#buildConfirm.show{display:flex}.confirm-card{width:min(320px,calc(100% - 32px));padding:18px;background:#18231b;border:1px solid #71866d;border-radius:14px;box-shadow:0 18px 50px #0009}.confirm-card h3{margin:0 0 7px;font-size:16px}.confirm-card p{margin:0 0 14px;color:var(--muted);font-size:12px}.confirm-card .actionrow button{padding:10px}
@@ -48,6 +48,7 @@ hr{border:0;border-top:1px solid var(--line);margin:12px 0}
 <button class="tool" data-kind="stairs">▱ Stairs<small>Connect stories</small></button>
 <button class="tool" data-kind="erase">⌫ Erase<small>Remove a piece</small></button>
 </div>
+<hr><div class="panel-title">BUILDING TEMPLATES</div><select id="templateSelect" aria-label="Choose building template"><option value="house">Starter house</option><option value="mansion">Mansion</option><option value="skyscraper">Skyscraper</option><option value="cabin">Cabin</option><option value="villa">Modern villa</option><option value="shop">Shop</option></select><div class="actionrow" style="margin-top:7px"><button id="placeTemplateBtn">Place template</button></div><p class="hint">Places a complete building near the centre of your view. You can edit every piece afterwards.</p>
 <hr><div class="panel-title">BUILDING STORY</div><div class="actionrow"><button id="storyDown">− Down</button><button id="storyUp">+ Up</button></div><p class="hint">Story <b id="storyNumber">1</b> · Ground is story 1; each story is 3 m higher.</p>
 <hr><div class="panel-title">VISIBILITY</div><div class="actionrow"><button class="visBtn" data-vis="walls">Walls: Solid</button><button class="visBtn" data-vis="roofs">Roofs: Solid</button></div><div class="actionrow" style="margin-top:6px"><button class="visBtn" data-vis="floors">Floors: Solid</button></div>
 <hr><div class="panel-title">MATERIAL COLOUR</div>
@@ -177,6 +178,42 @@ function addNew(type,x,z){
  if(occupied(type,cx,cz,currentStory,rotation)){say('That grid position is already occupied');return}
  const obj=makePiece(type,color);obj.rotation.y=rotation;positionPiece(obj,cx,cz,type,currentStory,rotation);scene.add(obj);pieces.push(obj);refresh();applyVisibility(obj);autoSave();updateEraseHover();
 }
+function placeTemplate(name){
+ const specs={
+  house:{w:6,d:6,stories:1,color:'#c6b99e',windowEvery:2},
+  mansion:{w:10,d:8,stories:2,color:'#e6e0d1',windowEvery:2},
+  skyscraper:{w:8,d:8,stories:8,color:'#a6b9c8',windowEvery:1},
+  cabin:{w:5,d:5,stories:1,color:'#9b7958',windowEvery:3},
+  villa:{w:9,d:7,stories:2,color:'#e6e0d1',windowEvery:1},
+  shop:{w:7,d:5,stories:1,color:'#d58b65',windowEvery:2}
+ };
+ const spec=specs[name];if(!spec)return;
+ const cx=Math.round(controls.target.x),cz=Math.round(controls.target.z);
+ const left=cx-Math.floor(spec.w/2),front=cz-Math.floor(spec.d/2),right=left+spec.w-1,back=front+spec.d-1;
+ let added=0;
+ const put=(type,x,z,story,rot=0)=>{const p=makePiece(type,spec.color);p.rotation.y=rot;positionPiece(p,x,z,type,story,rot);scene.add(p);pieces.push(p);applyVisibility(p);added++};
+ for(let story=1;story<=spec.stories;story++){
+  for(let x=left;x<=right;x++)for(let z=front;z<=back;z++)put('floor',x,z,story);
+  // Front and rear walls run along the X axis.
+  for(let x=left;x<=right;x++){
+   const isEntry=story===1&&x===left+Math.floor(spec.w/2);
+   const frontWindow=!isEntry&&((x-left)%spec.windowEvery===0);
+   const rearWindow=(x-left)%spec.windowEvery===0;
+   put(isEntry?'door':frontWindow?'window':'wall',x,front,story,0);
+   put(rearWindow?'window':'wall',x,back+1,story,0);
+  }
+  // Side walls run along the Z axis.
+  for(let z=front;z<=back;z++){
+   const sideWindow=(z-front)%spec.windowEvery===0;
+   put(sideWindow?'window':'wall',left,z,story,Math.PI/2);
+   put(sideWindow?'window':'wall',right+1,z,story,Math.PI/2);
+  }
+ }
+ // A flat roof caps the top story.
+ for(let x=left;x<=right;x++)for(let z=front;z<=back;z++)put('roof',x,z,spec.stories);
+ refresh();autoSave();say(spec.stories+'-storey '+name+' placed ('+added+' pieces)');
+}
+document.getElementById('placeTemplateBtn').addEventListener('click',()=>placeTemplate(document.getElementById('templateSelect').value));
 function setStory(n){
  const next=Math.max(1,Math.min(20,n)),delta=(next-currentStory)*STORY_HEIGHT;
  if(delta){camera.position.y+=delta;controls.target.y+=delta;grid.position.y=.123+(next-1)*STORY_HEIGHT;controls.update()}
