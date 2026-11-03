@@ -210,6 +210,13 @@ function placeTemplate(name){
    put(sideWindow?'window':'wall',left,z,story,Math.PI/2);
    put(sideWindow?'window':'wall',right+1,z,story,Math.PI/2);
   }
+  // Add a staircase between every pair of floors. Reverse direction each
+  // storey so the next flight begins where the previous one arrives.
+  if(story<spec.stories){
+   const stairX=left+Math.floor((spec.w-1)/2);
+   const stairZ=front+Math.floor((spec.d-5)/2);
+   put('stairs',stairX,stairZ,story,story%2===1?0:Math.PI);
+  }
  }
  // A flat roof caps the top story.
  for(let x=left;x<=right;x++)for(let z=front;z<=back;z++)put('roof',x,z,spec.stories);
