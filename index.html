@@ -28,7 +28,7 @@
 .source-progress{margin-top:18px}
 .source-progress-track{height:6px;margin:12px 0;border-radius:10px;background:#ffffff12;overflow:hidden}
 .source-progress-bar{width:0;height:100%;border-radius:10px;background:linear-gradient(90deg,#a48aff,#7bd7bd);transition:width .2s}
-.source-progress-label{color:#c8c1d9;font-size:11px}
+.source-progress-label{color:#c8c1d9;font-size:11px}.library-source-control{display:flex;align-items:center;gap:9px;color:#858193;font-size:10px;white-space:nowrap}.library-source-control select{max-width:190px;padding:9px 11px;border:1px solid #ffffff20;border-radius:10px;background:#1b1a22;color:#ddd9e7;font:500 11px "DM Sans",sans-serif;cursor:pointer}.library-source-control select:focus{outline:2px solid #b5a1ff88;outline-offset:2px}@media(max-width:620px){.results-heading{flex-wrap:wrap}.library-source-control{order:3;width:100%}.library-source-control select{flex:1;max-width:none}}
 </style>
 </head>
 <body>
@@ -51,7 +51,7 @@
     <div class="search-row"><label class="search-box"><span class="search-symbol">⌕</span><input id="searchInput" type="search" placeholder="Search projects, features, tags…" autocomplete="off"><kbd> / </kbd><button id="clearSearch" class="clear-search" aria-label="Clear search">×</button></label><label class="sort-box"><span>Sort by</span><select id="sortSelect"><option value="featured">Recommended</option><option value="az">Name A–Z</option><option value="za">Name Z–A</option><option value="category">Category</option></select></label></div>
     <div id="advancedFilters" class="advanced-filters" hidden><div class="filter-group"><span class="filter-title">CATEGORIES</span><div id="categoryFilters" class="filter-chips"></div></div><div class="filter-group"><span class="filter-title">TAGS</span><div id="tagFilters" class="filter-chips"></div></div><div class="filter-footer"><span id="filterHint">Choose one or more filters</span><button id="resetFilters">Reset filters</button></div></div>
     <div class="category-bar" id="categoryBar" aria-label="Quick category filters"></div>
-    <div class="results-heading"><span id="resultsLabel">All projects</span><span id="resultsCount">Loading projects…</span></div>
+    <div class="results-heading"><span id="resultsLabel">All projects</span><label class="library-source-control"><span>Show</span><select id="librarySource" aria-label="Project source"><option value="verified">Verified tabs</option><option value="github">Get from GitHub</option></select></label><span id="resultsCount">Loading projects…</span></div>
     <div id="projectGrid" class="project-grid" aria-live="polite"></div>
     <div id="emptyState" class="empty-state" hidden><div class="empty-mark">⌕</div><h3>No projects found</h3><p>Try a different search or clear a filter.</p><button id="emptyReset" class="primary-button">Show all projects</button></div>
     <div id="loadError" class="load-error" hidden><span>Something went wrong loading the library.</span><button id="retryButton" class="text-button">Try again ↗</button></div>
