@@ -174,7 +174,7 @@ function togglePlay(on){
   document.querySelector('.tools').style.display='none';document.querySelector('.stats').style.display='none';document.querySelector('.bottom').style.display='none';
   help.classList.add('show');prompt.classList.remove('show');playBtn.textContent='↩ Build Mode';
   if(ghost){scene.remove(ghost);ghost=null}
-  camera.position.set(0,1.65,6);yaw=0;pitch=0;camera.rotation.order='YXZ';renderer.domElement.requestPointerLock?.();
+  const viewDir=new THREE.Vector3();camera.getWorldDirection(viewDir);yaw=Math.atan2(-viewDir.x,-viewDir.z);pitch=0;camera.position.set(savedBuildCamera.position.x,1.65,savedBuildCamera.position.z);camera.rotation.order='YXZ';camera.rotation.set(0,yaw,0,'YXZ');renderer.domElement.requestPointerLock?.();
  }else{
   playMode=false;controls.enabled=true;document.exitPointerLock?.();
   document.querySelector('.tools').style.display='block';document.querySelector('.stats').style.display='block';document.querySelector('.bottom').style.display='flex';
