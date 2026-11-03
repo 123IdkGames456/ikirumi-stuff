@@ -48,6 +48,7 @@ hr{border:0;border-top:1px solid var(--line);margin:12px 0}
 <button class="tool" data-kind="erase">⌫ Erase<small>Remove a piece</small></button>
 </div>
 <hr><div class="panel-title">BUILDING STORY</div><div class="actionrow"><button id="storyDown">− Down</button><button id="storyUp">+ Up</button></div><p class="hint">Story <b id="storyNumber">1</b> · Ground is story 1; each story is 2.5 m higher.</p>
+<hr><div class="panel-title">VISIBILITY</div><div class="actionrow"><button class="visBtn" data-vis="walls">Walls: Solid</button><button class="visBtn" data-vis="roofs">Roofs: Solid</button></div><div class="actionrow" style="margin-top:6px"><button class="visBtn" data-vis="floors">Floors: Solid</button></div>
 <hr><div class="panel-title">MATERIAL COLOUR</div>
 <div class="swatches" id="swatches">
 <button class="swatch active" data-color="#c6b99e" style="background:#c6b99e" aria-label="Sand"></button>
@@ -58,11 +59,11 @@ hr{border:0;border-top:1px solid var(--line);margin:12px 0}
 <button class="swatch" data-color="#e6e0d1" style="background:#e6e0d1" aria-label="White"></button>
 <button class="swatch" data-color="#4d5a4d" style="background:#4d5a4d" aria-label="Forest"></button>
 </div>
-<hr><div class="actionrow"><button id="rotateBtn">↻ Rotate</button><button id="deleteBtn">Delete selected</button></div>
-<p class="hint">Choose a piece and click a grid cell to place it on the selected story. Upper floors and walls need structural support. Windows and doors attach to existing walls.</p>
+<hr><div class="actionrow"><button id="rotateBtn">↻ Rotate next piece</button></div>
+<p class="hint">Choose a piece, rotate its preview, then click to place. Use Erase to remove pieces. Clicks no longer select existing objects.</p>
 </section>
-<section class="panel stats"><div class="panel-title">YOUR BUILD</div><div class="stat"><span>Pieces</span><strong id="pieceCount">0</strong></div><div class="stat"><span>Selected</span><strong id="selectedName">None</strong></div><div class="stat"><span>Grid</span><strong>1 m</strong></div><div class="stat"><span>Story height</span><strong>2.5 m</strong></div><div class="stat"><span>Mode</span><strong id="modeName">Floor</strong></div></section>
-<div class="panel bottom"><span><b>Drag</b> orbit camera</span><span><b>Scroll</b> zoom</span><span><b>Click</b> place / select</span><span><b>Q / E</b> rotate</span><span><b>Auto-save</b> on device</span></div>
+<section class="panel stats"><div class="panel-title">YOUR BUILD</div><div class="stat"><span>Pieces</span><strong id="pieceCount">0</strong></div><div class="stat"><span>Grid</span><strong>1 m</strong></div><div class="stat"><span>Story height</span><strong>2.5 m</strong></div><div class="stat"><span>Mode</span><strong id="modeName">Floor</strong></div></section>
+<div class="panel bottom"><span><b>Drag</b> orbit camera</span><span><b>Scroll</b> zoom</span><span><b>Click</b> place</span><span><b>Q / E</b> rotate preview</span><span><b>Auto-save</b> on device</span></div>
 <div class="toast" id="toast"></div><div id="interactPrompt">E - INTERACT</div><div id="playHelp">WASD move · Mouse look · E interact · Esc exit</div>
 </main></div>
 <script type="module">
@@ -78,7 +79,7 @@ scene.add(new THREE.HemisphereLight('#e8f5ed','#68775e',2.1));const sun=new THRE
 const groundMat=new THREE.MeshStandardMaterial({color:'#7c9a72',roughness:1});const ground=new THREE.Mesh(new THREE.PlaneGeometry(100,100),groundMat);ground.rotation.x=-Math.PI/2;ground.position.y=-.12;ground.receiveShadow=true;scene.add(ground);
 const grid=new THREE.GridHelper(48,48,'#526d55','#789276');grid.position.y=-.105;scene.add(grid);
 const base=new THREE.Mesh(new THREE.BoxGeometry(12,.18,12),new THREE.MeshStandardMaterial({color:'#6d8762'}));base.position.set(0,-.025,0);base.receiveShadow=true;scene.add(base);
-const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();const pieces=[];let selected=null,kind='floor',rotation=0,color='#c6b99e',ghost=null,toastTimer=null,currentStory=1;
+const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();const pieces=[];let kind='floor',rotation=0,color='#c6b99e',ghost=null,toastTimer=null,currentStory=1;const seeThrough={walls:false,roofs:false,floors:false};
 const STORY_HEIGHT=2.5;const defs={floor:{label:'Floor',size:[1,.12,1]},wall:{label:'Wall',size:[1,2.5,.12]},roof:{label:'Roof',size:[1,.12,1]},window:{label:'Window wall',size:[1,2.5,.12]},door:{label:'Door wall',size:[1,2.5,.12]},stairs:{label:'Stairs',size:[1,2.5,1]}};
 let playMode=false,doorTarget=null,doorOpen=new Set(),keys={},yaw=0,pitch=0,lastFrame=performance.now();
 const mat=c=>new THREE.MeshStandardMaterial({color:c,roughness:.82});
@@ -99,7 +100,7 @@ function makePiece(type,c){
   const leaf=new THREE.Group();leaf.position.set(-.38,-1.19,.015);leaf.userData.isDoorLeaf=true;addBox(leaf,.76,2.30,.07,mat('#805b3e'),.38,1.15,0);addBox(leaf,.045,.045,.045,mat('#e6c56c'),.67,1.15,.055);group.add(leaf);group.userData.doorLeaf=leaf;
  }
  else if(type==='stairs'){for(let i=0;i<5;i++){const h=(i+1)*.48;addBox(group,1,h,.20,wood,0,-1.25+h/2,-.40+i*.20)}}
- group.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});return group;
+ group.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;o.userData.baseOpacity=o.material.opacity??1;o.userData.baseTransparent=!!o.material.transparent;o.userData.baseDepthWrite=o.material.depthWrite!==false}});return group;
 }
 function cell(v){return Math.round(v)}
 function pieceAt(type,x,z,story){
@@ -128,37 +129,39 @@ function addNew(type,x,z){
  const cx=snap(x),cz=snap(z);
  if(!supported(type,cx,cz,currentStory)){say(type==='window'||type==='door'?'Place this on an existing wall':'No support here — build a supporting wall or ground first');return}
  if(pieces.some(p=>p.userData.cellX===cx&&p.userData.cellZ===cz&&p.userData.story===currentStory&&(['wall','window','door'].includes(p.userData.kind)&&['wall','window','door'].includes(type)||p.userData.kind===type))){say('That grid cell is already occupied');return}
- const obj=makePiece(type,color);positionPiece(obj,cx,cz,type,currentStory);obj.rotation.y=rotation;scene.add(obj);pieces.push(obj);select(obj);refresh();autoSave();
+ const obj=makePiece(type,color);positionPiece(obj,cx,cz,type,currentStory);obj.rotation.y=rotation;scene.add(obj);pieces.push(obj);refresh();applyVisibility(obj);autoSave();
 }
 function setStory(n){currentStory=Math.max(1,Math.min(20,n));document.getElementById('storyNumber').textContent=currentStory;refresh();autoSave()}
 document.getElementById('storyDown').onclick=()=>setStory(currentStory-1);
 document.getElementById('storyUp').onclick=()=>setStory(currentStory+1);
-function select(obj){if(selected&&selected.userData.outline){scene.remove(selected.userData.outline);selected.userData.outline=null}selected=obj;if(selected){const b=new THREE.BoxHelper(selected,0xb6ef78);scene.add(b);selected.userData.outline=b;document.getElementById('selectedName').textContent=defs[selected.userData.kind].label}else document.getElementById('selectedName').textContent='None'}
+function visibilityGroup(type){if(['wall','window','door'].includes(type))return 'walls';if(type==='roof')return 'roofs';if(type==='floor')return 'floors';return null}
+function applyVisibility(group){const key=visibilityGroup(group.userData.kind);if(!key)return;const enabled=seeThrough[key];group.traverse(o=>{if(!o.isMesh)return;const isGlass=o.material.color&&o.material.color.getHexString()==='8bc9d0';if(isGlass)return;o.material.transparent=enabled||o.userData.baseTransparent;o.material.opacity=enabled?0.22:o.userData.baseOpacity;o.material.depthWrite=enabled?false:o.userData.baseDepthWrite;o.material.needsUpdate=true})}
+document.querySelectorAll('.visBtn').forEach(btn=>btn.addEventListener('click',()=>{const key=btn.dataset.vis;seeThrough[key]=!seeThrough[key];btn.textContent=(key==='walls'?'Walls':key==='roofs'?'Roofs':'Floors')+': '+(seeThrough[key]?'See-through':'Solid');pieces.forEach(applyVisibility)}));
 function refresh(){document.getElementById('pieceCount').textContent=pieces.length;document.getElementById('modeName').textContent=kind==='erase'?'Erase':defs[kind].label;document.getElementById('storyNumber').textContent=currentStory}
 function say(s){const t=document.getElementById('toast');t.textContent=s;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),1700)}
 function groundPoint(e){const r=renderer.domElement.getBoundingClientRect();pointer.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);raycaster.setFromCamera(pointer,camera);const plane=new THREE.Plane(new THREE.Vector3(0,1,0),0);const p=new THREE.Vector3();return raycaster.ray.intersectPlane(plane,p)?p:null}
 function pieceHit(e){const r=renderer.domElement.getBoundingClientRect();pointer.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);raycaster.setFromCamera(pointer,camera);const hits=raycaster.intersectObjects(pieces,true);if(!hits.length)return null;let o=hits[0].object;while(o.parent&&!pieces.includes(o))o=o.parent;return pieces.includes(o)?o:null}
 let downX=0,downY=0,dragged=false;renderer.domElement.addEventListener('pointerdown',e=>{downX=e.clientX;downY=e.clientY;dragged=false});renderer.domElement.addEventListener('pointermove',e=>{if(Math.hypot(e.clientX-downX,e.clientY-downY)>5)dragged=true});
-renderer.domElement.addEventListener('pointerup',e=>{if(dragged)return;const hit=pieceHit(e);if(kind==='erase'){if(hit){scene.remove(hit);pieces.splice(pieces.indexOf(hit),1);if(selected===hit)select(null);refresh();autoSave();say('Piece removed')}return}if(hit){select(hit);return}const p=groundPoint(e);if(p)addNew(kind,p.x,p.z)});
+renderer.domElement.addEventListener('pointerup',e=>{if(dragged)return;const hit=kind==='erase'?pieceHit(e):null;if(kind==='erase'){if(hit){scene.remove(hit);pieces.splice(pieces.indexOf(hit),1);refresh();autoSave();say('Piece removed')}return}const p=groundPoint(e);if(p)addNew(kind,p.x,p.z)});
 function setKind(k){kind=k;document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.kind===k));refresh();if(playMode)togglePlay(false);ensureGhost()}
 document.querySelectorAll('.tool').forEach(b=>b.addEventListener('click',()=>setKind(b.dataset.kind)));
-document.querySelectorAll('.swatch').forEach(b=>b.addEventListener('click',()=>{color=b.dataset.color;document.querySelectorAll('.swatch').forEach(s=>s.classList.toggle('active',s===b));if(selected){selected.traverse(o=>{if(o.isMesh&&o.material.color&&o.material.color.getHexString()!=='8bc9d0')o.material.color.set(color)});selected.userData.color=color;autoSave()}}));
-function rotate(){if(selected){selected.rotation.y+=Math.PI/2;selected.updateMatrixWorld();say('Selected piece rotated');autoSave()}else{rotation+=Math.PI/2;say('Next piece rotated')}}
-document.getElementById('rotateBtn').onclick=rotate;document.getElementById('deleteBtn').onclick=()=>{if(!selected)return;scene.remove(selected);pieces.splice(pieces.indexOf(selected),1);select(null);refresh();autoSave();say('Piece deleted')};
-window.addEventListener('keydown',e=>{if(playMode){keys[e.key.toLowerCase()]=true;if(e.key.toLowerCase()==='e')interactDoor();if(e.key==='Escape')togglePlay(false);return}if(e.key.toLowerCase()==='q'||e.key.toLowerCase()==='e')rotate();if(e.key==='Escape')select(null)});window.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false});
+document.querySelectorAll('.swatch').forEach(b=>b.addEventListener('click',()=>{color=b.dataset.color;document.querySelectorAll('.swatch').forEach(s=>s.classList.toggle('active',s===b));ensureGhost();if(ghost)updateGhostAt(ghost.position.x,ghost.position.z)}));
+function rotate(){rotation=(rotation+Math.PI/2)%(Math.PI*2);if(ghost){ghost.rotation.y=rotation;updateGhostAt(ghost.position.x,ghost.position.z)}say('Placement rotated')}
+document.getElementById('rotateBtn').onclick=rotate;
+window.addEventListener('keydown',e=>{if(playMode){keys[e.key.toLowerCase()]=true;if(e.key.toLowerCase()==='e')interactDoor();if(e.key==='Escape')togglePlay(false);return}if(e.key.toLowerCase()==='q'||e.key.toLowerCase()==='e')rotate();if(e.key==='Escape'){}});window.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false});
 function save(){autoSave();say('Build saved on this device')}
 function load(){
  try{
   const raw=JSON.parse(localStorage.getItem('crowbar-builder-save')||'null');const data=Array.isArray(raw)?{pieces:raw,currentStory:1}:raw;
   if(!data||!Array.isArray(data.pieces)){say('No saved build found');return}
-  pieces.forEach(p=>scene.remove(p));pieces.length=0;select(null);
-  data.pieces.forEach(d=>{if(!defs[d.kind])return;const p=makePiece(d.kind,d.color||'#c6b99e');const st=d.story||1;positionPiece(p,d.cellX??d.x,d.cellZ??d.z,d.kind,st);p.rotation.y=d.ry||0;scene.add(p);pieces.push(p)});
+  pieces.forEach(p=>scene.remove(p));pieces.length=0;
+  data.pieces.forEach(d=>{if(!defs[d.kind])return;const p=makePiece(d.kind,d.color||'#c6b99e');const st=d.story||1;positionPiece(p,d.cellX??d.x,d.cellZ??d.z,d.kind,st);p.rotation.y=d.ry||0;scene.add(p);pieces.push(p);applyVisibility(p)});
   setStory(data.currentStory||1);refresh();say('Build loaded from this device');
  }catch(e){say('Could not load saved build')}
 }
 document.getElementById('saveBtn').onclick=save;document.getElementById('loadBtn').onclick=load;window.addEventListener('beforeunload',autoSave);
 const prompt=document.getElementById('interactPrompt'),help=document.getElementById('playHelp'),playBtn=document.getElementById('playBtn');
-function ensureGhost(){if(ghost){scene.remove(ghost);ghost=null}if(playMode||kind==='erase')return;ghost=makePiece(kind,color);ghost.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.material.transparent=true;o.material.opacity=.34;o.material.depthWrite=false;o.material.color.set('#b6ef78')}});scene.add(ghost)}
+function ensureGhost(){if(ghost){scene.remove(ghost);ghost=null}if(playMode||kind==='erase')return;ghost=makePiece(kind,color);ghost.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.material.transparent=true;o.material.opacity=.34;o.material.depthWrite=false;o.material.color.set('#b6ef78')}});ghost.rotation.y=rotation;scene.add(ghost)}
 function updateGhostAt(x,z){if(!ghost)return;const cx=snap(x),cz=snap(z);positionPiece(ghost,cx,cz,kind,currentStory);ghost.rotation.y=rotation;const ok=supported(kind,cx,cz,currentStory)&&!pieces.some(p=>p.userData.cellX===cx&&p.userData.cellZ===cz&&p.userData.story===currentStory&&(['wall','window','door'].includes(p.userData.kind)&&['wall','window','door'].includes(kind)||p.userData.kind===kind));ghost.traverse(o=>{if(o.isMesh)o.material.color.set(ok?'#b6ef78':'#ef7777')})}
 function updateGhostPointer(e){if(!ghost||playMode)return;const p=groundPoint(e);if(p)updateGhostAt(p.x,p.z)}
 renderer.domElement.addEventListener('pointermove',updateGhostPointer);
@@ -171,5 +174,5 @@ function interactDoor(){if(!doorTarget)return;const leaf=doorTarget.userData.doo
 function updateDoorPrompt(){doorTarget=frontDoorTarget();prompt.classList.toggle('show',!!doorTarget);if(doorTarget)prompt.textContent='E - INTERACT'}
 function movePlayer(dt){const forward=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw)),right=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw)),move=new THREE.Vector3();if(keys.w)move.add(forward);if(keys.s)move.sub(forward);if(keys.d)move.add(right);if(keys.a)move.sub(right);if(!move.lengthSq())return;move.normalize().multiplyScalar(4.2*dt);const next=camera.position.clone().add(move);let blocked=false;for(const p of pieces){if(p.userData.story!==1)continue;const dx=Math.abs(next.x-p.position.x),dz=Math.abs(next.z-p.position.z);if(dx<.57&&dz<.57){if(p.userData.kind==='wall'||p.userData.kind==='window')blocked=true;if(p.userData.kind==='door'&&!doorOpen.has(p.uuid))blocked=true}}if(!blocked){camera.position.x=next.x;camera.position.z=next.z}}
 function resize(){const w=host.clientWidth,h=host.clientHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false)}new ResizeObserver(resize).observe(host);resize();
-function animate(now=performance.now()){requestAnimationFrame(animate);const dt=Math.min(.05,(now-lastFrame)/1000);lastFrame=now;if(playMode){if(document.pointerLockElement===renderer.domElement){movePlayer(dt);updateDoorPrompt()}}else controls.update();if(selected?.userData.outline)selected.userData.outline.update();renderer.render(scene,camera)}animate();refresh();load();ensureGhost();
+function animate(now=performance.now()){requestAnimationFrame(animate);const dt=Math.min(.05,(now-lastFrame)/1000);lastFrame=now;if(playMode){if(document.pointerLockElement===renderer.domElement){movePlayer(dt);updateDoorPrompt()}}else controls.update();renderer.render(scene,camera)}animate();refresh();load();ensureGhost();
 </script></body></html>
