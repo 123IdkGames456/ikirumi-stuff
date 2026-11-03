@@ -28,7 +28,9 @@
     "FPS Forge/index.html",
     "FPS Forge/site.json",
     "crowbar-builder/index.html",
-    "crowbar-builder/site.json"
+    "crowbar-builder/site.json",
+    "ai-model-generator/index.html",
+    "ai-model-generator/site.json"
   ],
   "sites": [
     "cookie-clicker",
@@ -40,6 +42,7 @@
     "THE TORCHES WIND - Book",
     "unity-csharp-blueprints",
     "FPS Forge",
-    "crowbar-builder"
+    "crowbar-builder",
+    "ai-model-generator"
   ]
 }
