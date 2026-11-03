@@ -28,12 +28,13 @@ hr{border:0;border-top:1px solid var(--line);margin:12px 0}
 .stats{right:14px;top:14px;padding:11px 13px;min-width:145px}.stat{display:flex;justify-content:space-between;gap:18px;font-size:11px;color:var(--muted);padding:3px 0}.stat strong{color:var(--text);font-variant-numeric:tabular-nums}
 .bottom{left:50%;bottom:14px;transform:translateX(-50%);padding:9px 13px;display:flex;gap:13px;align-items:center;white-space:nowrap;font-size:11px;color:var(--muted)}
 .bottom b{color:var(--text)}.toast{position:absolute;left:50%;top:18px;transform:translate(-50%,-10px);background:#263329;border:1px solid #60745e;padding:9px 13px;border-radius:9px;opacity:0;pointer-events:none;transition:.2s;font-size:12px}.toast.show{opacity:1;transform:translate(-50%,0)}
+#interactPrompt{display:none;position:absolute;left:50%;bottom:70px;transform:translateX(-50%);background:#142019ef;border:1px solid #b6ef78;border-radius:10px;padding:10px 16px;font-weight:850;box-shadow:0 5px 24px #0008;pointer-events:none}#interactPrompt.show{display:block}#playHelp{display:none;position:absolute;left:50%;top:14px;transform:translateX(-50%);background:#142019df;border:1px solid #405044;border-radius:9px;padding:8px 12px;color:#f1f5ee;font-size:11px;pointer-events:none}#playHelp.show{display:block}
 @media(max-width:650px){header{padding:0 11px}.pill{display:none}.tools{top:9px;left:9px;width:172px;padding:9px}.tool{padding:7px 5px;font-size:11px}.stats{top:9px;right:9px;min-width:112px;padding:8px}.bottom{bottom:8px;font-size:10px;gap:7px}.panel-title{margin-bottom:7px}}
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
 </head>
 <body><div id="app">
-<header><div class="logo">C</div><div><div class="brand">CROWBAR BUILDER</div><div class="sub">A tiny low-poly construction sandbox</div></div><div class="spacer"></div><span class="pill">PROTOTYPE 0.1 · BROWSER DEMO</span><button class="topbtn" id="saveBtn">Save</button><button class="topbtn" id="loadBtn">Load</button></header>
+<header><div class="logo">C</div><div><div class="brand">CROWBAR BUILDER</div><div class="sub">A tiny low-poly construction sandbox</div></div><div class="spacer"></div><span class="pill">PROTOTYPE 0.1 · BROWSER DEMO</span><button class="topbtn" id="saveBtn">Save</button><button class="topbtn" id="loadBtn">Load</button><button class="topbtn" id="playBtn">▶ Play</button></header>
 <main><div id="view"></div>
 <section class="panel tools">
 <div class="panel-title">BUILD PIECES</div>
@@ -41,8 +42,9 @@ hr{border:0;border-top:1px solid var(--line);margin:12px 0}
 <button class="tool active" data-kind="floor">▰ Floor<small>1 × 1 m tile</small></button>
 <button class="tool" data-kind="wall">▥ Wall<small>1 × 2.5 m panel</small></button>
 <button class="tool" data-kind="roof">⌂ Roof<small>1 × 1 m tile</small></button>
-<button class="tool" data-kind="window">▧ Window<small>Fits into a wall</small></button>
-<button class="tool" data-kind="door">▯ Door<small>Fits into a wall</small></button>
+<button class="tool" data-kind="window">▧ Window wall<small>Wall with glass opening</small></button>
+<button class="tool" data-kind="door">▯ Door wall<small>Wall with working door</small></button>
+<button class="tool" data-kind="stairs">▱ Stairs<small>Connect stories</small></button>
 <button class="tool" data-kind="erase">⌫ Erase<small>Remove a piece</small></button>
 </div>
 <hr><div class="panel-title">BUILDING STORY</div><div class="actionrow"><button id="storyDown">− Down</button><button id="storyUp">+ Up</button></div><p class="hint">Story <b id="storyNumber">1</b> · Ground is story 1; each story is 2.5 m higher.</p>
@@ -61,7 +63,7 @@ hr{border:0;border-top:1px solid var(--line);margin:12px 0}
 </section>
 <section class="panel stats"><div class="panel-title">YOUR BUILD</div><div class="stat"><span>Pieces</span><strong id="pieceCount">0</strong></div><div class="stat"><span>Selected</span><strong id="selectedName">None</strong></div><div class="stat"><span>Grid</span><strong>1 m</strong></div><div class="stat"><span>Story height</span><strong>2.5 m</strong></div><div class="stat"><span>Mode</span><strong id="modeName">Floor</strong></div></section>
 <div class="panel bottom"><span><b>Drag</b> orbit camera</span><span><b>Scroll</b> zoom</span><span><b>Click</b> place / select</span><span><b>Q / E</b> rotate</span><span><b>Auto-save</b> on device</span></div>
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast"></div><div id="interactPrompt">E - INTERACT</div><div id="playHelp">WASD move · Mouse look · E interact · Esc exit</div>
 </main></div>
 <script type="module">
 import * as THREE from 'three';
@@ -77,7 +79,8 @@ const groundMat=new THREE.MeshStandardMaterial({color:'#7c9a72',roughness:1});co
 const grid=new THREE.GridHelper(48,48,'#526d55','#789276');grid.position.y=-.105;scene.add(grid);
 const base=new THREE.Mesh(new THREE.BoxGeometry(12,.18,12),new THREE.MeshStandardMaterial({color:'#6d8762'}));base.position.set(0,-.025,0);base.receiveShadow=true;scene.add(base);
 const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();const pieces=[];let selected=null,kind='floor',rotation=0,color='#c6b99e',ghost=null,toastTimer=null,currentStory=1;
-const STORY_HEIGHT=2.5;const defs={floor:{label:'Floor',size:[1,.12,1]},wall:{label:'Wall',size:[1,2.5,.12]},roof:{label:'Roof',size:[1,.12,1]},window:{label:'Window',size:[.76,1.05,.08]},door:{label:'Door',size:[.72,2.1,.08]}};
+const STORY_HEIGHT=2.5;const defs={floor:{label:'Floor',size:[1,.12,1]},wall:{label:'Wall',size:[1,2.5,.12]},roof:{label:'Roof',size:[1,.12,1]},window:{label:'Window wall',size:[1,2.5,.12]},door:{label:'Door wall',size:[1,2.5,.12]},stairs:{label:'Stairs',size:[1,2.5,1]}};
+let playMode=false,doorTarget=null,doorOpen=new Set(),keys={},yaw=0,pitch=0,lastFrame=performance.now();
 const mat=c=>new THREE.MeshStandardMaterial({color:c,roughness:.82});
 function addBox(parent,w,h,d,material,x=0,y=0,z=0){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m}
 function makePiece(type,c){
@@ -86,20 +89,29 @@ function makePiece(type,c){
  if(type==='floor'){addBox(group,1,.12,1,wood,0,0,0);addBox(group,.018,.012,.94,trim,0,.066,0)}
  else if(type==='wall'){addBox(group,1,2.5,.12,wood,0,0,0);addBox(group,1,.07,.15,trim,0,1.215,0);addBox(group,1,.07,.15,trim,0,-1.215,0)}
  else if(type==='roof'){addBox(group,1,.12,1,wood,0,0,0)}
- else if(type==='window'){addBox(group,.82,.07,.12,trim,0,.56,0);addBox(group,.82,.07,.12,trim,0,-.56,0);addBox(group,.07,1.18,.12,trim,-.375,0,0);addBox(group,.07,1.18,.12,trim,.375,0,0);const glass=new THREE.MeshStandardMaterial({color:'#8bc9d0',metalness:.1,roughness:.2,transparent:true,opacity:.62});addBox(group,.68,1.02,.045,glass,0,0,-.018);addBox(group,.045,1.02,.14,trim,0,0,.025)}
- else if(type==='door'){addBox(group,.72,2.1,.09,mat('#805b3e'),0,-.2,0);addBox(group,.82,.08,.14,trim,0,.9,0);addBox(group,.08,2.25,.14,trim,-.41,-.12,0);addBox(group,.08,2.25,.14,trim,.41,-.12,0);addBox(group,.05,.05,.05,mat('#e6c56c'),.28,-.2,.08)}
+ else if(type==='window'){
+  addBox(group,.10,2.5,.12,wood,-.45,0,0);addBox(group,.10,2.5,.12,wood,.45,0,0);addBox(group,.80,.12,.12,wood,0,1.19,0);addBox(group,.80,.12,.12,wood,0,-1.19,0);
+  addBox(group,.08,1.15,.16,trim,-.39,0,0);addBox(group,.08,1.15,.16,trim,.39,0,0);addBox(group,.82,.08,.16,trim,0,.57,0);addBox(group,.82,.08,.16,trim,0,-.57,0);
+  const glass=new THREE.MeshStandardMaterial({color:'#8bc9d0',roughness:.18,transparent:true,opacity:.28,side:THREE.DoubleSide,depthWrite:false});addBox(group,.70,1.02,.025,glass,0,0,-.035);addBox(group,.035,1.02,.05,trim,0,0,.02);
+ }
+ else if(type==='door'){
+  addBox(group,.12,2.5,.12,wood,-.44,0,0);addBox(group,.12,2.5,.12,wood,.44,0,0);addBox(group,.88,.12,.12,wood,0,1.19,0);
+  const leaf=new THREE.Group();leaf.position.set(-.38,-1.19,.015);leaf.userData.isDoorLeaf=true;addBox(leaf,.76,2.30,.07,mat('#805b3e'),.38,1.15,0);addBox(leaf,.045,.045,.045,mat('#e6c56c'),.67,1.15,.055);group.add(leaf);group.userData.doorLeaf=leaf;
+ }
+ else if(type==='stairs'){for(let i=0;i<5;i++){const h=(i+1)*.48;addBox(group,1,h,.20,wood,0,-1.25+h/2,-.40+i*.20)}}
  group.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});return group;
 }
 function cell(v){return Math.round(v)}
 function pieceAt(type,x,z,story){
  return pieces.find(p=>p.userData.kind===type&&p.userData.cellX===x&&p.userData.cellZ===z&&p.userData.story===story);
 }
-function wallAt(x,z,story){return ['wall','window','door'].some(t=>pieceAt(t,x,z,story))||!!pieceAt('wall',x,z,story)}
+function wallAt(x,z,story){return !!pieceAt('wall',x,z,story)}
 function supported(type,x,z,story){
  if(type==='floor')return story===1||wallAt(x,z,story-1);
  if(type==='wall')return story===1||!!pieceAt('floor',x,z,story)||wallAt(x,z,story-1);
  if(type==='roof')return wallAt(x,z,story);
- if(type==='window'||type==='door')return !!pieceAt('wall',x,z,story);
+ if(type==='window'||type==='door')return story===1||!!pieceAt('floor',x,z,story)||wallAt(x,z,story-1);
+ if(type==='stairs')return story===1||!!pieceAt('floor',x,z,story);
  return false;
 }
 function snap(v){return Math.round(v)}
@@ -107,15 +119,15 @@ function positionPiece(obj,x,z,type,story){
  const base=(story-1)*STORY_HEIGHT;let y=base+1.25;
  if(type==='floor')y=base+.06;
  if(type==='roof')y=base+STORY_HEIGHT-.06;
- if(type==='window')y=base+1.35;
- if(type==='door')y=base+1.05;
+ if(type==='window'||type==='door')y=base+1.25;
+ if(type==='stairs')y=base+1.25;
  obj.position.set(x,y,z);obj.userData.cellX=x;obj.userData.cellZ=z;obj.userData.story=story;
 }
 function autoSave(){try{const data=pieces.map(p=>({kind:p.userData.kind,color:p.userData.color,x:p.position.x,y:p.position.y,z:p.position.z,cellX:p.userData.cellX,cellZ:p.userData.cellZ,story:p.userData.story,ry:p.rotation.y}));localStorage.setItem('crowbar-builder-save',JSON.stringify({version:2,currentStory,pieces:data}));}catch(e){say('Could not save on this device')}}
 function addNew(type,x,z){
  const cx=snap(x),cz=snap(z);
  if(!supported(type,cx,cz,currentStory)){say(type==='window'||type==='door'?'Place this on an existing wall':'No support here — build a supporting wall or ground first');return}
- if(pieces.some(p=>p.userData.kind===type&&p.userData.cellX===cx&&p.userData.cellZ===cz&&p.userData.story===currentStory)){say('A piece of this type is already in that cell');return}
+ if(pieces.some(p=>p.userData.cellX===cx&&p.userData.cellZ===cz&&p.userData.story===currentStory&&(['wall','window','door'].includes(p.userData.kind)&&['wall','window','door'].includes(type)||p.userData.kind===type))){say('That grid cell is already occupied');return}
  const obj=makePiece(type,color);positionPiece(obj,cx,cz,type,currentStory);obj.rotation.y=rotation;scene.add(obj);pieces.push(obj);select(obj);refresh();autoSave();
 }
 function setStory(n){currentStory=Math.max(1,Math.min(20,n));document.getElementById('storyNumber').textContent=currentStory;refresh();autoSave()}
@@ -128,12 +140,12 @@ function groundPoint(e){const r=renderer.domElement.getBoundingClientRect();poin
 function pieceHit(e){const r=renderer.domElement.getBoundingClientRect();pointer.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);raycaster.setFromCamera(pointer,camera);const hits=raycaster.intersectObjects(pieces,true);if(!hits.length)return null;let o=hits[0].object;while(o.parent&&!pieces.includes(o))o=o.parent;return pieces.includes(o)?o:null}
 let downX=0,downY=0,dragged=false;renderer.domElement.addEventListener('pointerdown',e=>{downX=e.clientX;downY=e.clientY;dragged=false});renderer.domElement.addEventListener('pointermove',e=>{if(Math.hypot(e.clientX-downX,e.clientY-downY)>5)dragged=true});
 renderer.domElement.addEventListener('pointerup',e=>{if(dragged)return;const hit=pieceHit(e);if(kind==='erase'){if(hit){scene.remove(hit);pieces.splice(pieces.indexOf(hit),1);if(selected===hit)select(null);refresh();autoSave();say('Piece removed')}return}if(hit){select(hit);return}const p=groundPoint(e);if(p)addNew(kind,p.x,p.z)});
-function setKind(k){kind=k;document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.kind===k));refresh()}
+function setKind(k){kind=k;document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.kind===k));refresh();if(playMode)togglePlay(false);ensureGhost()}
 document.querySelectorAll('.tool').forEach(b=>b.addEventListener('click',()=>setKind(b.dataset.kind)));
 document.querySelectorAll('.swatch').forEach(b=>b.addEventListener('click',()=>{color=b.dataset.color;document.querySelectorAll('.swatch').forEach(s=>s.classList.toggle('active',s===b));if(selected){selected.traverse(o=>{if(o.isMesh&&o.material.color&&o.material.color.getHexString()!=='8bc9d0')o.material.color.set(color)});selected.userData.color=color;autoSave()}}));
 function rotate(){if(selected){selected.rotation.y+=Math.PI/2;selected.updateMatrixWorld();say('Selected piece rotated');autoSave()}else{rotation+=Math.PI/2;say('Next piece rotated')}}
 document.getElementById('rotateBtn').onclick=rotate;document.getElementById('deleteBtn').onclick=()=>{if(!selected)return;scene.remove(selected);pieces.splice(pieces.indexOf(selected),1);select(null);refresh();autoSave();say('Piece deleted')};
-window.addEventListener('keydown',e=>{if(e.key.toLowerCase()==='q'||e.key.toLowerCase()==='e')rotate();if(e.key==='Escape')select(null)});
+window.addEventListener('keydown',e=>{if(playMode){keys[e.key.toLowerCase()]=true;if(e.key.toLowerCase()==='e')interactDoor();if(e.key==='Escape')togglePlay(false);return}if(e.key.toLowerCase()==='q'||e.key.toLowerCase()==='e')rotate();if(e.key==='Escape')select(null)});window.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false});
 function save(){autoSave();say('Build saved on this device')}
 function load(){
  try{
@@ -145,6 +157,19 @@ function load(){
  }catch(e){say('Could not load saved build')}
 }
 document.getElementById('saveBtn').onclick=save;document.getElementById('loadBtn').onclick=load;window.addEventListener('beforeunload',autoSave);
+const prompt=document.getElementById('interactPrompt'),help=document.getElementById('playHelp'),playBtn=document.getElementById('playBtn');
+function ensureGhost(){if(ghost){scene.remove(ghost);ghost=null}if(playMode||kind==='erase')return;ghost=makePiece(kind,color);ghost.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.material.transparent=true;o.material.opacity=.34;o.material.depthWrite=false;o.material.color.set('#b6ef78')}});scene.add(ghost)}
+function updateGhostAt(x,z){if(!ghost)return;const cx=snap(x),cz=snap(z);positionPiece(ghost,cx,cz,kind,currentStory);ghost.rotation.y=rotation;const ok=supported(kind,cx,cz,currentStory)&&!pieces.some(p=>p.userData.cellX===cx&&p.userData.cellZ===cz&&p.userData.story===currentStory&&(['wall','window','door'].includes(p.userData.kind)&&['wall','window','door'].includes(kind)||p.userData.kind===kind));ghost.traverse(o=>{if(o.isMesh)o.material.color.set(ok?'#b6ef78':'#ef7777')})}
+function updateGhostPointer(e){if(!ghost||playMode)return;const p=groundPoint(e);if(p)updateGhostAt(p.x,p.z)}
+renderer.domElement.addEventListener('pointermove',updateGhostPointer);
+function togglePlay(on){playMode=on;controls.enabled=!on;document.querySelector('.tools').style.display=on?'none':'block';document.querySelector('.stats').style.display=on?'none':'block';document.querySelector('.bottom').style.display=on?'none':'flex';help.classList.toggle('show',on);prompt.classList.remove('show');playBtn.textContent=on?'✕ Build':'▶ Play';if(on){if(ghost){scene.remove(ghost);ghost=null}camera.position.set(0,1.65,6);yaw=0;pitch=0;camera.rotation.order='YXZ';renderer.domElement.requestPointerLock?.()}else{document.exitPointerLock?.();ensureGhost()}}
+playBtn.onclick=()=>togglePlay(!playMode);
+document.addEventListener('pointerlockchange',()=>{if(playMode&&document.pointerLockElement!==renderer.domElement)togglePlay(false)});
+document.addEventListener('mousemove',e=>{if(!playMode||document.pointerLockElement!==renderer.domElement)return;yaw-=e.movementX*.0022;pitch-=e.movementY*.0022;pitch=Math.max(-1.35,Math.min(1.35,pitch));camera.rotation.set(pitch,yaw,0,'YXZ')});
+function frontDoorTarget(){const dir=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);raycaster.set(camera.position,dir);raycaster.far=3.2;const doors=pieces.filter(p=>p.userData.kind==='door');const hits=raycaster.intersectObjects(doors,true);if(!hits.length)return null;let o=hits[0].object;while(o.parent&&!doors.includes(o))o=o.parent;return doors.includes(o)?o:null}
+function interactDoor(){if(!doorTarget)return;const leaf=doorTarget.userData.doorLeaf;if(!leaf)return;if(doorOpen.has(doorTarget.uuid)){leaf.rotation.y=0;doorOpen.delete(doorTarget.uuid)}else{leaf.rotation.y=-Math.PI/2;doorOpen.add(doorTarget.uuid)}say(doorOpen.has(doorTarget.uuid)?'Door opened':'Door closed');prompt.classList.remove('show')}
+function updateDoorPrompt(){doorTarget=frontDoorTarget();prompt.classList.toggle('show',!!doorTarget);if(doorTarget)prompt.textContent='E - INTERACT'}
+function movePlayer(dt){const forward=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw)),right=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw)),move=new THREE.Vector3();if(keys.w)move.add(forward);if(keys.s)move.sub(forward);if(keys.d)move.add(right);if(keys.a)move.sub(right);if(!move.lengthSq())return;move.normalize().multiplyScalar(4.2*dt);const next=camera.position.clone().add(move);let blocked=false;for(const p of pieces){if(p.userData.story!==1)continue;const dx=Math.abs(next.x-p.position.x),dz=Math.abs(next.z-p.position.z);if(dx<.57&&dz<.57){if(p.userData.kind==='wall'||p.userData.kind==='window')blocked=true;if(p.userData.kind==='door'&&!doorOpen.has(p.uuid))blocked=true}}if(!blocked){camera.position.x=next.x;camera.position.z=next.z}}
 function resize(){const w=host.clientWidth,h=host.clientHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false)}new ResizeObserver(resize).observe(host);resize();
-function animate(){requestAnimationFrame(animate);controls.update();if(selected?.userData.outline)selected.userData.outline.update();renderer.render(scene,camera)}animate();refresh();load();
+function animate(now=performance.now()){requestAnimationFrame(animate);const dt=Math.min(.05,(now-lastFrame)/1000);lastFrame=now;if(playMode){if(document.pointerLockElement===renderer.domElement){movePlayer(dt);updateDoorPrompt()}}else controls.update();if(selected?.userData.outline)selected.userData.outline.update();renderer.render(scene,camera)}animate();refresh();load();ensureGhost();
 </script></body></html>
