@@ -78,7 +78,7 @@ const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'low-powe
 const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(0,1,0);controls.enableDamping=true;controls.maxPolarAngle=Math.PI*.49;controls.minDistance=7;controls.maxDistance=48;
 scene.add(new THREE.HemisphereLight('#e8f5ed','#68775e',2.1));const sun=new THREE.DirectionalLight('#fff0d5',2.1);sun.position.set(-9,18,11);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-24;sun.shadow.camera.right=24;sun.shadow.camera.top=24;sun.shadow.camera.bottom=-24;scene.add(sun);
 const groundMat=new THREE.MeshStandardMaterial({color:'#7c9a72',roughness:1});const ground=new THREE.Mesh(new THREE.PlaneGeometry(100,100),groundMat);ground.rotation.x=-Math.PI/2;ground.position.y=-.12;ground.receiveShadow=true;scene.add(ground);
-const grid=new THREE.GridHelper(48,48,'#526d55','#789276');grid.position.y=.066;grid.renderOrder=2;grid.material.depthWrite=false;scene.add(grid);
+const grid=new THREE.GridHelper(48,48,'#526d55','#789276');grid.position.y=.123;grid.renderOrder=2;grid.material.depthWrite=false;scene.add(grid);
 const base=new THREE.Mesh(new THREE.BoxGeometry(12,.18,12),new THREE.MeshStandardMaterial({color:'#6d8762'}));base.position.set(0,-.025,0);base.receiveShadow=true;scene.add(base);
 const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();const pieces=[];let kind='floor',rotation=0,color='#c6b99e',ghost=null,toastTimer=null,currentStory=1;const seeThrough={walls:false,roofs:false,floors:false};
 const STORY_HEIGHT=3;const defs={floor:{label:'Floor',size:[1,.12,1]},wall:{label:'Wall',size:[1,3,.12]},roof:{label:'Roof',size:[1,.12,1]},window:{label:'Window wall',size:[1,3,.12]},door:{label:'Door wall',size:[1,3,.12]},stairs:{label:'Stairs',size:[1,3,5]}};
@@ -104,7 +104,7 @@ function addBox(parent,w,h,d,material,x=0,y=0,z=0){const m=new THREE.Mesh(new TH
 function makePiece(type,c){
  const group=new THREE.Group();group.userData.kind=type;group.userData.color=c;
  const trim=mat('#e8dfc9','plaster'),wood=mat(c,type==='floor'?'floor':type==='roof'?'roof':'plaster');
- if(type==='floor'){addBox(group,1,.12,1,wood,0,0,0);addBox(group,.018,.012,.94,trim,0,.066,0);addBox(group,.018,.012,.94,trim,0,.066,-.46)}
+ if(type==='floor'){addBox(group,1,.12,1,wood,0,0,0);}
  else if(type==='wall'){addBox(group,1,3,.12,wood,0,0,0);addBox(group,1,.07,.15,trim,0,1.465,0);addBox(group,1,.07,.15,trim,0,-1.465,0)}
  else if(type==='roof'){addBox(group,1,.12,1,wood,0,0,0)}
  else if(type==='window'){
@@ -161,7 +161,7 @@ function gridCell(type,x,z,rot=rotation){
  return {x:Math.floor(x+1e-6),z:Math.floor(z+1e-6)};
 }
 function positionPiece(obj,x,z,type,story,rot=obj.rotation.y){
- const base=(story-1)*STORY_HEIGHT;let y=base+1.25;
+ const base=(story-1)*STORY_HEIGHT;let y=base+STORY_HEIGHT/2;
  if(type==='floor')y=base+.06;
  if(type==='roof')y=base+STORY_HEIGHT-.06;
  const alongZ=(Math.round(rot/(Math.PI/2))+4)%2===1;
@@ -179,7 +179,7 @@ function addNew(type,x,z){
 }
 function setStory(n){
  const next=Math.max(1,Math.min(20,n)),delta=(next-currentStory)*STORY_HEIGHT;
- if(delta){camera.position.y+=delta;controls.target.y+=delta;grid.position.y=.066+(next-1)*STORY_HEIGHT;controls.update()}
+ if(delta){camera.position.y+=delta;controls.target.y+=delta;grid.position.y=.123+(next-1)*STORY_HEIGHT;controls.update()}
  currentStory=next;document.getElementById('storyNumber').textContent=currentStory;refresh();if(ghost)updateGhostAt(ghost.position.x,ghost.position.z);autoSave()
 }
 document.getElementById('storyDown').onclick=()=>setStory(currentStory-1);
