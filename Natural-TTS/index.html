@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111116">
+<title>Natural TTS — Ikirumi Stuff</title>
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<main class="shell">
+  <header class="top">
+    <a class="brand" href="../">ikirumi <span>stuff</span></a>
+    <span class="local-tag"><i></i> RUNS IN YOUR BROWSER</span>
+  </header>
+  <section class="intro">
+    <p class="eyebrow">NATURAL TEXT TO SPEECH</p>
+    <h1>Listen to your words.</h1>
+    <p class="lead">A neural AI voice that runs on your device. No Bing voice or installed speech pack needed.</p>
+  </section>
+  <section class="workspace">
+    <div class="editor-head"><label for="text">YOUR TEXT</label><span id="wordCount">0 words</span></div>
+    <textarea id="text" spellcheck="true" placeholder="Paste or type something you want to listen to…"></textarea>
+    <div class="settings">
+      <label>VOICE
+        <select id="voice">
+          <option value="af_heart">Heart — American female</option>
+          <option value="af_bella">Bella — American female</option>
+          <option value="af_nova">Nova — American female</option>
+          <option value="af_sarah">Sarah — American female</option>
+          <option value="af_nicole">Nicole — American female</option>
+          <option value="am_michael">Michael — American male</option>
+          <option value="am_fenrir">Fenrir — American male</option>
+          <option value="am_puck">Puck — American male</option>
+          <option value="bf_emma">Emma — British female</option>
+          <option value="bf_isabella">Isabella — British female</option>
+          <option value="bm_george">George — British male</option>
+          <option value="bm_daniel">Daniel — British male</option>
+        </select>
+      </label>
+      <label>SPEED <span id="speedValue">1.0×</span>
+        <input id="speed" type="range" min="0.75" max="1.25" step="0.05" value="1">
+      </label>
+    </div>
+    <div class="actions">
+      <button id="load" class="secondary">Load AI voice</button>
+      <button id="play" class="primary" disabled>▶ Generate & play</button>
+      <button id="pause" class="secondary" disabled>Ⅱ Pause</button>
+      <button id="stop" class="secondary" disabled>■ Stop</button>
+    </div>
+    <div class="status-wrap">
+      <div class="status-line"><span id="statusDot" class="dot"></span><span id="status">AI voice has not been loaded yet.</span></div>
+      <div class="progress"><div id="progressBar"></div></div>
+    </div>
+  </section>
+  <section class="info">
+    <div><span class="info-icon">◈</span><div><strong>Private by design</strong><p>Your text is processed on your device. It is not sent to a speech-generation server.</p></div></div>
+    <div><span class="info-icon">↓</span><div><strong>First load is large</strong><p>The AI model is downloaded once (roughly a few hundred MB) and your browser may cache it for later visits.</p></div></div>
+    <div><span class="info-icon">EN</span><div><strong>English voices</strong><p>This Kokoro voice model currently reads English. It does not provide Norwegian speech.</p></div></div>
+  </section>
+  <footer>Powered by Kokoro TTS · Open model · <a href="https://github.com/hexgrad/kokoro">About the model</a></footer>
+</main>
+<script type="module" src="./app.js"></script>
+</body>
+</html>
