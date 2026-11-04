@@ -36,13 +36,25 @@ function refreshVoices() {
 if (synth.onvoiceschanged !== undefined) synth.addEventListener("voiceschanged", refreshVoices);
 refreshVoices();
 $("readerRate").addEventListener("input", e => $("readerRateLabel").textContent = Number(e.target.value).toFixed(2) + "×");
-function selectedText() { return String(window.getSelection ? window.getSelection() : "").trim(); }
+function selectedText() {
+  const own = String(window.getSelection ? window.getSelection() : "").trim();
+  if (own) return own;
+  try { return String($("projectFrame").contentWindow.getSelection() || "").trim(); } catch { return ""; }
+}
 function pageText() {
   const root = $("homeView");
-  if (!root || root.hidden) return "";
-  const clone = root.cloneNode(true);
-  clone.querySelectorAll("button,input,select,textarea,script,style,.footer,.hero-art,.category-bar,.advanced-filters").forEach(n => n.remove());
-  return (clone.innerText || clone.textContent || "").replace(/\n{3,}/g,"\n\n").trim();
+  if (root && !root.hidden) {
+    const clone = root.cloneNode(true);
+    clone.querySelectorAll("button,input,select,textarea,script,style,.footer,.hero-art,.category-bar,.advanced-filters").forEach(n => n.remove());
+    return (clone.innerText || clone.textContent || "").replace(/\n{3,}/g,"\n\n").trim();
+  }
+  try {
+    const body = $("projectFrame").contentDocument?.body;
+    if (!body) return "";
+    const clone = body.cloneNode(true);
+    clone.querySelectorAll("button,input,select,textarea,script,style,nav,footer").forEach(n => n.remove());
+    return (clone.innerText || clone.textContent || "").replace(/\n{3,}/g,"\n\n").trim();
+  } catch { return ""; }
 }
 function splitText(value) {
   return value.replace(/\s+/g," ").match(/[^.!?;:]+[.!?;:]+[”’"')\]]*|[^.!?;:]+$/g)?.map(s=>s.trim()).filter(Boolean) || [];
@@ -51,6 +63,7 @@ function setButtons(active) {
   $("readerPlay").disabled = active;
   $("readerPause").disabled = !active;
   $("readerStop").disabled = !active;
+  $("readerPause").textContent = "Ⅱ Pause";
 }
 function stop() {
   runId++; synth.cancel(); speaking = false; paused = false; chunks = []; index = 0;
