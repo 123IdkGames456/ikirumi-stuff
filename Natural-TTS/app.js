@@ -17,6 +17,37 @@ function setStatus(message, busy = false) {
 }
 function setProgress(value) {
   $("progressBar").style.width = Math.max(0, Math.min(100, value)) + "%";
+  $("downloadPercent").textContent = Math.round(Math.max(0, Math.min(100, value))) + "%";
+}
+function formatBytes(bytes) {
+  if (!Number.isFinite(bytes) || bytes < 0) return "—";
+  const units = ["B", "KB", "MB", "GB"];
+  let value = bytes;
+  let unit = 0;
+  while (value >= 1024 && unit < units.length - 1) {
+    value /= 1024;
+    unit++;
+  }
+  return value.toFixed(unit === 0 ? 0 : 1) + " " + units[unit];
+}
+function updateDownloadInfo(info) {
+  if (!info) return;
+  if (info.status === "progress_total" && Number.isFinite(info.loaded) && Number.isFinite(info.total) && info.total > 0) {
+    setProgress(info.progress ?? (info.loaded / info.total) * 100);
+    $("downloadSize").textContent = formatBytes(info.loaded) + " / " + formatBytes(info.total);
+    $("downloadFile").textContent = "Total model download";
+  } else if (info.status === "progress" && Number.isFinite(info.loaded)) {
+    if (Number.isFinite(info.total) && info.total > 0) {
+      setProgress((info.loaded / info.total) * 100);
+      $("downloadSize").textContent = formatBytes(info.loaded) + " / " + formatBytes(info.total);
+    } else {
+      $("downloadSize").textContent = formatBytes(info.loaded) + " downloaded · total size unavailable";
+    }
+    $("downloadFile").textContent = info.file || "Downloading model files";
+  } else if (info.status === "ready") {
+    setProgress(100);
+    $("downloadFile").textContent = "Model ready";
+  }
 }
 function updateCount() {
   const words = textInput.value.trim() ? textInput.value.trim().split(/\s+/).length : 0;
@@ -72,15 +103,20 @@ async function loadModel() {
 
       const model = "onnx-community/Kokoro-82M-v1.0-ONNX";
       const progress = event => {
-        if (event && typeof event.progress === "number") setProgress(event.progress);
-        if (event && event.file) setStatus("Downloading " + event.file + "…", true);
+        updateDownloadInfo(event);
+        if (event && event.file && event.status !== "progress") {
+          setStatus("Loading " + event.file + "…", true);
+        }
+        if (event && event.status === "progress_total") {
+          setStatus("Downloading AI model…", true);
+        }
       };
 
       if (navigator.gpu) {
         try {
           setStatus("Trying WebGPU. Downloading the AI model…", true);
           tts = await KokoroTTSClass.from_pretrained(model, {
-            dtype: "fp32",
+            dtype: "q8",
             device: "webgpu",
             progress_callback: progress
           });
@@ -103,6 +139,9 @@ async function loadModel() {
       loadButton.textContent = "✓ Voice loaded";
       playButton.disabled = false;
       setStatus("AI voice ready. Add text and press Generate & play.");
+      $("downloadFile").textContent = "Download complete · model cached by browser";
+      $("downloadSize").textContent = "100%";
+      setProgress(100);
       return tts;
     } catch (error) {
       console.error("Natural TTS loading error:", error);
