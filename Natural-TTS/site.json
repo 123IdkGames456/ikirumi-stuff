@@ -1,0 +1,13 @@
+{
+  "name": "Natural TTS",
+  "description": "Listen to text with a neural AI voice running in your browser.",
+  "category": "Tools",
+  "icon": "◖",
+  "tags": [
+    "AI",
+    "Accessibility",
+    "Text to Speech",
+    "Voice"
+  ],
+  "featured": true
+}
