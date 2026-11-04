@@ -10,6 +10,9 @@ let tts = null;
 let audio = null;
 let audioUrl = null;
 let loadingPromise = null;
+let speedFiles = new Map();
+let speedPendingBytes = 0;
+let speedLastTime = 0;
 
 function setStatus(message, busy = false) {
   $("status").textContent = message;
@@ -32,21 +35,43 @@ function formatBytes(bytes) {
 }
 function updateDownloadInfo(info) {
   if (!info) return;
-  if (info.status === "progress_total" && Number.isFinite(info.loaded) && Number.isFinite(info.total) && info.total > 0) {
-    setProgress(info.progress ?? (info.loaded / info.total) * 100);
-    $("downloadSize").textContent = formatBytes(info.loaded) + " / " + formatBytes(info.total);
-    $("downloadFile").textContent = "Total model download";
-  } else if (info.status === "progress" && Number.isFinite(info.loaded)) {
-    if (Number.isFinite(info.total) && info.total > 0) {
-      setProgress((info.loaded / info.total) * 100);
-      $("downloadSize").textContent = formatBytes(info.loaded) + " / " + formatBytes(info.total);
-    } else {
-      $("downloadSize").textContent = formatBytes(info.loaded) + " downloaded · total size unavailable";
+
+  if (info.status === "progress" || info.status === "progress_total") {
+    const key = info.file || "model";
+    if (Number.isFinite(info.loaded)) {
+      const previous = speedFiles.get(key) || 0;
+      const delta = info.loaded >= previous ? info.loaded - previous : info.loaded;
+      speedPendingBytes += Math.max(0, delta);
+      speedFiles.set(key, info.loaded);
     }
-    $("downloadFile").textContent = info.file || "Downloading model files";
+
+    const now = performance.now();
+    if (!speedLastTime) speedLastTime = now;
+    const elapsed = (now - speedLastTime) / 1000;
+    if (elapsed >= 0.5) {
+      const mbPerSecond = speedPendingBytes / elapsed / 1000000;
+      $("downloadSpeed").textContent = mbPerSecond.toFixed(2) + " MB/s";
+      speedPendingBytes = 0;
+      speedLastTime = now;
+    }
+
+    if (info.status === "progress_total" && Number.isFinite(info.loaded) && Number.isFinite(info.total) && info.total > 0) {
+      setProgress(info.progress ?? (info.loaded / info.total) * 100);
+      $("downloadSize").textContent = formatBytes(info.loaded) + " / " + formatBytes(info.total);
+      $("downloadFile").textContent = "Total model download";
+    } else if (info.status === "progress" && Number.isFinite(info.loaded)) {
+      if (Number.isFinite(info.total) && info.total > 0) {
+        setProgress((info.loaded / info.total) * 100);
+        $("downloadSize").textContent = formatBytes(info.loaded) + " / " + formatBytes(info.total);
+      } else {
+        $("downloadSize").textContent = formatBytes(info.loaded) + " downloaded";
+      }
+      $("downloadFile").textContent = info.file || "Downloading model files";
+    }
   } else if (info.status === "ready") {
     setProgress(100);
     $("downloadFile").textContent = "Model ready";
+    $("downloadSpeed").textContent = "Complete";
   }
 }
 function updateCount() {
@@ -88,7 +113,11 @@ async function loadModel() {
   loadButton.disabled = true;
   playButton.disabled = true;
   setStatus("Loading the AI library…", true);
-  setProgress(2);
+  setProgress(0);
+  speedFiles = new Map();
+  speedPendingBytes = 0;
+  speedLastTime = 0;
+  $("downloadSpeed").textContent = "0.00 MB/s";
 
   loadingPromise = (async () => {
     try {
@@ -140,7 +169,8 @@ async function loadModel() {
       playButton.disabled = false;
       setStatus("AI voice ready. Add text and press Generate & play.");
       $("downloadFile").textContent = "Download complete · model cached by browser";
-      $("downloadSize").textContent = "100%";
+      $("downloadSize").textContent = "Download complete";
+      $("downloadSpeed").textContent = "Complete";
       setProgress(100);
       return tts;
     } catch (error) {
