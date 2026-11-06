@@ -1,0 +1,11 @@
+{
+  "name": "HTML Viewer",
+  "description": "Open, preview, and edit HTML files right inside your browser.",
+  "category": "Tools",
+  "icon": "〈/〉",
+  "tags": [
+    "HTML",
+    "Viewer",
+    "Editor"
+  ]
+}
