@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101116">
+<title>HTML Viewer — Ikirumi Stuff</title>
+<style>
+:root{color-scheme:dark;--bg:#101116;--panel:#191a22;--line:#ffffff16;--muted:#9293a3;--text:#f1f0f7;--accent:#b5a1ff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+.top{height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid var(--line);background:#14151b}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.2px}.mark{display:grid;place-items:center;width:30px;height:30px;border-radius:10px;background:#b5a1ff20;color:#d8ccff;font-size:17px}
+.actions{display:flex;align-items:center;gap:8px}
+button,.file-select{font:inherit;color:inherit;cursor:pointer}
+.tool{height:34px;padding:0 11px;border:1px solid var(--line);border-radius:9px;background:#ffffff08;font-size:12px;font-weight:650}
+.tool:hover{border-color:#b5a1ff80;background:#b5a1ff14}
+.tool.primary{background:#b5a1ff;color:#171320;border-color:#b5a1ff}
+.icon{width:34px;padding:0;font-size:17px}
+main{height:calc(100vh - 62px);display:flex;flex-direction:column;padding:14px;gap:12px}
+.toolbar{display:flex;align-items:center;gap:10px;min-height:38px}
+.file-select{max-width:min(420px,55vw);min-width:130px;padding:8px 30px 8px 11px;border:1px solid var(--line);border-radius:9px;background:var(--panel);font-size:12px}
+.hint{color:var(--muted);font-size:11px;margin-left:auto}
+.stage{position:relative;flex:1;min-height:0;overflow:hidden;border:1px solid var(--line);border-radius:13px;background:#fff}
+iframe{display:block;width:100%;height:100%;border:0;background:#fff}
+.empty{position:absolute;inset:0;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 40%,#292437,#15161d 65%)}
+.empty[hidden]{display:none}
+.empty-inner{text-align:center;padding:24px;max-width:440px}
+.empty-icon{width:58px;height:58px;margin:0 auto 16px;display:grid;place-items:center;border:1px solid #b5a1ff45;border-radius:18px;background:#b5a1ff14;color:#d8ccff;font-size:26px}
+h1{font-size:23px;line-height:1.2;margin:0 0 9px}.empty p{color:#a5a4b3;margin:0 0 19px;font-size:13px}
+.drop{border:1px dashed #b5a1ff70;border-radius:12px;padding:14px;color:#d8ccff;font-size:12px}
+.editor{position:fixed;inset:0;z-index:5;display:grid;place-items:center;padding:16px;background:#050509c9;backdrop-filter:blur(8px)}
+.editor[hidden]{display:none}
+.editor-card{width:min(1000px,100%);height:min(780px,92vh);display:flex;flex-direction:column;border:1px solid #ffffff20;border-radius:16px;background:#191a22;box-shadow:0 25px 90px #000b;overflow:hidden}
+.editor-head{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--line);gap:12px}
+.editor-head strong{font-size:13px}.editor-head span{font-size:11px;color:var(--muted)}
+textarea{flex:1;min-height:0;width:100%;resize:none;padding:17px;border:0;outline:0;background:#101116;color:#e9e6f2;font:12px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;tab-size:2}
+.editor-foot{display:flex;align-items:center;gap:8px;padding:12px 14px;border-top:1px solid var(--line)}
+.status{color:var(--muted);font-size:11px;margin-right:auto}
+#fileInput{display:none}
+@media(max-width:600px){.top{padding:0 11px}.top .tool-label{display:none}main{padding:9px}.hint{display:none}.toolbar{gap:7px}.file-select{flex:1;max-width:none}.editor-foot{flex-wrap:wrap}.status{width:100%;order:2}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="mark">i</span><span>HTML Viewer</span></div>
+  <div class="actions">
+    <button class="tool" id="editBtn" title="Edit the current HTML">✎ <span class="tool-label">Edit HTML</span></button>
+    <button class="tool primary" id="addBtn" title="Add an HTML file">＋ <span class="tool-label">Add HTML</span></button>
+  </div>
+</header>
+<main>
+  <div class="toolbar">
+    <select class="file-select" id="fileSelect" aria-label="Choose HTML file" hidden></select>
+    <span class="hint" id="fileHint">Add an HTML file to preview it here</span>
+    <button class="tool icon" id="downloadBtn" title="Download current HTML" aria-label="Download HTML" hidden>↓</button>
+    <button class="tool icon" id="removeBtn" title="Remove current HTML" aria-label="Remove HTML" hidden>×</button>
+  </div>
+  <section class="stage">
+    <iframe id="preview" title="HTML preview" sandbox="allow-scripts allow-forms allow-modals allow-downloads allow-pointer-lock"></iframe>
+    <div class="empty" id="empty">
+      <div class="empty-inner">
+        <div class="empty-icon">〈/〉</div>
+        <h1>Your HTML, displayed.</h1>
+        <p>Open an HTML file to see it run in this viewer. You can also edit the code and preview your changes.</p>
+        <div class="drop">＋ Add HTML from your device</div>
+      </div>
+    </div>
+  </section>
+</main>
+<input id="fileInput" type="file" accept=".html,.htm,text/html" multiple>
+<div class="editor" id="editor" hidden role="dialog" aria-modal="true" aria-label="Edit HTML">
+  <section class="editor-card">
+    <div class="editor-head"><div><strong>Edit HTML</strong><br><span>Changes appear in the preview when you apply them.</span></div><button class="tool icon" id="closeEditor" aria-label="Close editor">×</button></div>
+    <textarea id="code" spellcheck="false" aria-label="HTML source code" placeholder="Paste your HTML here…"></textarea>
+    <div class="editor-foot"><span class="status" id="editorStatus">Ready</span><button class="tool" id="cancelEdit">Cancel</button><button class="tool primary" id="applyEdit">Apply changes</button></div>
+  </section>
+</div>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const files=[];
+let active=-1;
+function show(){const has=active>=0&&files[active];$('empty').hidden=!!has;$('preview').hidden=!has;$('fileSelect').hidden=!has;$('downloadBtn').hidden=!has;$('removeBtn').hidden=!has;$('editBtn').disabled=!has;$('fileHint').textContent=has?files[active].name:'Add an HTML file to preview it here';if(has){$('preview').srcdoc=files[active].content;$('fileSelect').value=String(active)}}
+function refreshSelect(){const s=$('fileSelect');s.replaceChildren();files.forEach((f,i)=>{const o=document.createElement('option');o.value=String(i);o.textContent=f.name;s.append(o)});show()}
+function addFiles(list){const incoming=[...list].filter(f=>/\.html?$/i.test(f.name)||f.type==='text/html');if(!incoming.length)return;incoming.forEach(f=>{const reader=new FileReader();reader.onload=()=>{files.push({name:f.name,content:String(reader.result||'')});active=files.length-1;refreshSelect()};reader.readAsText(f)});$('fileInput').value=''}
+$('addBtn').onclick=()=>$('fileInput').click();
+$('fileInput').onchange=e=>addFiles(e.target.files);
+$('fileSelect').onchange=e=>{active=Number(e.target.value);show()};
+$('editBtn').onclick=()=>{if(active<0)return;$('code').value=files[active].content;$('editorStatus').textContent=files[active].name;$('editor').hidden=false;$('code').focus()};
+function closeEditor(){$('editor').hidden=true}
+$('closeEditor').onclick=$('cancelEdit').onclick=closeEditor;
+$('applyEdit').onclick=()=>{if(active<0)return;files[active].content=$('code').value;show();closeEditor()};
+$('downloadBtn').onclick=()=>{if(active<0)return;const blob=new Blob([files[active].content],{type:'text/html;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=files[active].name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+$('removeBtn').onclick=()=>{if(active<0)return;files.splice(active,1);active=files.length?Math.min(active,files.length-1):-1;refreshSelect();if(!files.length)$('preview').srcdoc=''};
+$('editor').addEventListener('click',e=>{if(e.target===$('editor'))closeEditor()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('editor').hidden)closeEditor();if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'&&!$('editor').hidden){e.preventDefault();$('applyEdit').click()}});
+const stage=document.querySelector('.stage');stage.addEventListener('dragover',e=>{e.preventDefault();stage.style.outline='2px solid #b5a1ff'});stage.addEventListener('dragleave',()=>stage.style.outline='');stage.addEventListener('drop',e=>{e.preventDefault();stage.style.outline='';addFiles(e.dataTransfer.files)});
+show();
+})();
+</script>
+</body>
+</html>
