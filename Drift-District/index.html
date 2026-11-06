@@ -47,7 +47,7 @@ function mat(color,roughness=.7,metalness=0){return new THREE.MeshStandardMateri
 function box(parent,w,h,d,material,x=0,y=0,z=0){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m}
 function init(){
  scene=new THREE.Scene();scene.background=new THREE.Color(0x9bb9c8);scene.fog=new THREE.Fog(0x9bb9c8,45,190);
- camera=new THREE.PerspectiveCamera( sixty(),innerWidth/innerHeight,.1,260);
+ camera=new THREE.PerspectiveCamera(68,innerWidth/innerHeight,.1,260);
  renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.8));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;$('game').append(renderer.domElement);
  scene.add(new THREE.HemisphereLight(0xe5f4ff,0x52604b,2.1));const sun=new THREE.DirectionalLight(0xffe4bd,3.1);sun.position.set(-20,35,15);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-35;sun.shadow.camera.right=35;sun.shadow.camera.top=45;sun.shadow.camera.bottom=-45;scene.add(sun);
  const ground=new THREE.Mesh(new THREE.PlaneGeometry(600,600),mat(0x526b50));ground.rotation.x=-Math.PI/2;ground.position.y=-.12;ground.receiveShadow=true;scene.add(ground);
@@ -58,7 +58,7 @@ function init(){
  const mountains=mat(0x829b9a);for(let i=0;i<24;i++){let m=new THREE.Mesh(new THREE.ConeGeometry(10+Math.random()*12,20+Math.random()*18,5),mountains);m.position.set((Math.random()-.5)*170,7,-100-Math.random()*170);scene.add(m)}
  buildCar();clock=new THREE.Clock();window.addEventListener('resize',resize);animate();
 }
-function sixty(){return  sixtyValue()}function sixtyValue(){return  sixtyValue2()}function sixtyValue2(){return  sixtyValue3()}function sixtyValue3(){return  sixtyValue4()}function sixtyValue4(){return  68}
+
 function buildCar(){
  if(car)scene.remove(car);car=new THREE.Group();carParts=[];const v=vehicles[selected],bodyMat=mat(paints[paint][1],.3,.25),dark=mat(0x18212b,.55),glass= new THREE.MeshStandardMaterial({color:0x8ab5c5,metalness:.35,roughness:.18}),rubber=mat(0x101318,.92),light=mat(0xffe9ae,.25);
  const body=box(car,v.width,v.height*.45,v.length,bodyMat,0,v.height*.48,0);carParts.push(body);
@@ -79,7 +79,7 @@ function update(dt){
  if(!playing||paused)return;const c=input(),v=vehicles[selected];const throttle=c.gas?1:0,braking=c.brake?1:0,hand=c.hand?1:0;
  speed+=throttle*48*v.accel*dt;speed-=braking*78*dt;speed-= (5+speed*.035)*dt;if(hand)speed-=9*dt;speed=Math.max(0,Math.min(v.top,speed));
  const steerInput=(c.left?-1:0)+(c.right?1:0);const speedFactor=.25+speed/v.top*.85;steer+=(steerInput-steer)*Math.min(1,dt*7);
- const grip=hand?0.35:1;player.yaw+=(steer*speedFactor*v.turn*.95-player.yaw*.7)*dt*grip;player.vx+=Math.sin(player.yaw)*speed*.055*dt*60;player.vx*=Math.pow(hand?.992:.94,dt*60);player.x+=player.vx*dt;player.x=Math.max(-7,Math.min(7,player.x));player.vx*=Math.abs(player.x)>6.7?.85:1;
+ const grip=hand?0.35:1;player.yaw+=(steer*speedFactor*v.turn*.95-player.yaw*.7)*dt*grip;player.vx+=Math.sin(player.yaw)*speed*.055*dt*60;player.vx*=Math.pow(hand ? 0.992 : 0.94,dt*60);player.x+=player.vx*dt;player.x=Math.max(-7,Math.min(7,player.x));player.vx*=Math.abs(player.x)>6.7?.85:1;
  car.position.x=THREE.MathUtils.lerp(car.position.x,player.x,.18);car.rotation.y=THREE.MathUtils.lerp(car.rotation.y,-player.yaw*.75,.15);car.rotation.z=THREE.MathUtils.lerp(car.rotation.z,-steer*.09,.12);
  const move=speed*.19*dt;roadZ+=move;roadMarks.forEach(m=>{m.position.z+=move;if(m.position.z>12)m.position.z-=390});
  worldObjects.forEach(o=>{o.mesh.position.z+=move;if(o.mesh.position.z>12)o.mesh.position.z-=410});
