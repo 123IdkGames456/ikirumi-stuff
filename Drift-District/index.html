@@ -91,7 +91,7 @@ function update(dt){
  if(spawnTimer<=0){spawnPattern();spawnTimer=Math.max(.7,1.55-distance/1400)}
  roadLines.forEach(o=>{o.position.z+=move;if(o.position.z>12)o.position.z-=420});
  scenery.forEach(o=>{o.trunk.position.z+=move;o.crown.position.z+=move;if(o.trunk.position.z>15){o.trunk.position.z-=440;o.crown.position.z-=440}});
- obstacles.forEach(o=>{o.mesh.position.z+=move;o.z=o.mesh.position.z;if(!o.passed&&o.z>2){o.passed=true;if(o.type==='boss'){bossHits++;endEvent(true)}else if(o.lane===targetLane){hit() }else score+=30}});
+ obstacles.forEach(o=>{o.mesh.position.z+=move;o.z=o.mesh.position.z;if(!o.passed&&o.z>2){o.passed=true;if(o.type==='boss'){if(o.lane===targetLane){hit()}else{bossHits++;endEvent(true)}}else if(o.lane===targetLane){hit()}else score+=30}});
  obstacles=obstacles.filter(o=>{if(o.z>18){scene.remove(o.mesh);return false}return true});
  coins.forEach(o=>{o.mesh.position.z+=move;o.mesh.rotation.z+=dt*3;o.z=o.mesh.position.z;if(o.z>1&&o.z<9&&o.lane===targetLane){score+=100;scene.remove(o.mesh);o.z=999}});
  coins=coins.filter(o=>{if(o.z>18||o.z===999){scene.remove(o.mesh);return false}return true});
