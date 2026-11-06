@@ -1,0 +1,14 @@
+{
+  "name": "Drift District",
+  "description": "A 3D arcade driving game with drifting, score combos, RPM, speed and six vehicles to unlock your inner rally driver.",
+  "category": "Games",
+  "icon": "🏎️",
+  "tags": [
+    "3D",
+    "Driving",
+    "Drifting",
+    "Arcade",
+    "Cars"
+  ],
+  "featured": true
+}
