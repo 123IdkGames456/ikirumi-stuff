@@ -1,14 +1,14 @@
 {
-  "name": "Drift District",
-  "description": "A 3D arcade driving game with drifting, score combos, RPM, speed and six vehicles to unlock your inner rally driver.",
+  "name": "Carway Surfers",
+  "description": "A 3D endless car runner with lane switching, traffic, obstacles, coin trails, rival races and boss chases.",
   "category": "Games",
-  "icon": "🏎️",
+  "icon": "🚘",
   "tags": [
     "3D",
-    "Driving",
-    "Drifting",
-    "Arcade",
-    "Cars"
+    "Endless Runner",
+    "Cars",
+    "Races",
+    "Bosses"
   ],
   "featured": true
 }
