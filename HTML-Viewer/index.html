@@ -2,101 +2,124 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#101116">
 <title>HTML Viewer — Ikirumi Stuff</title>
 <style>
-:root{color-scheme:dark;--bg:#101116;--panel:#191a22;--line:#ffffff16;--muted:#9293a3;--text:#f1f0f7;--accent:#b5a1ff}
+:root{color-scheme:dark;--bg:#101116;--panel:#1b1c25;--line:#ffffff20;--text:#f2f0f8;--muted:#a4a2b2;--accent:#b9a6ff}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
-.top{height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid var(--line);background:#14151b}
-.brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.2px}.mark{display:grid;place-items:center;width:30px;height:30px;border-radius:10px;background:#b5a1ff20;color:#d8ccff;font-size:17px}
-.actions{display:flex;align-items:center;gap:8px}
-button,.file-select{font:inherit;color:inherit;cursor:pointer}
-.tool{height:34px;padding:0 11px;border:1px solid var(--line);border-radius:9px;background:#ffffff08;font-size:12px;font-weight:650}
-.tool:hover{border-color:#b5a1ff80;background:#b5a1ff14}
-.tool.primary{background:#b5a1ff;color:#171320;border-color:#b5a1ff}
-.icon{width:34px;padding:0;font-size:17px}
-main{height:calc(100vh - 62px);display:flex;flex-direction:column;padding:14px;gap:12px}
-.toolbar{display:flex;align-items:center;gap:10px;min-height:38px}
-.file-select{max-width:min(420px,55vw);min-width:130px;padding:8px 30px 8px 11px;border:1px solid var(--line);border-radius:9px;background:var(--panel);font-size:12px}
-.hint{color:var(--muted);font-size:11px;margin-left:auto}
-.stage{position:relative;flex:1;min-height:0;overflow:hidden;border:1px solid var(--line);border-radius:13px;background:#fff}
-iframe{display:block;width:100%;height:100%;border:0;background:#fff}
-.empty{position:absolute;inset:0;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 40%,#292437,#15161d 65%)}
-.empty[hidden]{display:none}
-.empty-inner{text-align:center;padding:24px;max-width:440px}
-.empty-icon{width:58px;height:58px;margin:0 auto 16px;display:grid;place-items:center;border:1px solid #b5a1ff45;border-radius:18px;background:#b5a1ff14;color:#d8ccff;font-size:26px}
-h1{font-size:23px;line-height:1.2;margin:0 0 9px}.empty p{color:#a5a4b3;margin:0 0 19px;font-size:13px}
-.drop{border:1px dashed #b5a1ff70;border-radius:12px;padding:14px;color:#d8ccff;font-size:12px}
-.editor{position:fixed;inset:0;z-index:5;display:grid;place-items:center;padding:16px;background:#050509c9;backdrop-filter:blur(8px)}
-.editor[hidden]{display:none}
-.editor-card{width:min(1000px,100%);height:min(780px,92vh);display:flex;flex-direction:column;border:1px solid #ffffff20;border-radius:16px;background:#191a22;box-shadow:0 25px 90px #000b;overflow:hidden}
-.editor-head{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--line);gap:12px}
-.editor-head strong{font-size:13px}.editor-head span{font-size:11px;color:var(--muted)}
-textarea{flex:1;min-height:0;width:100%;resize:none;padding:17px;border:0;outline:0;background:#101116;color:#e9e6f2;font:12px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;tab-size:2}
-.editor-foot{display:flex;align-items:center;gap:8px;padding:12px 14px;border-top:1px solid var(--line)}
-.status{color:var(--muted);font-size:11px;margin-right:auto}
+html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+#preview{position:fixed;inset:0;width:100%;height:100%;border:0;background:white;display:none}
+#empty{position:fixed;inset:0;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 50% 38%,#302941,#101116 70%)}
+#empty[hidden]{display:none}
+.empty-inner{text-align:center;max-width:440px}
+.mark{width:62px;height:62px;display:grid;place-items:center;margin:0 auto 18px;border-radius:19px;background:#b9a6ff20;border:1px solid #b9a6ff55;color:#e0d6ff;font-size:27px}
+h1{font-size:25px;line-height:1.2;margin:0 0 10px}
+p{color:var(--muted);margin:0 0 18px}
+#menuButton{position:fixed;z-index:10;top:max(12px,env(safe-area-inset-top));right:12px;width:42px;height:42px;border:1px solid #ffffff30;border-radius:13px;background:#171820eF;color:white;font-size:21px;cursor:pointer;box-shadow:0 5px 25px #0006;backdrop-filter:blur(12px)}
+#menuButton:hover{border-color:#b9a6ff}
+#menu{position:fixed;z-index:11;top:max(62px,calc(env(safe-area-inset-top) + 50px));right:12px;width:min(290px,calc(100vw - 24px));padding:12px;border:1px solid var(--line);border-radius:15px;background:#1b1c25f5;box-shadow:0 16px 55px #0009;backdrop-filter:blur(18px)}
+#menu[hidden]{display:none}
+.menu-title{font-weight:750;font-size:13px;padding:3px 5px 10px}
+.menu-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+button,.file-select{font:inherit;cursor:pointer}
+.action{min-height:38px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:#ffffff09;color:var(--text);font-size:12px;text-align:left}
+.action:hover{background:#b9a6ff18;border-color:#b9a6ff70}
+.action.primary{background:var(--accent);color:#171320;border-color:var(--accent);font-weight:700}
+.action:disabled{opacity:.35;cursor:not-allowed}
+#fileSelect{width:100%;margin-top:9px;padding:9px;border:1px solid var(--line);border-radius:9px;background:#111219;color:var(--text);font-size:12px}
+#fileSelect[hidden]{display:none}
+.menu-note{font-size:10px;color:var(--muted);padding:10px 4px 1px}
 #fileInput{display:none}
-@media(max-width:600px){.top{padding:0 11px}.top .tool-label{display:none}main{padding:9px}.hint{display:none}.toolbar{gap:7px}.file-select{flex:1;max-width:none}.editor-foot{flex-wrap:wrap}.status{width:100%;order:2}}
+#editor{position:fixed;z-index:20;inset:0;display:grid;place-items:center;padding:14px;background:#050509d9;backdrop-filter:blur(9px)}
+#editor[hidden]{display:none}
+.editor-card{width:min(1000px,100%);height:min(850px,94dvh);display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--line);border-radius:15px;background:#191a22;box-shadow:0 20px 80px #000b}
+.editor-head,.editor-foot{display:flex;align-items:center;gap:9px;padding:12px;border-bottom:1px solid var(--line)}
+.editor-head strong{font-size:13px}.editor-head span{font-size:11px;color:var(--muted)}.editor-head .close{margin-left:auto}
+textarea{flex:1;min-height:0;width:100%;resize:none;padding:15px;border:0;outline:0;background:#101116;color:#eeeaf8;font:12px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;tab-size:2}
+.editor-foot{border-top:1px solid var(--line);border-bottom:0;flex-wrap:wrap}
+.status{color:var(--muted);font-size:11px;margin-right:auto}
+@media(max-width:480px){.editor-foot .status{width:100%;order:2}}
 </style>
 </head>
 <body>
-<header class="top">
-  <div class="brand"><span class="mark">i</span><span>HTML Viewer</span></div>
-  <div class="actions">
-    <button class="tool" id="editBtn" title="Edit the current HTML">✎ <span class="tool-label">Edit HTML</span></button>
-    <button class="tool primary" id="addBtn" title="Add an HTML file">＋ <span class="tool-label">Add HTML</span></button>
-  </div>
-</header>
-<main>
-  <div class="toolbar">
-    <select class="file-select" id="fileSelect" aria-label="Choose HTML file" hidden></select>
-    <span class="hint" id="fileHint">Add an HTML file to preview it here</span>
-    <button class="tool icon" id="downloadBtn" title="Download current HTML" aria-label="Download HTML" hidden>↓</button>
-    <button class="tool icon" id="removeBtn" title="Remove current HTML" aria-label="Remove HTML" hidden>×</button>
-  </div>
-  <section class="stage">
-    <iframe id="preview" title="HTML preview" sandbox="allow-scripts allow-forms allow-modals allow-downloads allow-pointer-lock"></iframe>
-    <div class="empty" id="empty">
-      <div class="empty-inner">
-        <div class="empty-icon">〈/〉</div>
-        <h1>Your HTML, displayed.</h1>
-        <p>Open an HTML file to see it run in this viewer. You can also edit the code and preview your changes.</p>
-        <div class="drop">＋ Add HTML from your device</div>
-      </div>
-    </div>
-  </section>
-</main>
+<iframe id="preview" title="HTML preview" sandbox="allow-scripts allow-forms allow-modals allow-downloads allow-pointer-lock"></iframe>
+<div id="empty">
+ <div class="empty-inner"><div class="mark">&lt;/&gt;</div><h1>Your HTML, full screen.</h1><p>Open an HTML file or paste HTML code. Your page will use the whole screen.</p></div>
+</div>
+<button id="menuButton" aria-label="Open menu" aria-expanded="false" title="Menu">☰</button>
+<section id="menu" hidden aria-label="HTML viewer menu">
+ <div class="menu-title">HTML Viewer</div>
+ <div class="menu-actions">
+  <button class="action primary" id="addFile">＋ Add file</button>
+  <button class="action primary" id="addText">＋ Add as text</button>
+  <button class="action" id="editBtn" disabled>✎ Edit HTML</button>
+  <button class="action" id="downloadBtn" disabled>↓ Download</button>
+  <button class="action" id="removeBtn" disabled>× Remove HTML</button>
+ </div>
+ <select id="fileSelect" hidden aria-label="Choose HTML"></select>
+ <div class="menu-note">Files and pasted HTML stay in this browser session. They are not uploaded to GitHub.</div>
+</section>
 <input id="fileInput" type="file" accept=".html,.htm,text/html" multiple>
-<div class="editor" id="editor" hidden role="dialog" aria-modal="true" aria-label="Edit HTML">
-  <section class="editor-card">
-    <div class="editor-head"><div><strong>Edit HTML</strong><br><span>Changes appear in the preview when you apply them.</span></div><button class="tool icon" id="closeEditor" aria-label="Close editor">×</button></div>
-    <textarea id="code" spellcheck="false" aria-label="HTML source code" placeholder="Paste your HTML here…"></textarea>
-    <div class="editor-foot"><span class="status" id="editorStatus">Ready</span><button class="tool" id="cancelEdit">Cancel</button><button class="tool primary" id="applyEdit">Apply changes</button></div>
-  </section>
+<div id="editor" hidden role="dialog" aria-modal="true" aria-label="HTML editor">
+ <section class="editor-card">
+  <div class="editor-head"><div><strong id="editorTitle">HTML source</strong><br><span>Paste or edit your HTML, then apply it.</span></div><button class="action close" id="closeEditor">✕</button></div>
+  <textarea id="code" spellcheck="false" placeholder="Paste your complete HTML here..."></textarea>
+  <div class="editor-foot"><span class="status" id="status">Ready</span><button class="action" id="cancelEdit">Cancel</button><button class="action primary" id="applyEdit">Apply HTML</button></div>
+ </section>
 </div>
 <script>
 (()=>{
-const $=id=>document.getElementById(id);
-const files=[];
-let active=-1;
-function show(){const has=active>=0&&files[active];$('empty').hidden=!!has;$('preview').hidden=!has;$('fileSelect').hidden=!has;$('downloadBtn').hidden=!has;$('removeBtn').hidden=!has;$('editBtn').disabled=!has;$('fileHint').textContent=has?files[active].name:'Add an HTML file to preview it here';if(has){$('preview').srcdoc=files[active].content;$('fileSelect').value=String(active)}}
-function refreshSelect(){const s=$('fileSelect');s.replaceChildren();files.forEach((f,i)=>{const o=document.createElement('option');o.value=String(i);o.textContent=f.name;s.append(o)});show()}
-function addFiles(list){const incoming=[...list].filter(f=>/\.html?$/i.test(f.name)||f.type==='text/html');if(!incoming.length)return;incoming.forEach(f=>{const reader=new FileReader();reader.onload=()=>{files.push({name:f.name,content:String(reader.result||'')});active=files.length-1;refreshSelect()};reader.readAsText(f)});$('fileInput').value=''}
-$('addBtn').onclick=()=>$('fileInput').click();
-$('fileInput').onchange=e=>addFiles(e.target.files);
-$('fileSelect').onchange=e=>{active=Number(e.target.value);show()};
-$('editBtn').onclick=()=>{if(active<0)return;$('code').value=files[active].content;$('editorStatus').textContent=files[active].name;$('editor').hidden=false;$('code').focus()};
+const $=id=>document.getElementById(id),files=[];
+let active=-1,editingNew=false;
+function menu(open){$('menu').hidden=!open;$('menuButton').setAttribute('aria-expanded',String(open));$('menuButton').textContent=open?'×':'☰'}
+function render(){
+ const has=active>=0&&!!files[active];
+ $('empty').hidden=has;$('preview').style.display=has?'block':'none';
+ if(has)$('preview').srcdoc=files[active].content;
+ ['editBtn','downloadBtn','removeBtn'].forEach(id=>$(id).disabled=!has);
+ const select=$('fileSelect');select.hidden=files.length<2;
+ select.replaceChildren();
+ files.forEach((f,i)=>{const o=document.createElement('option');o.value=String(i);o.textContent=f.name;select.append(o)});
+ if(has)select.value=String(active);
+}
+function add(name,content){files.push({name,content});active=files.length-1;render();menu(false)}
+function openEditor(isNew){
+ editingNew=isNew;
+ $('editorTitle').textContent=isNew?'Add HTML as text':'Edit HTML';
+ $('code').value=isNew?'':files[active].content;
+ $('status').textContent=isNew?'New HTML':'Editing '+files[active].name;
+ $('editor').hidden=false;$('code').focus();menu(false);
+}
+$('menuButton').onclick=()=>menu($('menu').hidden);
+$('addFile').onclick=()=>$('fileInput').click();
+$('fileInput').onchange=e=>{
+ [...e.target.files].filter(f=>/\.html?$/i.test(f.name)||f.type==='text/html').forEach(f=>{
+  const reader=new FileReader();reader.onload=()=>add(f.name,String(reader.result||''));reader.readAsText(f);
+ });e.target.value='';
+};
+$('addText').onclick=()=>openEditor(true);
+$('editBtn').onclick=()=>{if(active>=0)openEditor(false)};
+$('fileSelect').onchange=e=>{active=Number(e.target.value);render()};
 function closeEditor(){$('editor').hidden=true}
 $('closeEditor').onclick=$('cancelEdit').onclick=closeEditor;
-$('applyEdit').onclick=()=>{if(active<0)return;files[active].content=$('code').value;show();closeEditor()};
-$('downloadBtn').onclick=()=>{if(active<0)return;const blob=new Blob([files[active].content],{type:'text/html;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=files[active].name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
-$('removeBtn').onclick=()=>{if(active<0)return;files.splice(active,1);active=files.length?Math.min(active,files.length-1):-1;refreshSelect();if(!files.length)$('preview').srcdoc=''};
+$('applyEdit').onclick=()=>{
+ const value=$('code').value;
+ if(editingNew)add('Pasted HTML.html',value);
+ else if(active>=0){files[active].content=value;render();closeEditor()}
+};
+$('downloadBtn').onclick=()=>{
+ if(active<0)return;
+ const blob=new Blob([files[active].content],{type:'text/html;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download=files[active].name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+};
+$('removeBtn').onclick=()=>{if(active<0)return;files.splice(active,1);active=files.length?Math.min(active,files.length-1):-1;render();if(!files.length)$('preview').srcdoc=''};
 $('editor').addEventListener('click',e=>{if(e.target===$('editor'))closeEditor()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('editor').hidden)closeEditor();if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'&&!$('editor').hidden){e.preventDefault();$('applyEdit').click()}});
-const stage=document.querySelector('.stage');stage.addEventListener('dragover',e=>{e.preventDefault();stage.style.outline='2px solid #b5a1ff'});stage.addEventListener('dragleave',()=>stage.style.outline='');stage.addEventListener('drop',e=>{e.preventDefault();stage.style.outline='';addFiles(e.dataTransfer.files)});
-show();
+document.addEventListener('keydown',e=>{
+ if(e.key==='Escape'){if(!$('editor').hidden)closeEditor();else menu(false)}
+ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'&&!$('editor').hidden){e.preventDefault();$('applyEdit').click()}
+});
+render();
 })();
 </script>
 </body>
