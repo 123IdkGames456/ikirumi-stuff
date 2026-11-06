@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#10131b">
+<title>Drift District — Ikirumi Stuff</title>
+<style>
+:root{color-scheme:dark;--bg:#10131b;--panel:#191f2b;--line:#30394a;--muted:#9ca9bb;--cyan:#5ee7e0;--orange:#ffb36b}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:Inter,ui-sans-serif,system-ui,Segoe UI,sans-serif;color:#f4f7fb}button{font:inherit;cursor:pointer;border:0;color:inherit}.game{position:fixed;inset:0}canvas{display:block;width:100%;height:100%}
+.hud{position:absolute;inset:0;pointer-events:none;display:none}.topbar{position:absolute;top:18px;left:20px;right:20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.brand{font-weight:900;letter-spacing:.12em;font-size:13px;color:#dbe7f5}.brand span{color:var(--cyan)}.stats{display:flex;gap:9px}.stat{background:#101722d9;border:1px solid #ffffff1c;border-radius:13px;padding:10px 14px;min-width:90px;backdrop-filter:blur(12px)}.stat small{display:block;color:#9ca9bb;font-size:9px;letter-spacing:.13em;font-weight:800}.stat strong{font-size:23px;font-variant-numeric:tabular-nums}.stat strong em{font-size:10px;color:#aab7c8;font-style:normal}.bottom{position:absolute;left:20px;right:20px;bottom:18px;display:flex;justify-content:space-between;align-items:end;gap:14px}.meter{width:min(280px,42vw);padding:13px 15px;background:#101722d9;border:1px solid #ffffff1c;border-radius:14px;backdrop-filter:blur(12px)}.meter-head{display:flex;justify-content:space-between;font-size:10px;color:#aab7c8;letter-spacing:.12em;font-weight:800}.rpmbar{height:7px;background:#343d4c;border-radius:10px;margin-top:9px;overflow:hidden}.rpmfill{height:100%;width:0;background:linear-gradient(90deg,#5ee7e0,#ffcc78,#ff786b);border-radius:10px}.controls{font-size:11px;color:#d0d9e6;text-align:right;line-height:1.8;text-shadow:0 2px 8px #000}.controls b{color:#fff;background:#1a2330;border:1px solid #ffffff24;padding:3px 7px;border-radius:5px}.drift{position:absolute;top:30%;left:50%;transform:translateX(-50%);font-size:clamp(25px,5vw,52px);font-weight:1000;font-style:italic;color:#ffce79;text-shadow:0 4px 25px #ff8a3d88;opacity:0;transition:opacity .1s}.pause{pointer-events:auto;background:#101722d9;border:1px solid #ffffff30;border-radius:10px;padding:9px 13px}
+.overlay{position:absolute;inset:0;display:grid;place-items:center;background:linear-gradient(110deg,#0b1019eF,#111827a8 60%,#0b1019c9);padding:20px}.menu{width:min(920px,100%);max-height:94vh;overflow:auto;background:#151c28ed;border:1px solid #ffffff20;border-radius:24px;padding:clamp(20px,4vw,38px);box-shadow:0 30px 100px #0009;backdrop-filter:blur(18px)}.eyebrow{font-size:10px;letter-spacing:.25em;color:var(--cyan);font-weight:900}.menu h1{font-size:clamp(36px,7vw,68px);line-height:.95;letter-spacing:-.055em;margin:10px 0}.menu h1 span{color:var(--orange)}.intro{color:#aab7c8;max-width:560px;line-height:1.55;font-size:14px}.section-title{display:flex;justify-content:space-between;align-items:center;margin:25px 0 11px;font-size:11px;letter-spacing:.16em;color:#bdc9d8;font-weight:900}.cars{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.car{background:#202938;border:1px solid #ffffff13;border-radius:13px;padding:12px;text-align:left;transition:.15s}.car.selected{border-color:var(--cyan);background:#1b343b}.car .emoji{font-size:25px}.car strong{display:block;font-size:13px;margin-top:5px}.car small{color:#9ca9bb;font-size:10px}.skin-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.swatch{width:30px;height:30px;border-radius:50%;border:2px solid #ffffff40;box-shadow:0 0 0 2px transparent}.swatch.selected{box-shadow:0 0 0 2px var(--cyan)}.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:25px}.start{background:var(--cyan);color:#102027;font-weight:1000;padding:14px 23px;border-radius:11px;min-width:180px}.secondary{background:#293445;border:1px solid #ffffff18;padding:13px 18px;border-radius:11px}.tip{font-size:11px;color:#91a0b3;margin-left:auto}.result{display:none;text-align:center;padding:12px}.result h2{font-size:40px;margin:0 0 5px}.result p{color:#aab7c8}.mobile-controls{position:absolute;bottom:95px;left:16px;right:16px;display:none;justify-content:space-between;pointer-events:none}.mobile-controls button{pointer-events:auto;width:62px;height:62px;border-radius:50%;background:#101722bb;border:1px solid #ffffff45;font-weight:900;font-size:20px;touch-action:none}
+@media(max-width:650px){.cars{grid-template-columns:repeat(2,1fr)}.stats{gap:5px}.stat{min-width:66px;padding:8px}.stat strong{font-size:18px}.topbar{top:10px;left:10px;right:10px}.bottom{left:10px;right:10px;bottom:10px}.meter{width:48vw}.controls{font-size:9px}.mobile-controls{display:flex}}
+</style>
+</head>
+<body>
+<div class="game" id="game"></div>
+<div class="hud" id="hud">
+ <div class="topbar"><div><div class="brand">IKIRUMI <span>STUFF</span> / DRIFT DISTRICT</div><button class="pause" id="pause">Ⅱ Pause</button></div><div class="stats"><div class="stat"><small>SPEED</small><strong id="speed">0 <em>KPH</em></strong></div><div class="stat"><small>RPM</small><strong id="rpm">900</strong></div><div class="stat"><small>SCORE</small><strong id="score">0</strong></div></div></div>
+ <div class="drift" id="driftText">DRIFT +0</div>
+ <div class="bottom"><div class="meter"><div class="meter-head"><span>ENGINE LOAD</span><span id="gear">GEAR 1</span></div><div class="rpmbar"><div class="rpmfill" id="rpmfill"></div></div></div><div class="controls"><b>W</b><b>A</b><b>S</b><b>D</b> drive & steer<br><b>SPACE</b> handbrake drift · <b>R</b> reset</div></div>
+ <div class="mobile-controls"><button data-key="left">◀</button><button data-key="brake">▼</button><button data-key="gas">▲</button><button data-key="right">▶</button><button data-key="drift">✦</button></div>
+</div>
+<div class="overlay" id="overlay"><div class="menu">
+ <div class="eyebrow">ARCADE DRIVING · ENDLESS ROAD</div><h1>DRIFT <span>DISTRICT</span></h1>
+ <p class="intro">Build speed, throw the car sideways and keep the combo alive. Pick your ride, choose a paint job, and chase a bigger score.</p>
+ <div class="section-title"><span>CHOOSE YOUR VEHICLE</span><span id="vehicleCount">06 RIDES</span></div><div class="cars" id="cars"></div>
+ <div class="section-title"><span>PAINT JOB</span><span id="skinName">CYAN</span></div><div class="skin-row" id="skins"></div>
+ <div class="actions"><button class="start" id="start">START DRIVING →</button><button class="secondary" id="how">HOW TO PLAY</button><span class="tip">Best played with keyboard · fullscreen</span></div>
+ <div class="result" id="result"><h2 id="resultScore">0</h2><p>POINTS EARNED THIS RUN</p></div>
+ </div></div>
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+const $=id=>document.getElementById(id);
+const vehicles=[
+ {name:'Rally Car',type:'RALLY',emoji:'🏁',width:1.9,length:3.8,height:.85,mass:1,accel:1.15,turn:1.2,top:205,style:'rally'},
+ {name:'Pickup Truck',type:'PICKUP',emoji:'🛻',width:2.05,length:4.7,height:1.35,mass:1.35,accel:.82,turn:.82,top:175,style:'pickup'},
+ {name:'Cargo Van',type:'VAN',emoji:'🚐',width:2.05,length:4.6,height:1.8,mass:1.5,accel:.72,turn:.72,top:165,style:'van'},
+ {name:'Big Rig',type:'TRUCK',emoji:'🚛',width:2.25,length:6.3,height:2.1,mass:2,accel:.55,turn:.55,top:145,style:'truck'},
+ {name:'Street GT',type:'SPORT',emoji:'🏎️',width:1.95,length:4.1,height:.8,mass:.9,accel:1.3,turn:1.25,top:245,style:'sport'},
+ {name:'Trail SUV',type:'SUV',emoji:'🚙',width:2.1,length:4.5,height:1.35,mass:1.25,accel:.9,turn:.9,top:185,style:'suv'}
+];
+const paints=[['CYAN',0x20d6ce],['CRIMSON',0xe34c5b],['GOLD',0xf4b942],['VIOLET',0x9271ef],['LIME',0x91d65c],['ARCTIC',0xe5edf4],['MIDNIGHT',0x303849]];
+let selected=0,paint=0,scene,camera,renderer,clock,car,carParts=[],roadMarks=[],trees=[],speed=0,score=0,runBest=0,steer=0,driftCombo=0,paused=true,playing=false,roadZ=0,worldObjects=[],lastDrift=0;
+const keys={};let player={x:0,vx:0,yaw:0};
+function mat(color,roughness=.7,metalness=0){return new THREE.MeshStandardMaterial({color,roughness,metalness})}
+function box(parent,w,h,d,material,x=0,y=0,z=0){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m}
+function init(){
+ scene=new THREE.Scene();scene.background=new THREE.Color(0x9bb9c8);scene.fog=new THREE.Fog(0x9bb9c8,45,190);
+ camera=new THREE.PerspectiveCamera( sixty(),innerWidth/innerHeight,.1,260);
+ renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.8));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;$('game').append(renderer.domElement);
+ scene.add(new THREE.HemisphereLight(0xe5f4ff,0x52604b,2.1));const sun=new THREE.DirectionalLight(0xffe4bd,3.1);sun.position.set(-20,35,15);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-35;sun.shadow.camera.right=35;sun.shadow.camera.top=45;sun.shadow.camera.bottom=-45;scene.add(sun);
+ const ground=new THREE.Mesh(new THREE.PlaneGeometry(600,600),mat(0x526b50));ground.rotation.x=-Math.PI/2;ground.position.y=-.12;ground.receiveShadow=true;scene.add(ground);
+ const road=box(scene,18,.12,500,mat(0x343a43,.95),0,-.02,-150);road.receiveShadow=true;
+ for(let side of [-1,1]){box(scene,.22,.16,500,mat(0xe7e1c9),side*8.8,.06,-150);for(let z=-390;z<25;z+=13){let line=box(scene,.16,.025,5,mat(0xe4e7e5),0,.055,z);roadMarks.push(line)}}
+ const shoulder=mat(0x777c72);for(let side of [-1,1])for(let z=-390;z<25;z+=20){let post=box(scene,.28,1.1,.28,shoulder,side*10,.5,z);worldObjects.push({mesh:post,z,side})}
+ const treeMats=[mat(0x345b45),mat(0x456b4a),mat(0x6b7650)];for(let side of [-1,1])for(let i=0;i<48;i++){let z= -i*9+8;let x=side*(14+Math.random()*22);let trunk=box(scene,.45,2.2,.45,mat(0x554536),x,1.1,z);let crown=new THREE.Mesh(new THREE.ConeGeometry(2+Math.random()*1.4,5+Math.random()*3,7),treeMats[i%3]);crown.position.set(x,4,z);crown.castShadow=true;scene.add(crown);trees.push({trunk,crown,z,side})}
+ const mountains=mat(0x829b9a);for(let i=0;i<24;i++){let m=new THREE.Mesh(new THREE.ConeGeometry(10+Math.random()*12,20+Math.random()*18,5),mountains);m.position.set((Math.random()-.5)*170,7,-100-Math.random()*170);scene.add(m)}
+ buildCar();clock=new THREE.Clock();window.addEventListener('resize',resize);animate();
+}
+function sixty(){return  sixtyValue()}function sixtyValue(){return  sixtyValue2()}function sixtyValue2(){return  sixtyValue3()}function sixtyValue3(){return  sixtyValue4()}function sixtyValue4(){return  68}
+function buildCar(){
+ if(car)scene.remove(car);car=new THREE.Group();carParts=[];const v=vehicles[selected],bodyMat=mat(paints[paint][1],.3,.25),dark=mat(0x18212b,.55),glass= new THREE.MeshStandardMaterial({color:0x8ab5c5,metalness:.35,roughness:.18}),rubber=mat(0x101318,.92),light=mat(0xffe9ae,.25);
+ const body=box(car,v.width,v.height*.45,v.length,bodyMat,0,v.height*.48,0);carParts.push(body);
+ box(car,v.width*.86,v.height*.55,v.length*.48,bodyMat,0,v.height*.9,-v.length*.12);
+ box(car,v.width*.78,v.height*.37,v.length*.34,glass,0,v.height*1.12,-v.length*.12);
+ if(v.style==='pickup'){box(car,v.width*.85,.18,v.length*.38,dark,0,.48,v.length*.28);box(car,v.width*.88,.12,.15,dark,0,.8,v.length*.05)}
+ if(v.style==='van'||v.style==='truck'){box(car,v.width*.91,v.height*.72,v.length*.58,bodyMat,0,v.height*.86,-v.length*.2);box(car,v.width*.8,.5,.08,glass,0,v.height*1.13,v.length*.1)}
+ if(v.style==='truck'){box(car,v.width*.95,v.height*.82,v.length*.34,bodyMat,0,v.height*.9,-v.length*.39);box(car,v.width*.84,.5,.08,glass,0,v.height*1.15,-v.length*.2)}
+ if(v.style==='rally'){box(car,v.width*.94,.16,.22,dark,0,v.height*1.23,-v.length*.42);for(let z of [-.3,.3])box(car,v.width*.96,.12,.22,dark,0,.4,z*v.length)}
+ if(v.style==='sport'){box(car,v.width*.95,.12,.22,dark,0,.45,-v.length*.47)}
+ for(let x of [-v.width*.52,v.width*.52])for(let z of [-v.length*.32,v.length*.32]){const wheel=new THREE.Mesh(new THREE.CylinderGeometry(.43,.43,.25,18),rubber);wheel.rotation.z=Math.PI/2;wheel.position.set(x,.43,z);wheel.castShadow=true;car.add(wheel);const hub=new THREE.Mesh(new THREE.CylinderGeometry(.2,.2,.26,12),mat(0x8995a2,.3,.7));hub.rotation.z=Math.PI/2;hub.position.copy(wheel.position);car.add(hub)}
+ for(let x of [-v.width*.34,v.width*.34]){box(car,.28,.17,.08,light,x,v.height*.5,v.length*.51);box(car,.32,.16,.08,mat(0xff3d35),x,v.height*.5,-v.length*.51)}
+ car.position.set(0,0,4);scene.add(car);
+}
+function resize(){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)}
+function input(){const gas=keys.KeyW||keys.ArrowUp||keys.gas,brake=keys.KeyS||keys.ArrowDown||keys.brake,left=keys.KeyA||keys.ArrowLeft||keys.left,right=keys.KeyD||keys.ArrowRight||keys.right,hand=keys.Space||keys.drift;return {gas,brake,left,right,hand}}
+function update(dt){
+ if(!playing||paused)return;const c=input(),v=vehicles[selected];const throttle=c.gas?1:0,braking=c.brake?1:0,hand=c.hand?1:0;
+ speed+=throttle*48*v.accel*dt;speed-=braking*78*dt;speed-= (5+speed*.035)*dt;if(hand)speed-=9*dt;speed=Math.max(0,Math.min(v.top,speed));
+ const steerInput=(c.left?-1:0)+(c.right?1:0);const speedFactor=.25+speed/v.top*.85;steer+=(steerInput-steer)*Math.min(1,dt*7);
+ const grip=hand?0.35:1;player.yaw+=(steer*speedFactor*v.turn*.95-player.yaw*.7)*dt*grip;player.vx+=Math.sin(player.yaw)*speed*.055*dt*60;player.vx*=Math.pow(hand?.992:.94,dt*60);player.x+=player.vx*dt;player.x=Math.max(-7,Math.min(7,player.x));player.vx*=Math.abs(player.x)>6.7?.85:1;
+ car.position.x=THREE.MathUtils.lerp(car.position.x,player.x,.18);car.rotation.y=THREE.MathUtils.lerp(car.rotation.y,-player.yaw*.75,.15);car.rotation.z=THREE.MathUtils.lerp(car.rotation.z,-steer*.09,.12);
+ const move=speed*.19*dt;roadZ+=move;roadMarks.forEach(m=>{m.position.z+=move;if(m.position.z>12)m.position.z-=390});
+ worldObjects.forEach(o=>{o.mesh.position.z+=move;if(o.mesh.position.z>12)o.mesh.position.z-=410});
+ trees.forEach(o=>{o.trunk.position.z+=move;o.crown.position.z+=move;if(o.trunk.position.z>15){o.trunk.position.z-=432;o.crown.position.z-=432}});
+ const angle=Math.abs(player.yaw);const sideways=Math.abs(player.vx);const drifting=speed>42&&(hand||angle>.12)&&sideways>.25;
+ if(drifting){const add=Math.round((speed*.14+sideways*4)*dt);score+=add;driftCombo+=add;lastDrift=2.1;$('driftText').textContent='DRIFT +'+driftCombo.toLocaleString();$('driftText').style.opacity=1}else{lastDrift-=dt;if(lastDrift<=0){driftCombo=0;$('driftText').style.opacity=0}}
+ score+=Math.round(speed*.008);$('score').textContent=Math.floor(score).toLocaleString();$('speed').innerHTML=Math.round(speed)+' <em>KPH</em>';
+ const rpm=900+speed/v.top*5100+(throttle?Math.random()*160:0);$('rpm').textContent=Math.round(rpm/100)*100;$('rpmfill').style.width=(rpm/6500*100)+'%';$('gear').textContent='GEAR '+Math.max(1,Math.min(6,Math.floor(speed/36)+1));
+ camera.position.x=THREE.MathUtils.lerp(camera.position.x,car.position.x*.55,.045);camera.position.y=THREE.MathUtils.lerp(camera.position.y,5.5+speed*.003,.04);camera.position.z=11.5;camera.lookAt(car.position.x*.3,1.0,-12);
+}
+function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.04);update(dt);renderer.render(scene,camera)}
+function drawMenu(){const box=$('cars');box.replaceChildren();vehicles.forEach((v,i)=>{const b=document.createElement('button');b.className='car'+(i===selected?' selected':'');b.innerHTML='<span class="emoji">'+v.emoji+'</span><strong>'+v.name+'</strong><small>'+v.type+' · '+v.top+' KPH TOP SPEED</small>';b.onclick=()=>{selected=i;drawMenu();if(scene)buildCar()};box.append(b)});const skins=$('skins');skins.replaceChildren();paints.forEach((p,i)=>{const b=document.createElement('button');b.className='swatch'+(i===paint?' selected':'');b.style.background='#'+p[1].toString(16).padStart(6,'0');b.title=p[0];b.setAttribute('aria-label',p[0]);b.onclick=()=>{paint=i;$('skinName').textContent=p[0];drawMenu();if(scene)buildCar()};skins.append(b)});$('skinName').textContent=paints[paint][0]}
+function start(){playing=true;paused=false;speed=0;score=0;driftCombo=0;player={x:0,vx:0,yaw:0};$('overlay').style.display='none';$('hud').style.display='block'}
+function showMenu(){paused=true;playing=false;$('overlay').style.display='grid';$('hud').style.display='none';$('result').style.display='block';$('resultScore').textContent=Math.floor(score).toLocaleString();$('start').textContent='DRIVE AGAIN →'}
+function pause(){if(!playing)return;paused=!paused;$('pause').textContent=paused?'▶ Resume':'Ⅱ Pause';if(paused){$('overlay').style.display='grid';$('result').style.display='none';$('start').textContent='RESUME →';$('start').onclick=()=>{paused=false;$('overlay').style.display='none';$('start').onclick=start;$('start').textContent='START DRIVING →'}}else{$('overlay').style.display='none'}}
+$('start').onclick=start;$('pause').onclick=pause;$('how').onclick=()=>alert('W / ↑ = accelerate\nS / ↓ = brake\nA and D / ← and → = steer\nSPACE = handbrake drift\nR = reset position\n\nBuild speed, steer into a slide, and hold a drift to build points!');window.addEventListener('keydown',e=>{keys[e.code]=true;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();if(e.code==='Escape')pause();if(e.code==='KeyR'){player={x:0,vx:0,yaw:0};speed=0}});window.addEventListener('keyup',e=>keys[e.code]=false);
+document.querySelectorAll('[data-key]').forEach(b=>{const k=b.dataset.key;b.addEventListener('pointerdown',e=>{e.preventDefault();keys[k]=true;b.setPointerCapture(e.pointerId)});['pointerup','pointercancel','lostpointercapture'].forEach(ev=>b.addEventListener(ev,()=>keys[k]=false))});
+drawMenu();init();
+</script>
+</body></html>
