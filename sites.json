@@ -1,10 +1,11 @@
 {
-  "version": 14,
+  "version": 15,
   "files": [],
   "sites": [
     "Natural-TTS",
     "Drift-District",
     "HTML-Viewer",
-    "Little-Nightwing"
+    "Little-Nightwing",
+    "Little-Night-Bat"
   ]
 }
