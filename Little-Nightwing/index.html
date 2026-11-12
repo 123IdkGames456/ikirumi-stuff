@@ -30,7 +30,7 @@
 </div>
 <div class="settings" id="settings"><section class="dialog"><h2>Pet settings</h2><p>AI controls his choices. The little simulation continues locally, and only asks Gemini when an API key is configured.</p>
 <label class="field">Gemini API key<input id="apiKey" type="password" autocomplete="off" placeholder="Paste your API key"></label>
-<label class="field">Gemini model<input id="model" value="gemini-3.6" spellcheck="false"><span class="small">Model names can change. If this model is unavailable, enter a model enabled for your API key.</span></label>
+<label class="field">Gemini model<input id="model" value="gemini-3.6-flash" spellcheck="false"><span class="small">Model names can change. If this model is unavailable, enter a model enabled for your API key.</span></label>
 <label class="toggle">Let Nightwing make AI decisions <input id="aiEnabled" type="checkbox" checked></label>
 <label class="toggle">Allow spontaneous walks (AI decides when) <input id="walkEnabled" type="checkbox" checked></label>
 <label class="toggle">Allow short learning flights <input id="flyEnabled" type="checkbox" checked></label>
@@ -41,7 +41,7 @@
 <script>
 (()=>{
 const $=id=>document.getElementById(id),S={day:1,minute:540,room:"living",x:48,energy:80,hunger:35,bond:50,mood:"Curious",status:"Nightwing is looking around.",action:"idle",parcel:null,storage:[],lastAI:0,logs:[],mouse:false,aiBusy:false};
-const defaults={key:"",model:"gemini-3.6",ai:true,walk:true,fly:true,mouse:true,interval:60};
+const defaults={key:"",model:"gemini-3.6-flash",ai:true,walk:true,fly:true,mouse:true,interval:60};
 let cfg={...defaults,...JSON.parse(localStorage.getItem("nightwing-settings")||"{}")};
 function log(t){S.logs.unshift(t);S.logs=S.logs.slice(0,12);$("log").innerHTML=S.logs.map(x=>"<p>• "+esc(x)+"</p>").join("")}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
@@ -62,12 +62,12 @@ else if(action==="sit"){S.action="sitting";S.room="living";S.status="Sitting qui
 else{S.action="idle";S.room="living";S.status="Listening to the house.";if(a?.speech)say(a.speech)}
 if(a?.mood)S.mood=String(a.mood).slice(0,24);if(Number.isFinite(a?.bond_delta))S.bond=Math.max(0,Math.min(100,S.bond+a.bond_delta));if(Number.isFinite(a?.energy_delta))S.energy=Math.max(0,Math.min(100,S.energy+a.energy_delta));render()}
 async function decision(){if(S.aiBusy)return;S.energy=Math.max(0,S.energy-.6);S.hunger=Math.min(100,S.hunger+.5);S.minute+=1;if(S.minute>=1440){S.minute=0;S.day++}let result=await askGemini();if(result)perform(result);else perform({action:localChoice()[0]})}
-function saveSettings(){cfg={key:$("apiKey").value.trim(),model:$("model").value.trim()||defaults.model,ai:$("aiEnabled").checked,walk:$("walkEnabled").checked,fly:$("flyEnabled").checked,mouse:$("mouseEnabled").checked,interval:Number($("interval").value)};localStorage.setItem("nightwing-settings",JSON.stringify(cfg));$("settings").classList.remove("open");log("Pet settings saved.");}
+function saveSettings(){cfg={key:$("apiKey").value.trim(),model:$("model").value.trim()||defaults.model,ai:$("aiEnabled").checked,walk:$("walkEnabled").checked,fly:$("flyEnabled").checked,mouse:$("mouseEnabled").checked,interval:Number($("interval").value)};localStorage.setItem("nightwing-settings",JSON.stringify(cfg));clearInterval(decisionTimer);decisionTimer=setInterval(decision,Math.max(20,cfg.interval)*1000);$("settings").classList.remove("open");log("Pet settings saved.");}
 $("settingsBtn").onclick=()=>{$("apiKey").value=cfg.key;$("model").value=cfg.model;$("aiEnabled").checked=cfg.ai;$("walkEnabled").checked=cfg.walk;$("flyEnabled").checked=cfg.fly;$("mouseEnabled").checked=cfg.mouse;$("interval").value=cfg.interval;$("settings").classList.add("open")};$("closeSettings").onclick=()=>$("settings").classList.remove("open");$("saveSettings").onclick=saveSettings;
 document.querySelectorAll("[data-food]").forEach(b=>b.onclick=()=>{if(S.parcel){say("One parcel at a time! I'll fetch this one first.");return}const food={fruit:["Fruit","🍎"],snack:["Snack","🍪"],drink:["Drink","🧃"],meal:["Meal","🥪"]}[b.dataset.food];S.parcel={name:food[0],emoji:food[1],carried:false};log("You sent a "+food[0].toLowerCase()+" parcel. It is waiting outside the door.");say("Parcel delivery! I'll go get it.");render()});
 $("askBtn").onclick=()=>{say("Could you order me something to eat or drink?");log("He asked for food, a drink, or a snack.");S.mood="Hopeful"};$("petBtn").onclick=()=>{const lines=["Hey! You're back.","I like hanging out with you.","Did you bring a snack?","Wanna watch me practise flying?","I'm comfy here.","You're my favourite human today."];say(lines[Math.floor(Math.random()*lines.length)]);S.bond=Math.min(100,S.bond+2);S.mood="Happy";render()};
 $("scene").addEventListener("click",e=>{if(e.target.closest("button"))return;S.bond=Math.min(100,S.bond+1);say("Hm? Did you need me?");render()});
-setInterval(decision,Math.max(20,cfg.interval)*1000);setInterval(()=>{if(S.room==="bedroom"&&S.action==="sleeping"){S.energy=Math.min(100,S.energy+2);render()}},10000);render();log("Nightwing woke up in his little home.");
+let decisionTimer=setInterval(decision,Math.max(20,cfg.interval)*1000);setInterval(()=>{if(S.room==="bedroom"&&S.action==="sleeping"){S.energy=Math.min(100,S.energy+2);render()}},10000);render();log("Nightwing woke up in his little home.");
 })();
 </script>
 </body>
