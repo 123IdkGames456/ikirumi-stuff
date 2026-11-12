@@ -1,0 +1,13 @@
+{
+  "name": "Nightwing",
+  "description": "Chat with your little AI bat using Gemini, voice input, and device text-to-speech.",
+  "category": "Experiments",
+  "icon": "🦇",
+  "tags": [
+    "AI",
+    "Virtual Companion",
+    "Gemini",
+    "Voice Chat"
+  ],
+  "image": ""
+}
