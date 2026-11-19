@@ -115,6 +115,7 @@ async function start(){
  els.title.textContent="Community map";
  els.count.textContent="—";
  els.results.innerHTML='<div style="padding:12px;color:#a1a6b3;font-size:11px">The custom map engine did not load. Showing the GTADB map instead.</div>';
+ }
 }
 function zoom(delta){if(!map)return;const s=map.get();map.set({z:Math.max(0,Math.min(5,s.targetZ+delta))})}
 document.getElementById("zoomIn").onclick=()=>zoom(.5);
