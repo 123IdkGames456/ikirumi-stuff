@@ -1,0 +1,14 @@
+{
+  "name": "GTA 6 Map",
+  "description": "Explore Leonida with a zoomable community map, searchable places, and filters for barbers, gas stations, vehicle mod shops, stores, food, transport and landmarks.",
+  "category": "Tools",
+  "icon": "🗺️",
+  "tags": [
+    "GTA 6",
+    "Interactive Map",
+    "Leonida",
+    "Search",
+    "Locations"
+  ],
+  "featured": true
+}
