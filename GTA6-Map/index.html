@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#101114">
+<title>GTA 6 Map — Ikirumi Stuff</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://maps.gtadb.org/maps.css">
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101114;color:#eee;font-family:"DM Sans",sans-serif}button,input{font:inherit}button{cursor:pointer}
+:root{--panel:#17191f;--panel2:#20232b;--line:#ffffff18;--muted:#a1a6b3;--accent:#e6a45b;--accent2:#e9bd83}
+.app{height:100dvh;display:grid;grid-template-rows:62px 1fr}.top{z-index:20;display:flex;align-items:center;gap:14px;padding:0 18px;background:#14161b;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;min-width:170px;color:#fff;text-decoration:none;font:700 17px "Space Grotesk",sans-serif}.brand-mark{display:grid;place-items:center;width:34px;height:34px;border-radius:11px;background:#e6a45b;color:#17130e;font-weight:700}.brand small{display:block;color:var(--muted);font:600 9px "DM Sans";letter-spacing:1.5px}
+.search{flex:1;max-width:580px;position:relative}.search input{width:100%;height:40px;padding:0 42px 0 40px;border:1px solid var(--line);border-radius:11px;background:#20232b;color:#fff;outline:none}.search input:focus{border-color:#e6a45b99}.search-icon{position:absolute;left:14px;top:10px;color:#a8acb7}.search-clear{position:absolute;right:8px;top:5px;width:30px;height:30px;border:0;background:transparent;color:#a8acb7;font-size:20px}
+.top-actions{display:flex;align-items:center;gap:8px;margin-left:auto}.top-btn,.map-btn{height:38px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:#20232b;color:#e9e9ed;font-size:12px;font-weight:600}.top-btn.active,.map-btn.active{border-color:#e6a45b80;background:#e6a45b18;color:#ffd9a8}
+.workspace{min-height:0;display:grid;grid-template-columns:300px 1fr;position:relative}.sidebar{z-index:10;display:flex;flex-direction:column;min-height:0;background:var(--panel);border-right:1px solid var(--line)}
+.side-head{padding:18px 16px 12px;border-bottom:1px solid var(--line)}.eyebrow{font-size:9px;font-weight:700;letter-spacing:1.7px;color:var(--accent2)}.side-head h1{margin:7px 0 5px;font:700 22px "Space Grotesk"}.sub{color:var(--muted);font-size:11px;line-height:1.5}
+.count{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;color:#b7bbc5;font-size:11px;border-bottom:1px solid var(--line)}.count strong{color:#fff;font-size:14px}
+.category-list{padding:9px 10px;overflow:auto;flex:1}.category{display:flex;align-items:center;gap:10px;width:100%;padding:10px 9px;margin:2px 0;border:1px solid transparent;border-radius:10px;background:transparent;color:#e5e6eb;text-align:left}.category:hover{background:#ffffff08}.category.selected{border-color:#e6a45b55;background:#e6a45b12}.cat-icon{display:grid;place-items:center;width:31px;height:31px;border-radius:9px;background:#ffffff0c;font-size:15px}.cat-label{flex:1;font-size:12px;font-weight:600}.cat-count{color:#9298a5;font-size:10px;font-variant-numeric:tabular-nums}
+.list-head{padding:12px 14px 8px;border-top:1px solid var(--line);font-size:10px;color:#b9bdc6;font-weight:700;letter-spacing:1px;text-transform:uppercase}.results{max-height:30%;min-height:110px;overflow:auto;padding:0 8px 10px}.result{display:block;width:100%;padding:9px 10px;border:0;border-radius:8px;background:transparent;color:#f1f1f3;text-align:left}.result:hover,.result.active{background:#ffffff0d}.result strong{display:block;font-size:11px;font-weight:600}.result small{display:block;margin-top:3px;color:#999eaa;font-size:10px}
+.map-wrap{position:relative;min-width:0;min-height:0;background:#101114;overflow:hidden}#mapHost{position:absolute;inset:0}#map{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;background:#101114!important}#canvas{width:100%;height:100%;display:block}#markers{position:absolute;inset:0;pointer-events:none}#markers .marker{pointer-events:auto;width:11px;height:11px;border:2px solid #fff;border-radius:50%;box-shadow:0 1px 7px #000b;transform:translate(-50%,-50%);cursor:pointer;opacity:.95}#markers .marker:hover,#markers .marker.selected{width:17px;height:17px;border:3px solid #fff;box-shadow:0 0 0 5px #e6a45b55,0 2px 10px #000}
+.map-controls{position:absolute;right:14px;top:14px;z-index:5;display:grid;gap:7px}.map-controls button{width:39px;height:39px;border:1px solid #ffffff20;border-radius:11px;background:#17191fe8;color:#fff;font-size:19px;box-shadow:0 4px 16px #0004}.map-controls button:hover{border-color:#e6a45b88}
+.map-note{position:absolute;left:14px;bottom:12px;z-index:5;max-width:min(520px,calc(100% - 28px));padding:8px 11px;border:1px solid #ffffff16;border-radius:9px;background:#14161be8;color:#aeb3bd;font-size:10px;line-height:1.5;backdrop-filter:blur(10px)}
+.place-card{position:absolute;right:14px;bottom:14px;z-index:8;width:min(320px,calc(100% - 28px));padding:15px;border:1px solid #ffffff22;border-radius:14px;background:#17191ff2;box-shadow:0 12px 40px #0008;backdrop-filter:blur(12px)}.place-card[hidden]{display:none}.place-top{display:flex;align-items:flex-start;gap:10px}.place-dot{width:12px;height:12px;flex:none;margin-top:4px;border-radius:50%;background:var(--accent);border:2px solid white}.place-card h2{flex:1;margin:0;font:600 16px "Space Grotesk"}.place-close{border:0;background:transparent;color:#aab0ba;font-size:20px}.place-address{margin:8px 0;color:#b4b8c1;font-size:11px;line-height:1.5}.place-tags{display:flex;flex-wrap:wrap;gap:5px}.tag{padding:4px 7px;border-radius:6px;background:#ffffff0c;color:#c9cbd1;font-size:9px}.place-coords{margin-top:10px;color:#818794;font-size:9px}
+.loading{position:absolute;inset:0;z-index:30;display:grid;place-items:center;background:#101114;color:#d5d8df;font-size:13px}.loading[hidden]{display:none}.spinner{width:25px;height:25px;margin:0 auto 12px;border:2px solid #ffffff20;border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.mobile-filter{display:none}.credits{padding:9px 12px;border-top:1px solid var(--line);color:#808694;font-size:9px;line-height:1.5}.credits a{color:#c8a16e}
+@media(max-width:760px){.app{grid-template-rows:58px 1fr}.top{padding:0 10px;gap:8px}.brand{min-width:0;font-size:14px}.brand-mark{width:31px;height:31px}.brand small{display:none}.top-actions .top-btn{display:none}.workspace{display:block}.sidebar{position:absolute;top:0;bottom:0;left:0;width:min(320px,88vw);transform:translateX(-102%);transition:transform .22s ease;box-shadow:12px 0 40px #0008}.sidebar.open{transform:translateX(0)}.mobile-filter{display:block}.search{max-width:none}.search input{height:38px;font-size:12px}.side-head{padding:14px}.results{max-height:25%}.map-note{font-size:9px}.place-card{right:10px;bottom:10px}.map-controls{right:10px;top:10px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top">
+<a class="brand" href="../" title="Back to Ikirumi Stuff"><span class="brand-mark">i</span><span>GTA 6 MAP<small>LEONIDA EXPLORER</small></span></a>
+<div class="search"><span class="search-icon">⌕</span><input id="search" type="search" placeholder="Search places, areas, or services…" autocomplete="off"><button id="clearSearch" class="search-clear" aria-label="Clear search">×</button></div>
+<div class="top-actions"><button id="allButton" class="top-btn active">All places</button><button id="resetButton" class="top-btn">Reset view</button><button id="filterButton" class="top-btn mobile-filter">☷ Filters</button></div>
+</header>
+<div class="workspace">
+<aside id="sidebar" class="sidebar">
+<div class="side-head"><div class="eyebrow">COMMUNITY MAP</div><h1>Explore Leonida</h1><div class="sub">Zoom into Vice City and the rest of the state. Choose a category to find places.</div></div>
+<div class="count"><span id="categoryTitle">All mapped places</span><strong id="locationCount">—</strong></div>
+<div id="categories" class="category-list"></div>
+<div class="list-head">Matching places</div><div id="results" class="results"></div>
+<div class="credits">Unofficial fan-made reconstruction. Locations are community-sourced estimates, not official Rockstar confirmations.<br>Map tiles & landmark data: <a href="https://map.gtadb.org/" target="_blank" rel="noreferrer">GTADB.org</a> and contributors · CC BY 4.0.</div>
+</aside>
+<main class="map-wrap">
+<div id="mapHost"></div>
+<div class="map-controls"><button id="zoomIn" aria-label="Zoom in">+</button><button id="zoomOut" aria-label="Zoom out">−</button><button id="homeView" aria-label="Show whole map">⌂</button></div>
+<div class="map-note">Community reconstruction · Approximate locations · Not an official Rockstar map</div>
+<div id="placeCard" class="place-card" hidden><div class="place-top"><span class="place-dot"></span><h2 id="placeName"></h2><button id="closePlace" class="place-close" aria-label="Close">×</button></div><div id="placeAddress" class="place-address"></div><div id="placeTags" class="place-tags"></div><div id="placeCoords" class="place-coords"></div></div>
+<div id="loading" class="loading"><div><div class="spinner"></div>Loading Leonida map…</div></div>
+</main>
+</div>
+</div>
+<script>window.gtadb=window.gtadb||{};</script>
+<script src="https://maps.gtadb.org/config.js"></script>
+<script src="https://maps.gtadb.org/maps.js"></script>
+<script>
+const DATA_URL="https://raw.githubusercontent.com/rolux/gtadb.org/main/map/data/6/landmarks.json";
+const categories=[
+{id:"barber",name:"Barbers & salons",icon:"✂️",tags:["#hair"]},
+{id:"gas",name:"Gas stations",icon:"⛽",tags:["#gas"]},
+{id:"mods",name:"Vehicle mod shops",icon:"🔧",tags:["#modshop","#pay'n'spray"]},
+{id:"wash",name:"Car washes",icon:"🚿",tags:["#carwash"]},
+{id:"shops",name:"Clothing & stores",icon:"🛍️",tags:["#clothes","#shoes","#electronics","#supermarket"]},
+{id:"food",name:"Food & restaurants",icon:"🍔",tags:["#food","#fastfood","#vendor"]},
+{id:"transport",name:"Transport & marinas",icon:"🚉",tags:["#bus","#train","#metro","#metromover","#airport","#marina"]},
+{id:"activities",name:"Sports & recreation",icon:"🏟️",tags:["#tennis","#golf","#gym","#cinema","#ferriswheel","#volleyball"]},
+{id:"landmarks",name:"Landmarks & places",icon:"📍",tags:["landmark","natural","leisure","hotel","public","residential","government","industrial","utilities","agriculture","construction","office","retail","restaurant","transportation"]}
+];
+const excludedTags=new Set(["#guns","#stripclub","#liquor","#drinks","#nightclub","#bar","#pharmacy","demolished"]);
+const els={loading:document.getElementById("loading"),categories:document.getElementById("categories"),results:document.getElementById("results"),search:document.getElementById("search"),count:document.getElementById("locationCount"),title:document.getElementById("categoryTitle"),card:document.getElementById("placeCard"),name:document.getElementById("placeName"),address:document.getElementById("placeAddress"),tags:document.getElementById("placeTags"),coords:document.getElementById("placeCoords"),sidebar:document.getElementById("sidebar")};
+let all=[],visible=[],activeCategory="all",selected=null,map=null;
+function titleFor(item){return item[0]||"Unnamed location"}
+function safeItem(item){const tags=item[6]||[];return !tags.some(t=>excludedTags.has(t))&&item[1]&&item[1].length===2&&Number.isFinite(item[1][0])&&Number.isFinite(item[1][1])}
+function toLandmark(id,item){return {id,igAddress:titleFor(item),title:titleFor(item),igCoordinates:item[1],rlAddress:item[3]||"",rlCoordinates:item[4]||null,tags:item[6]||[],color:item[7]||"e6a45b",edited:item[8]||[]}}
+function categoryMatches(place,cat){return !cat||cat.tags.some(t=>place.tags.includes(t))}
+function matchesSearch(place,q){return !q||place.title.toLowerCase().includes(q)||place.id.toLowerCase().includes(q)||place.tags.join(" ").toLowerCase().includes(q)}
+function renderCategories(){
+ els.categories.innerHTML="";
+ const allBtn=document.createElement("button");allBtn.className="category"+(activeCategory==="all"?" selected":"");allBtn.innerHTML='<span class="cat-icon">🌎</span><span class="cat-label">All places</span><span class="cat-count">'+all.length+'</span>';allBtn.onclick=()=>setCategory("all");els.categories.appendChild(allBtn);
+ categories.forEach(cat=>{const count=all.filter(p=>categoryMatches(p,cat)).length;const b=document.createElement("button");b.className="category"+(activeCategory===cat.id?" selected":"");b.innerHTML='<span class="cat-icon">'+cat.icon+'</span><span class="cat-label">'+cat.name+'</span><span class="cat-count">'+count+'</span>';b.onclick=()=>setCategory(cat.id);els.categories.appendChild(b)});
+}
+function setCategory(id){activeCategory=id;render();if(innerWidth<=760)els.sidebar.classList.remove("open")}
+function render(){
+ const cat=categories.find(c=>c.id===activeCategory);const q=els.search.value.trim().toLowerCase();visible=all.filter(p=>(activeCategory==="all"||categoryMatches(p,cat))&&matchesSearch(p,q));
+ els.title.textContent=cat?cat.name:"All mapped places";els.count.textContent=visible.length.toLocaleString();
+ els.results.innerHTML="";visible.slice(0,250).forEach(p=>{const b=document.createElement("button");b.className="result"+(selected&&selected.id===p.id?" active":"");const short=p.title.split(",").slice(0,2).join(", ");b.innerHTML="<strong></strong><small></small>";b.children[0].textContent=short;b.children[1].textContent=p.tags.filter(t=>t.startsWith("#")).slice(0,3).join(" · ")||"Community landmark";b.onclick=()=>focusPlace(p.id);els.results.appendChild(b)});
+ if(map)map.set({currentLandmarks:visible,selected:selected?selected.id:null});
+ renderCategories();
+}
+function showPlace(p){selected=p;if(!p){els.card.hidden=true;return}els.card.hidden=false;els.name.textContent=p.title;els.address.textContent=p.rlAddress||"No extra location notes available.";els.tags.innerHTML="";p.tags.filter(t=>t.startsWith("#")||["hotel","landmark","natural","leisure"].includes(t)).slice(0,7).forEach(t=>{const span=document.createElement("span");span.className="tag";span.textContent=t.replace(/^#/,"").replace(/-/g," ");els.tags.appendChild(span)});els.coords.textContent="Community map coordinates: "+p.igCoordinates.map(n=>Math.round(n)).join(", ");renderResultsActive()}
+function renderResultsActive(){document.querySelectorAll(".result").forEach(el=>el.classList.remove("active"));if(!selected)return;const i=visible.findIndex(p=>p.id===selected.id);if(i>=0&&els.results.children[i])els.results.children[i].classList.add("active")}
+function focusPlace(id){const p=all.find(x=>x.id===id);if(!p)return;showPlace(p);if(map)map.set({selected:id,x:p.igCoordinates[0],y:p.igCoordinates[1],z:4});}
+async function start(){
+ try{
+  const response=await fetch(DATA_URL,{cache:"no-cache"});if(!response.ok)throw new Error("Data request failed");const raw=await response.json();
+  all=Object.entries(raw).filter(([,item])=>safeItem(item)).map(([id,item])=>toLandmark(id,item)).filter(p=>categories.some(c=>categoryMatches(p,c)));
+  if(!window.gtadb||!gtadb.Maps)throw new Error("Map engine unavailable");
+  map=gtadb.Maps({parentElement:document.getElementById("mapHost"),v:6,tileSet:"yanis,18",x:-4000,y:2000,z:1,focused:true,landmarks:all,currentLandmarks:all});
+  map.addEventListener("select",e=>{const p=all.find(x=>x.id===e.detail.id);if(p)showPlace(p);else showPlace(null)});
+  map.addEventListener("mapchangeend",()=>{});
+  render();els.loading.hidden=true;
+ }catch(error){els.loading.innerHTML='<div><div style="font-size:24px;margin-bottom:10px">⚠</div>Could not load the map.<br><small style="color:#9da3ae">Check your connection and reload the page.</small></div>';console.error(error)}
+}
+function zoom(delta){if(!map)return;const s=map.get();map.set({z:Math.max(0,Math.min(5,s.targetZ+delta))})}
+document.getElementById("zoomIn").onclick=()=>zoom(.5);
+document.getElementById("zoomOut").onclick=()=>zoom(-.5);
+document.getElementById("homeView").onclick=()=>map&&map.set({x:-4000,y:2000,z:1});
+document.getElementById("resetButton").onclick=()=>{activeCategory="all";els.search.value="";showPlace(null);map&&map.set({x:-4000,y:2000,z:1});render()};
+document.getElementById("allButton").onclick=()=>setCategory("all");
+document.getElementById("filterButton").onclick=()=>els.sidebar.classList.toggle("open");
+document.getElementById("clearSearch").onclick=()=>{els.search.value="";render()};
+els.search.addEventListener("input",render);
+document.getElementById("closePlace").onclick=()=>{showPlace(null);if(map)map.set({selected:null})};
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){showPlace(null);els.sidebar.classList.remove("open")}});
+start();
+</script>
+</body>
+</html>
