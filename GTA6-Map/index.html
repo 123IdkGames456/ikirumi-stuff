@@ -102,7 +102,19 @@ async function start(){
   map.addEventListener("select",e=>{const p=all.find(x=>x.id===e.detail.id);if(p)showPlace(p);else showPlace(null)});
   map.addEventListener("mapchangeend",()=>{});
   render();els.loading.hidden=true;
- }catch(error){els.loading.innerHTML='<div><div style="font-size:24px;margin-bottom:10px">⚠</div>Could not load the map.<br><small style="color:#9da3ae">Check your connection and reload the page.</small></div>';console.error(error)}
+ }catch(error){
+ console.error("GTA6 map failed to initialize:",error);
+ const fallback=document.createElement("iframe");
+ fallback.title="GTADB community GTA VI map";
+ fallback.src="https://map.gtadb.org/#VI";
+ fallback.allow="fullscreen";
+ fallback.referrerPolicy="strict-origin-when-cross-origin";
+ fallback.style.cssText="position:absolute;inset:0;width:100%;height:100%;border:0;background:#101114";
+ document.getElementById("mapHost").replaceChildren(fallback);
+ els.loading.hidden=true;
+ els.title.textContent="Community map";
+ els.count.textContent="—";
+ els.results.innerHTML='<div style="padding:12px;color:#a1a6b3;font-size:11px">The custom map engine did not load. Showing the GTADB map instead.</div>';
 }
 function zoom(delta){if(!map)return;const s=map.get();map.set({z:Math.max(0,Math.min(5,s.targetZ+delta))})}
 document.getElementById("zoomIn").onclick=()=>zoom(.5);
