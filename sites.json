@@ -1,5 +1,5 @@
 {
-  "version": 17,
+  "version": 18,
   "files": [],
   "sites": [
     "Natural-TTS",
@@ -8,6 +8,7 @@
     "Little-Nightwing",
     "Little-Night-Bat",
     "Nightwing",
-    "BeamNG-Mod-Maker"
+    "BeamNG-Mod-Maker",
+    "GTA6-Map"
   ]
 }
