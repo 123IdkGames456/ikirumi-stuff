@@ -41,3 +41,60 @@
 .menu-dots i{display:block;width:3px;height:3px;border-radius:50%;background:#f1edf9}
 .menu-button-label,.menu-chevron{display:none!important}
 @media(max-width:620px){.viewer-menu-wrap{top:9px;right:9px}.viewer-menu-toggle{width:39px;height:39px;min-width:39px;padding:0}}
+
+
+/* Easier, calmer home-page layout */
+.hero{min-height:0;padding:36px 4px 32px}
+.hero h1{font-size:clamp(34px,5vw,54px);letter-spacing:-2px;margin:13px 0 12px;line-height:1.08}
+.hero-description{font-size:15px;line-height:1.65}
+.hero-art{scale:.78;opacity:.62;margin-right:0}
+.hero-stats{margin-top:20px;gap:17px}
+.library{padding-top:32px}
+.section-heading{margin-bottom:16px}
+.section-heading h2{font-size:25px}
+.search-row{gap:10px}
+.search-box{height:58px;border-radius:15px;background:#ffffff08;border-color:#ffffff20}
+.search-box input{font-size:15px}
+.search-box input::placeholder{color:#aaa6b7}
+.sort-box{min-height:58px}
+.category-bar{padding:16px 0 17px;gap:7px}
+.category-pill{padding:10px 14px;border-radius:999px}
+.category-pill.active{box-shadow:0 3px 14px #e6e0f820}
+.results-heading{padding:13px 14px;margin:0 0 15px;border:1px solid #ffffff12;border-radius:12px;background:#ffffff04}
+.library-source-control{font-size:11px}
+.library-source-control select{font-size:12px;padding:10px 12px}
+.project-grid{gap:14px}
+.project-card{border-radius:15px}
+.card-art{height:130px}
+.card-content{padding:15px 16px}
+.card-title{font-size:16px}
+.card-description{font-size:12px;line-height:1.65}
+.card-tag{font-size:10px}
+.filter-toggle{border-radius:999px}
+@media(max-width:700px){
+ .hero{padding:28px 0 24px}
+ .hero-art{right:-75px;top:8px;opacity:.24;scale:.65}
+ .hero h1{font-size:clamp(33px,9vw,47px);letter-spacing:-1.7px;max-width:340px}
+ .hero-description{font-size:14px;max-width:300px}
+ .hero-stats{gap:12px;margin-top:17px}
+ .hero-stats strong{font-size:17px}
+ .library{padding-top:25px}
+ .search-row{gap:9px}
+ .search-box{height:55px;padding:0 12px}
+ .search-box input{font-size:14px}
+ .sort-box{height:47px;min-height:47px}
+ .category-bar{padding:13px 0 15px}
+ .category-pill{padding:9px 12px;font-size:11px}
+ .results-heading{flex-wrap:wrap;padding:11px}
+ .library-source-control{width:100%;order:3}
+ .library-source-control select{flex:1;max-width:none}
+ .card-art{height:105px}
+ .card-content{padding:12px 11px}
+ .card-title{font-size:14px}
+ .card-description{font-size:11px}
+}
+@media(max-width:370px){
+ .hero-stats{gap:8px}
+ .hero-stats span{letter-spacing:.7px}
+ .card-art{height:95px}
+}
