@@ -1,5 +1,5 @@
 {
-  "version": 19,
+  "version": 20,
   "files": [],
   "sites": [
     "Natural-TTS",
@@ -10,6 +10,7 @@
     "Nightwing",
     "BeamNG-Mod-Maker",
     "GTA6-Map",
-    "PointForge-3D"
+    "PointForge-3D",
+    "RoomTrace-3D"
   ]
 }
