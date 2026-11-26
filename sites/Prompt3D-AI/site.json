@@ -1,0 +1,12 @@
+{
+  "name": "Prompt3D AI",
+  "description": "Generate 3D models from text prompts with an AI provider, preview them interactively, and export assets.",
+  "category": "Tools",
+  "icon": "◇",
+  "tags": [
+    "AI",
+    "3D",
+    "Model Generator",
+    "Creative"
+  ]
+}
