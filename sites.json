@@ -1,5 +1,5 @@
 {
-  "version": 22,
+  "version": 23,
   "files": [],
   "sites": [
     "Natural-TTS",
@@ -9,6 +9,6 @@
     "GTA6-Map",
     "PointForge-3D",
     "RoomTrace-3D",
-    "Prompt3D-AI"
+    "sites/Prompt3D-AI"
   ]
 }
